@@ -1,0 +1,86 @@
+# ===========================================================================
+# IntelliSignal - Stage 2
+# Reinforcement-learning environment settings
+# ---------------------------------------------------------------------------
+# These values configure the RL *environment*, not the traffic scenario.
+# The traffic scenarios (config/moderate.yaml, config/heavy.yaml) are reused
+# from Stage 1 exactly as they are.
+#
+# This file lives in config/rl/ rather than config/ on purpose: the Stage 1
+# helper available_scenarios() lists every .yaml directly inside config/, so
+# putting it here keeps "moderate" and "heavy" as the only two scenarios.
+#
+# A scenario file may override any of these values by adding its own "rl:"
+# section; neither moderate.yaml nor heavy.yaml does so today.
+# ===========================================================================
+
+environment:
+
+  # Seconds of simulated time that pass per agent decision.
+  #
+  # Why a decision interval exists: a traffic signal that could change on
+  # every 1-second simulation step would be able to flicker, which is both
+  # unsafe and meaningless for real traffic. Holding each decision for a
+  # fixed interval also shortens the episode (1800 s becomes 180 decisions
+  # instead of 1800), which makes learning far easier later.
+  #
+  # It must be larger than yellow_time + all_red_time, otherwise a switch
+  # would consume the whole interval and no green time would be left.
+  decision_interval: 10
+
+  # A green must have been running for at least this long before the agent
+  # is allowed to end it. Prevents rapid, unrealistic switching.
+  min_green: 10
+
+  # A green is ended automatically after this long, even if the agent asks
+  # to keep it. This is the fairness guarantee: no approach can be starved
+  # of green time indefinitely.
+  max_green: 60
+
+  # Simulated seconds per episode. null = use simulation.duration from the
+  # scenario file (1800 s for both Stage 1 scenarios).
+  episode_duration: null
+
+  # Transition timings. null = take them from the scenario file's "signal"
+  # section, so the RL environment respects the same yellow / all-red
+  # clearance as the Stage 1 fixed-time controller (yellow 4 s, all-red 0 s).
+  yellow_time: null
+  all_red_time: null
+
+  # Simulated seconds to run before the first observation is returned.
+  # 0 keeps reset() fully deterministic and the episode length exact.
+  warmup_time: 0
+
+
+observation:
+  # Normalisation constants. They are divisors, not limits: larger values are
+  # clipped to 1.0, so the observation can never leave the observation space.
+  #
+  # These are not guesses. Both scenarios were run for a full 1800 s episode
+  # under a random policy and under a keep-only policy, and the per-approach
+  # values were measured (see docs/rl_environment.md):
+  #
+  #     queue   / approach : max 50,   99th percentile 50    (heavy)
+  #     waiting / approach : max 1848, 99th percentile 1392  (heavy)
+  #
+  # 50 vehicles is also very close to the physical capacity of one approach
+  # (2 lanes x 200 m). The same constants are used for both scenarios on
+  # purpose, so that one trained agent can later be evaluated on both.
+  max_queue_per_approach: 50        # halting vehicles on one approach
+  max_waiting_per_approach: 1500    # summed current waiting time, vehicle-seconds
+
+
+reward:
+  # reward = -scale * ( waiting_time_weight * total_waiting
+  #                     + queue_weight      * total_queue
+  #                     + fairness_weight   * worst_approach_waiting )
+  waiting_time_weight: 1.0
+  queue_weight: 1.0
+
+  # Optional extra fairness term. 0.0 = off. The max_green setting above is
+  # already a hard guarantee that no approach is ignored indefinitely, so the
+  # default reward is exactly the simple form: -(waiting + queue).
+  fairness_weight: 0.0
+
+  # Keeps the reward in a small, numerically comfortable range.
+  scale: 0.01

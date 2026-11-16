@@ -1,0 +1,13 @@
+scenario,controller,metric,mean,std,min,max,seeds
+heavy,fixed_time,average_waiting_time,18.37,1.4148144754701946,17.25,19.96,3
+heavy,fixed_time,average_queue_length,14.623333333333333,1.070015576210615,13.79,15.83,3
+heavy,fixed_time,max_queue_length,35.0,1.7320508075688772,33.0,36.0,3
+heavy,fixed_time,throughput,194.33333333333334,2.516611478423583,192.0,197.0,3
+heavy,fixed_time,vehicles_still_in_network,59.666666666666664,2.516611478423583,57.0,62.0,3
+heavy,fixed_time,teleports,0.0,0.0,0.0,0.0,3
+heavy,dqn,average_waiting_time,13.660000000000002,1.3168523075880605,12.15,14.57,3
+heavy,dqn,average_queue_length,10.736666666666666,1.0217794934981486,9.56,11.4,3
+heavy,dqn,max_queue_length,28.0,2.0,26.0,30.0,3
+heavy,dqn,throughput,198.0,1.7320508075688772,197.0,200.0,3
+heavy,dqn,vehicles_still_in_network,56.0,1.7320508075688772,54.0,57.0,3
+heavy,dqn,teleports,0.0,0.0,0.0,0.0,3

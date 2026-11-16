@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IntelliSignal Stage 1 : explicit turning movements at junction C.
+     Each approach: lane 0 -> right turn + straight, lane 1 -> left turn. -->
+<connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/connections_file.xsd">
+
+    <!-- From NORTH, travelling southbound -->
+    <connection from="N2C" to="C2W" fromLane="0" toLane="0"/>  <!-- right  -->
+    <connection from="N2C" to="C2S" fromLane="0" toLane="0"/>  <!-- through-->
+    <connection from="N2C" to="C2S" fromLane="1" toLane="1"/>  <!-- through-->
+    <connection from="N2C" to="C2E" fromLane="1" toLane="1"/>  <!-- left   -->
+
+    <!-- From SOUTH, travelling northbound -->
+    <connection from="S2C" to="C2E" fromLane="0" toLane="0"/>  <!-- right  -->
+    <connection from="S2C" to="C2N" fromLane="0" toLane="0"/>  <!-- through-->
+    <connection from="S2C" to="C2N" fromLane="1" toLane="1"/>  <!-- through-->
+    <connection from="S2C" to="C2W" fromLane="1" toLane="1"/>  <!-- left   -->
+
+    <!-- From EAST, travelling westbound -->
+    <connection from="E2C" to="C2N" fromLane="0" toLane="0"/>  <!-- right  -->
+    <connection from="E2C" to="C2W" fromLane="0" toLane="0"/>  <!-- through-->
+    <connection from="E2C" to="C2W" fromLane="1" toLane="1"/>  <!-- through-->
+    <connection from="E2C" to="C2S" fromLane="1" toLane="1"/>  <!-- left   -->
+
+    <!-- From WEST, travelling eastbound -->
+    <connection from="W2C" to="C2S" fromLane="0" toLane="0"/>  <!-- right  -->
+    <connection from="W2C" to="C2E" fromLane="0" toLane="0"/>  <!-- through-->
+    <connection from="W2C" to="C2E" fromLane="1" toLane="1"/>  <!-- through-->
+    <connection from="W2C" to="C2N" fromLane="1" toLane="1"/>  <!-- left   -->
+
+</connections>

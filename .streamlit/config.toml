@@ -1,0 +1,16 @@
+# IntelliSignal dashboard theme.
+# The theme is pinned so the dashboard looks the same on any machine during a
+# live demonstration, instead of following the operating system's dark mode.
+
+[theme]
+base = "light"
+primaryColor = "#3b6fb6"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6f8"
+textColor = "#1f2326"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false

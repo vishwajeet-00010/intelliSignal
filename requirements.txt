@@ -1,0 +1,61 @@
+# IntelliSignal - Stage 1 requirements
+#
+# SUMO itself is a separate program. Install it from https://sumo.dlr.de
+# and set the SUMO_HOME environment variable, or install the packaged
+# version listed below (eclipse-sumo), which ships the SUMO binaries.
+
+eclipse-sumo>=1.19.0     # SUMO simulator binaries (sumo, sumo-gui, netconvert)
+traci>=1.19.0            # Python interface that controls a running SUMO
+sumolib>=1.19.0          # SUMO helper library (locates the binaries)
+
+numpy>=1.24
+pandas>=2.0
+matplotlib>=3.7
+PyYAML>=6.0
+
+# Optional
+pytest>=7.0              # to run the tests in tests/
+Pillow>=9.0              # only used to crop the presentation screenshots
+
+# ---------------------------------------------------------------------------
+# Stage 2 - reinforcement-learning environment
+# ---------------------------------------------------------------------------
+# These are needed for the RL environment in rl/. They do not affect Stage 1:
+# the Stage 1 scripts and tests run without them.
+
+gymnasium>=1.0            # the standard RL environment API (reset / step / spaces)
+sumo-rl>=1.4              # SUMO <-> Gymnasium integration library
+
+# ---------------------------------------------------------------------------
+# Stage 3 - the Deep Q-Network
+# ---------------------------------------------------------------------------
+# The only new dependency. The DQN, the replay buffer and the target network
+# are written directly against PyTorch in agents/, so Stable-Baselines3 is
+# NOT required: a 5,000-parameter network with a 2-action space does not need
+# a training framework, and writing the update rule out in full is what makes
+# it explainable in a project report.
+#
+# Stage 1 and Stage 2 still run without torch. When it is missing, the
+# dashboard reports the DQN mode as unavailable instead of failing.
+#
+# The CPU build is enough - the network is tiny and training is bounded by
+# SUMO, not by the GPU. On Linux, `pip install torch` downloads a large
+# CUDA-enabled wheel; the smaller CPU build is:
+#     pip install torch --index-url https://download.pytorch.org/whl/cpu
+#
+# PyTorch publishes wheels a version or two behind the newest Python release.
+# If pip reports "no matching distribution" for torch, the Python version is
+# too new - use Python 3.12 or 3.13 for this project.
+torch>=2.0                # the neural network, autograd and the optimiser
+
+# ---------------------------------------------------------------------------
+# Dashboard - the Streamlit presentation layer
+# ---------------------------------------------------------------------------
+# Needed only for `streamlit run dashboard.py`. The command-line simulation,
+# the RL environment and the Stage 1 tests all run without them.
+#
+# 1.49 is the minimum because the dashboard uses the `width="stretch"` API,
+# which replaced the deprecated `use_container_width` argument.
+# Altair ships with Streamlit and draws the charts.
+
+streamlit>=1.49

@@ -1,0 +1,92 @@
+# ===========================================================================
+# IntelliSignal - Stage 3
+# Deep Q-Network training settings
+# ---------------------------------------------------------------------------
+# These values configure the AGENT and its TRAINING. They do not configure the
+# traffic scenario (config/moderate.yaml, config/heavy.yaml) or the RL
+# environment (config/rl/environment.yaml); both of those are reused from
+# Stage 1 and Stage 2 exactly as they are.
+#
+# This file lives in config/dqn/ for the same reason the RL settings live in
+# config/rl/: utils.config_loader.available_scenarios() lists every .yaml
+# directly inside config/, so a file at config/dqn.yaml would have become a
+# third "scenario".
+#
+# Every value here can be overridden on the command line, e.g.
+#     python training/train_dqn.py --scenario moderate --episodes 20 --seed 42
+# ===========================================================================
+
+network:
+
+  # Hidden layers of the Q-network. The input size is NOT configured here: it
+  # is taken from env.observation_space.shape (10), and the output size from
+  # env.action_space.n (2). Changing the observation in rl/state.py therefore
+  # changes the network automatically.
+  #
+  #     10 (observation) -> 64 -> ReLU -> 64 -> ReLU -> 2 (Q-values)
+  hidden_layers: [64, 64]
+
+
+training:
+
+  # --- how much experience to collect -------------------------------------
+  # One episode is one full SUMO run of the scenario. With the Stage 2
+  # defaults (1800 s episode, 10 s decision interval) that is 180 decisions,
+  # so 100 episodes is 18,000 training steps.
+  episodes: 100
+
+  # Simulated seconds per training episode. null = use the scenario's own
+  # simulation.duration (1800 s), which is exactly the length of the Stage 1
+  # baseline run, so training and evaluation see the same episode.
+  episode_duration: null
+
+  # Hard cap on decisions per episode. null = no cap beyond the episode
+  # duration (the environment truncates at episode_duration / decision_interval).
+  max_steps_per_episode: null
+
+  # --- the learning update -------------------------------------------------
+  batch_size: 64              # transitions per gradient step
+  learning_rate: 0.001        # Adam step size
+  gamma: 0.9                  # discount factor - the project's planned value
+  loss: huber                 # "huber" (smooth_l1) or "mse"
+  gradient_clip: 10.0         # max gradient norm; 0 or null disables clipping
+
+  # --- replay buffer -------------------------------------------------------
+  replay_capacity: 50000      # transitions kept (18,000 fit in one 100-episode run)
+  learning_starts: 500        # no gradient step before this many transitions
+  train_frequency: 1          # gradient steps per environment step
+
+  # --- target network ------------------------------------------------------
+  # The target network is refreshed from the policy network every N gradient
+  # steps. Larger = more stable but slower to follow the policy network.
+  target_update_frequency: 500
+
+  # --- exploration ---------------------------------------------------------
+  epsilon_start: 1.0
+  epsilon_end: 0.05
+
+  # "linear" decays epsilon from epsilon_start to epsilon_end over
+  # epsilon_decay_steps environment steps; "exponential" multiplies epsilon by
+  # epsilon_decay_rate every step.
+  epsilon_decay: linear
+
+  # null = exploration_fraction x (episodes x decisions per episode), so the
+  # schedule automatically stretches or shrinks with --episodes and the agent
+  # never stops exploring after a handful of episodes.
+  epsilon_decay_steps: null
+  exploration_fraction: 0.5
+  epsilon_decay_rate: 0.9995  # only used when epsilon_decay is "exponential"
+
+  # --- bookkeeping ---------------------------------------------------------
+  seed: 42                    # Python / NumPy / PyTorch / SUMO seed
+  checkpoint_every: 10        # episodes between checkpoint saves
+
+  # best.pt is saved when the mean return of the last `best_window` episodes
+  # improves, not when a single episode happens to be good. Traffic RL returns
+  # are noisy and one lucky episode is not a better policy.
+  best_window: 5
+
+  # Reuse the same SUMO seed for every episode (true) or advance it per
+  # episode (false). Advancing it exposes the agent to different vehicle
+  # arrival patterns and makes the learned policy less seed-specific.
+  vary_episode_seed: true

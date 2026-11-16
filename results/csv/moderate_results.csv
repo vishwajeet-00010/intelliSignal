@@ -1,0 +1,2 @@
+scenario,vehicles,average_waiting_time,average_queue_length,throughput,simulation_time,max_queue_length,vehicles_departed,vehicles_still_in_network,teleports,config_file
+moderate,702,10.04,3.7,693,1800.0,10,702,9,0,moderate.yaml

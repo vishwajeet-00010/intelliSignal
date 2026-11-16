@@ -1,0 +1,7 @@
+scenario,metric,label,lower_is_better,fixed_time_mean,fixed_time_std,dqn_mean,dqn_std,difference,improvement_percent,dqn_better
+moderate,average_waiting_time,Average waiting time (s/vehicle),True,8.283333333333333,0.23180451534284963,3.8333333333333335,0.28936712552280924,-4.449999999999999,53.72233400402414,True
+moderate,average_queue_length,Average queue length (vehicles),True,3.1933333333333334,0.07505553499465129,1.4566666666666668,0.11846237095944571,-1.7366666666666666,54.38413361169102,True
+moderate,max_queue_length,Maximum queue length (vehicles),True,9.333333333333334,0.5773502691896257,6.0,0.0,-3.333333333333334,35.71428571428572,True
+moderate,throughput,Throughput (vehicles completed),False,104.66666666666667,0.5773502691896257,107.33333333333333,1.1547005383792515,2.666666666666657,2.5477707006369332,True
+moderate,vehicles_still_in_network,Vehicles still in network,True,17.333333333333332,0.5773502691896257,14.666666666666666,1.1547005383792515,-2.666666666666666,15.384615384615383,True
+moderate,teleports,Teleports,True,0.0,0.0,0.0,0.0,0.0,,

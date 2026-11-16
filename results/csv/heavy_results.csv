@@ -1,0 +1,2 @@
+scenario,vehicles,average_waiting_time,average_queue_length,throughput,simulation_time,max_queue_length,vehicles_departed,vehicles_still_in_network,teleports,config_file
+heavy,1445,51.9,40.39,1351,1800.0,72,1445,94,0,heavy.yaml

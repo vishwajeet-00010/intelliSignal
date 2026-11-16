@@ -1,0 +1,47 @@
+# ===========================================================================
+# IntelliSignal - Stage 1
+# Scenario 1 : MODERATE TRAFFIC
+# ---------------------------------------------------------------------------
+# Every value the simulation uses is defined here. Changing a number here is
+# the only thing needed to change the scenario - no Python file has to be
+# edited. The SUMO route file and the traffic-light program are generated
+# from this file every time the scenario is run.
+# ===========================================================================
+
+scenario:
+  name: moderate
+  description: Moderate traffic demand - regular flow with short queues
+
+simulation:
+  duration: 1800          # seconds of simulated time
+  step_length: 1.0        # seconds per simulation step
+  seed: 42                # fixed seed so the run is reproducible
+  time_to_teleport: 300   # SUMO removes a vehicle blocked this long (s)
+
+# Fixed-time signal plan (Stage 1 baseline controller).
+#   North-South green -> yellow -> East-West green -> yellow -> repeat
+signal:
+  ns_green: 30            # seconds of green for the North-South direction
+  ew_green: 30            # seconds of green for the East-West direction
+  yellow: 4               # seconds of yellow after every green
+  all_red: 0              # seconds of all-red clearance (0 = not used)
+
+# Traffic demand, in vehicles per hour entering from each approach.
+demand:
+  north: 400
+  south: 400
+  east: 300
+  west: 300
+  turn_ratios:            # how the demand of an approach splits by movement
+    right: 0.25
+    straight: 0.55
+    left: 0.20
+
+# Vehicle properties used for the SUMO vehicle type "car".
+vehicle:
+  max_speed: 13.89        # m/s (= 50 km/h)
+  accel: 2.6              # m/s^2
+  decel: 4.5              # m/s^2
+  length: 5.0             # m
+  min_gap: 2.5            # m
+  sigma: 0.5              # driver imperfection (0 = perfect driver)

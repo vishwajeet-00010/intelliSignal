@@ -1,0 +1,70 @@
+{
+  "scenarios": [
+    "heavy",
+    "moderate"
+  ],
+  "episodes": 300,
+  "training_seed": 42,
+  "training_traffic_seeds": [
+    42,
+    341
+  ],
+  "duration_seconds": 1800,
+  "reference_seeds": [
+    42,
+    43,
+    44
+  ],
+  "holdout_seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010
+  ],
+  "checkpoint_selection": "best.pt selected by existing 5-episode mean training return",
+  "training_mode": "fresh; default epsilon schedule stretches to 27000 decisions",
+  "promotion_rule": "On holdouts: lower mean waiting, waiting wins on >5/10 seeds, no worse mean queue, throughput or teleports vs incumbent. Report reference results and all tradeoffs. No automatic replacement.",
+  "python": "3.12.13 (main, Apr  7 2026, 20:53:22) [MSC v.1944 64 bit (AMD64)]",
+  "packages": {
+    "eclipse-sumo": "1.28.0",
+    "traci": "1.28.0",
+    "sumolib": "1.28.0",
+    "torch": "2.14.1",
+    "numpy": "2.5.4",
+    "gymnasium": "1.4.0"
+  },
+  "config": {
+    "hidden_layers": [
+      64,
+      64
+    ],
+    "episodes": 300,
+    "episode_duration": null,
+    "max_steps_per_episode": null,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "gamma": 0.9,
+    "loss": "huber",
+    "gradient_clip": 10.0,
+    "replay_capacity": 50000,
+    "learning_starts": 500,
+    "train_frequency": 1,
+    "target_update_frequency": 500,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": "linear",
+    "epsilon_decay_steps": null,
+    "exploration_fraction": 0.5,
+    "epsilon_decay_rate": 0.9995,
+    "seed": 42,
+    "checkpoint_every": 10,
+    "best_window": 5,
+    "vary_episode_seed": true
+  }
+}

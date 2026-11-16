@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Test / tooling caches
+.pytest_cache/
+.coverage
+
+# SUMO files that are generated from the YAML configuration at run time
+sumo/routes/*.rou.xml
+sumo/additional/*_tls.add.xml
+sumo/config/*.sumocfg
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dashboard scratch: simulations started from the Streamlit dashboard.
+# The recorded Stage 1 baseline in results/csv/ is kept.
+results/data/*.csv
