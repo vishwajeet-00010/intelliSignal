@@ -1,0 +1,124 @@
+{
+  "scenario": "heavy",
+  "model": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\models\\dqn_heavy\\best.pt",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "rows": [
+    {
+      "scenario": "heavy",
+      "vehicles": 1462,
+      "average_waiting_time": 47.92,
+      "average_queue_length": 37.79,
+      "throughput": 1347,
+      "simulation_time": 1800.0,
+      "max_queue_length": 71,
+      "vehicles_departed": 1462,
+      "vehicles_still_in_network": 115,
+      "teleports": 0,
+      "controller": "dqn",
+      "seed": 42,
+      "episode_duration": 1800.0,
+      "episode_return": -593.454,
+      "decisions": 180,
+      "switch_count": 89,
+      "terminated_early": false,
+      "model": "models\\dqn_heavy\\best.pt"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1455,
+      "average_waiting_time": 49.9,
+      "average_queue_length": 39.21,
+      "throughput": 1337,
+      "simulation_time": 1800.0,
+      "max_queue_length": 71,
+      "vehicles_departed": 1455,
+      "vehicles_still_in_network": 118,
+      "teleports": 0,
+      "controller": "dqn",
+      "seed": 43,
+      "episode_duration": 1800.0,
+      "episode_return": -615.038,
+      "decisions": 180,
+      "switch_count": 89,
+      "terminated_early": false,
+      "model": "models\\dqn_heavy\\best.pt"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1461,
+      "average_waiting_time": 45.91,
+      "average_queue_length": 36.25,
+      "throughput": 1347,
+      "simulation_time": 1800.0,
+      "max_queue_length": 67,
+      "vehicles_departed": 1461,
+      "vehicles_still_in_network": 114,
+      "teleports": 0,
+      "controller": "dqn",
+      "seed": 44,
+      "episode_duration": 1800.0,
+      "episode_return": -566.837,
+      "decisions": 180,
+      "switch_count": 89,
+      "terminated_early": false,
+      "model": "models\\dqn_heavy\\best.pt"
+    }
+  ],
+  "aggregate": {
+    "average_waiting_time": {
+      "mean": 47.91,
+      "std": 1.99501879690393,
+      "min": 45.91,
+      "max": 49.9,
+      "n": 3
+    },
+    "average_queue_length": {
+      "mean": 37.75,
+      "std": 1.4804053498957646,
+      "min": 36.25,
+      "max": 39.21,
+      "n": 3
+    },
+    "max_queue_length": {
+      "mean": 69.66666666666667,
+      "std": 2.309401076758503,
+      "min": 67.0,
+      "max": 71.0,
+      "n": 3
+    },
+    "throughput": {
+      "mean": 1343.6666666666667,
+      "std": 5.773502691896257,
+      "min": 1337.0,
+      "max": 1347.0,
+      "n": 3
+    },
+    "vehicles_still_in_network": {
+      "mean": 115.66666666666667,
+      "std": 2.0816659994661326,
+      "min": 114.0,
+      "max": 118.0,
+      "n": 3
+    },
+    "teleports": {
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "n": 3
+    }
+  },
+  "epsilon": 0.0,
+  "architecture": "10 -> 64 -> 64 -> 2",
+  "timeseries": [
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\incumbent\\dqn_heavy_seed42_timeseries.csv",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\incumbent\\dqn_heavy_seed43_timeseries.csv",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\incumbent\\dqn_heavy_seed44_timeseries.csv"
+  ],
+  "raw_csv": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\incumbent\\dqn_heavy_evaluation.csv",
+  "summary_csv": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\incumbent\\dqn_heavy_evaluation_summary.csv"
+}

@@ -1,0 +1,4 @@
+scenario,controller,seed,vehicles,average_waiting_time,average_queue_length,max_queue_length,throughput,vehicles_still_in_network,teleports,simulation_time,vehicles_departed,episode_return,switch_count,decisions,model
+heavy,dqn,42,1462,47.92,37.79,71,1347,115,0,1800.0,1462,-593.454,89,180,models\dqn_heavy\best.pt
+heavy,dqn,43,1455,49.9,39.21,71,1337,118,0,1800.0,1455,-615.038,89,180,models\dqn_heavy\best.pt
+heavy,dqn,44,1461,45.91,36.25,67,1347,114,0,1800.0,1461,-566.837,89,180,models\dqn_heavy\best.pt

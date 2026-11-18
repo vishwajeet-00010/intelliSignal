@@ -31,3 +31,5 @@ results/data/*.csv
 .venv-*/
 __pycache__/
 *.pyc
+
+*.lock

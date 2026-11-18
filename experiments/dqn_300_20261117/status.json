@@ -1,6 +1,6 @@
 {
-  "stage": "evaluating_incumbent",
-  "updated_at": "2026-11-18 12:12:17",
+  "stage": "evaluating_candidate",
+  "updated_at": "2026-11-18 12:15:12",
   "scenario": "heavy",
-  "seed_set": "reference"
+  "seed_set": "holdout"
 }

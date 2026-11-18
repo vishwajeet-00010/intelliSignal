@@ -210,3 +210,42 @@ EXPERIMENT_STATUS {"stage": "evaluating_incumbent", "updated_at": "2026-11-18 12
 --------------------------------------------------------------------------
   seed   wait(s)   queue   maxQ   thru   left  tele  switches
     42     47.92   37.79    71   1347    115     0        89
+    43     49.90   39.21    71   1337    118     0        89
+    44     45.91   36.25    67   1347    114     0        89
+--------------------------------------------------------------------------
+  MEAN ± SAMPLE STANDARD DEVIATION over 3 seed(s)
+--------------------------------------------------------------------------
+  Average waiting time (s/vehicle)       47.91 ± 2.00
+  Average queue length (vehicles)        37.75 ± 1.48
+  Maximum queue length (vehicles)        70 ± 2
+  Throughput (vehicles completed)        1344 ± 6
+  Vehicles still in network              116 ± 2
+  Teleports                              0 ± 0
+--------------------------------------------------------------------------
+  Raw results   : experiments\dqn_300_20261117\heavy\evaluation\reference\incumbent\dqn_heavy_evaluation.csv
+  Aggregated    : experiments\dqn_300_20261117\heavy\evaluation\reference\incumbent\dqn_heavy_evaluation_summary.csv
+  These are DQN numbers only. They say nothing about whether the
+  DQN beat the fixed-time plan - run compare_controllers.py for that.
+==========================================================================
+EXPERIMENT_STATUS {"stage": "evaluating_candidate", "updated_at": "2026-11-18 12:15:12", "scenario": "heavy", "seed_set": "holdout"}
+==============================================================================
+  IntelliSignal - Stage 3  |  Fixed-Time vs DQN
+==============================================================================
+  Scenario   : heavy
+  Model      : experiments\dqn_300_20261117\heavy\models\best.pt  (273 episodes trained)
+  Seeds      : 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010
+  Duration   : 1800 s
+  Controllers: fixed-time, DQN, untrained control
+  Both controllers run on the SAME generated network, demand and
+  seed, and are measured by the same Stage 1 metrics collector.
+------------------------------------------------------------------------------
+  seed 1001
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     53.37    41.57     75    1350      0
+    DQN                            48.50    38.26     71    1343      0
+    DQN (untrained control)       103.04    64.57    101    1026      0
+  seed 1002
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     52.11    40.48     70    1355      0
+    DQN                            47.45    37.42     71    1338      0
+    DQN (untrained control)        94.24    60.92    102    1062      0
