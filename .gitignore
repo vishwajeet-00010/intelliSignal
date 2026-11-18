@@ -24,3 +24,10 @@ Thumbs.db
 # Dashboard scratch: simulations started from the Streamlit dashboard.
 # The recorded Stage 1 baseline in results/csv/ is kept.
 results/data/*.csv
+
+*.lock
+
+.venv/
+.venv-*/
+__pycache__/
+*.pyc

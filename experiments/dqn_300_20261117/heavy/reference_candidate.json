@@ -1,0 +1,424 @@
+{
+  "scenario": "heavy",
+  "model": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\models\\best.pt",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "controllers": [
+    "fixed_time",
+    "dqn",
+    "dqn_untrained"
+  ],
+  "rows": [
+    {
+      "scenario": "heavy",
+      "vehicles": 1445,
+      "average_waiting_time": 51.9,
+      "average_queue_length": 40.39,
+      "throughput": 1351,
+      "simulation_time": 1800.0,
+      "max_queue_length": 72,
+      "vehicles_departed": 1445,
+      "vehicles_still_in_network": 94,
+      "teleports": 0,
+      "controller": "fixed_time",
+      "seed": 42,
+      "episode_duration": 1800.0,
+      "signal_program": "fixed",
+      "switch_count": 52,
+      "decisions": 180
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1468,
+      "average_waiting_time": 45.85,
+      "average_queue_length": 36.25,
+      "throughput": 1349,
+      "simulation_time": 1800.0,
+      "max_queue_length": 69,
+      "vehicles_departed": 1468,
+      "vehicles_still_in_network": 119,
+      "teleports": 0,
+      "controller": "dqn",
+      "seed": 42,
+      "episode_duration": 1800.0,
+      "episode_return": -567.347,
+      "decisions": 180,
+      "switch_count": 88,
+      "terminated_early": false,
+      "model": "experiments\\dqn_300_20261117\\heavy\\models\\best.pt"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1167,
+      "average_waiting_time": 95.21,
+      "average_queue_length": 61.07,
+      "throughput": 1059,
+      "simulation_time": 1800.0,
+      "max_queue_length": 101,
+      "vehicles_departed": 1167,
+      "vehicles_still_in_network": 108,
+      "teleports": 0,
+      "controller": "dqn_untrained",
+      "seed": 42,
+      "episode_duration": 1800.0,
+      "episode_return": -3412.069,
+      "decisions": 180,
+      "switch_count": 39,
+      "terminated_early": false,
+      "model": "random weights (control)"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1448,
+      "average_waiting_time": 51.62,
+      "average_queue_length": 40.21,
+      "throughput": 1355,
+      "simulation_time": 1800.0,
+      "max_queue_length": 68,
+      "vehicles_departed": 1448,
+      "vehicles_still_in_network": 93,
+      "teleports": 0,
+      "controller": "fixed_time",
+      "seed": 43,
+      "episode_duration": 1800.0,
+      "signal_program": "fixed",
+      "switch_count": 52,
+      "decisions": 180
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1459,
+      "average_waiting_time": 47.74,
+      "average_queue_length": 37.57,
+      "throughput": 1340,
+      "simulation_time": 1800.0,
+      "max_queue_length": 70,
+      "vehicles_departed": 1459,
+      "vehicles_still_in_network": 119,
+      "teleports": 0,
+      "controller": "dqn",
+      "seed": 43,
+      "episode_duration": 1800.0,
+      "episode_return": -592.013,
+      "decisions": 180,
+      "switch_count": 88,
+      "terminated_early": false,
+      "model": "experiments\\dqn_300_20261117\\heavy\\models\\best.pt"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1173,
+      "average_waiting_time": 93.17,
+      "average_queue_length": 60.17,
+      "throughput": 1061,
+      "simulation_time": 1800.0,
+      "max_queue_length": 101,
+      "vehicles_departed": 1173,
+      "vehicles_still_in_network": 112,
+      "teleports": 0,
+      "controller": "dqn_untrained",
+      "seed": 43,
+      "episode_duration": 1800.0,
+      "episode_return": -3385.116,
+      "decisions": 180,
+      "switch_count": 39,
+      "terminated_early": false,
+      "model": "random weights (control)"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1448,
+      "average_waiting_time": 54.27,
+      "average_queue_length": 42.35,
+      "throughput": 1348,
+      "simulation_time": 1800.0,
+      "max_queue_length": 74,
+      "vehicles_departed": 1448,
+      "vehicles_still_in_network": 100,
+      "teleports": 0,
+      "controller": "fixed_time",
+      "seed": 44,
+      "episode_duration": 1800.0,
+      "signal_program": "fixed",
+      "switch_count": 52,
+      "decisions": 180
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1459,
+      "average_waiting_time": 49.33,
+      "average_queue_length": 38.88,
+      "throughput": 1340,
+      "simulation_time": 1800.0,
+      "max_queue_length": 70,
+      "vehicles_departed": 1459,
+      "vehicles_still_in_network": 119,
+      "teleports": 0,
+      "controller": "dqn",
+      "seed": 44,
+      "episode_duration": 1800.0,
+      "episode_return": -610.153,
+      "decisions": 180,
+      "switch_count": 88,
+      "terminated_early": false,
+      "model": "experiments\\dqn_300_20261117\\heavy\\models\\best.pt"
+    },
+    {
+      "scenario": "heavy",
+      "vehicles": 1261,
+      "average_waiting_time": 76.24,
+      "average_queue_length": 52.61,
+      "throughput": 1148,
+      "simulation_time": 1800.0,
+      "max_queue_length": 101,
+      "vehicles_departed": 1261,
+      "vehicles_still_in_network": 113,
+      "teleports": 0,
+      "controller": "dqn_untrained",
+      "seed": 44,
+      "episode_duration": 1800.0,
+      "episode_return": -2729.447,
+      "decisions": 180,
+      "switch_count": 39,
+      "terminated_early": false,
+      "model": "random weights (control)"
+    }
+  ],
+  "aggregates": {
+    "fixed_time": {
+      "average_waiting_time": {
+        "mean": 52.596666666666664,
+        "std": 1.4558960585609613,
+        "min": 51.62,
+        "max": 54.27,
+        "n": 3
+      },
+      "average_queue_length": {
+        "mean": 40.983333333333334,
+        "std": 1.1869849760352211,
+        "min": 40.21,
+        "max": 42.35,
+        "n": 3
+      },
+      "max_queue_length": {
+        "mean": 71.33333333333333,
+        "std": 3.0550504633038935,
+        "min": 68.0,
+        "max": 74.0,
+        "n": 3
+      },
+      "throughput": {
+        "mean": 1351.3333333333333,
+        "std": 3.511884584284246,
+        "min": 1348.0,
+        "max": 1355.0,
+        "n": 3
+      },
+      "vehicles_still_in_network": {
+        "mean": 95.66666666666667,
+        "std": 3.7859388972001824,
+        "min": 93.0,
+        "max": 100.0,
+        "n": 3
+      },
+      "teleports": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 3
+      }
+    },
+    "dqn": {
+      "average_waiting_time": {
+        "mean": 47.64000000000001,
+        "std": 1.7421538393609202,
+        "min": 45.85,
+        "max": 49.33,
+        "n": 3
+      },
+      "average_queue_length": {
+        "mean": 37.56666666666667,
+        "std": 1.3150031685639911,
+        "min": 36.25,
+        "max": 38.88,
+        "n": 3
+      },
+      "max_queue_length": {
+        "mean": 69.66666666666667,
+        "std": 0.5773502691896257,
+        "min": 69.0,
+        "max": 70.0,
+        "n": 3
+      },
+      "throughput": {
+        "mean": 1343.0,
+        "std": 5.196152422706632,
+        "min": 1340.0,
+        "max": 1349.0,
+        "n": 3
+      },
+      "vehicles_still_in_network": {
+        "mean": 119.0,
+        "std": 0.0,
+        "min": 119.0,
+        "max": 119.0,
+        "n": 3
+      },
+      "teleports": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 3
+      }
+    },
+    "dqn_untrained": {
+      "average_waiting_time": {
+        "mean": 88.20666666666666,
+        "std": 10.413512055657945,
+        "min": 76.24,
+        "max": 95.21,
+        "n": 3
+      },
+      "average_queue_length": {
+        "mean": 57.949999999999996,
+        "std": 4.646417975171842,
+        "min": 52.61,
+        "max": 61.07,
+        "n": 3
+      },
+      "max_queue_length": {
+        "mean": 101.0,
+        "std": 0.0,
+        "min": 101.0,
+        "max": 101.0,
+        "n": 3
+      },
+      "throughput": {
+        "mean": 1089.3333333333333,
+        "std": 50.816663933530045,
+        "min": 1059.0,
+        "max": 1148.0,
+        "n": 3
+      },
+      "vehicles_still_in_network": {
+        "mean": 111.0,
+        "std": 2.6457513110645907,
+        "min": 108.0,
+        "max": 113.0,
+        "n": 3
+      },
+      "teleports": {
+        "mean": 0.0,
+        "std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "n": 3
+      }
+    }
+  },
+  "improvements": [
+    {
+      "metric": "average_waiting_time",
+      "label": "Average waiting time (s/vehicle)",
+      "lower_is_better": true,
+      "fixed_time_mean": 52.596666666666664,
+      "fixed_time_std": 1.4558960585609613,
+      "dqn_mean": 47.64000000000001,
+      "dqn_std": 1.7421538393609202,
+      "difference": -4.956666666666656,
+      "improvement_percent": 9.42391786551744,
+      "dqn_better": true
+    },
+    {
+      "metric": "average_queue_length",
+      "label": "Average queue length (vehicles)",
+      "lower_is_better": true,
+      "fixed_time_mean": 40.983333333333334,
+      "fixed_time_std": 1.1869849760352211,
+      "dqn_mean": 37.56666666666667,
+      "dqn_std": 1.3150031685639911,
+      "difference": -3.4166666666666643,
+      "improvement_percent": 8.33672224481496,
+      "dqn_better": true
+    },
+    {
+      "metric": "max_queue_length",
+      "label": "Maximum queue length (vehicles)",
+      "lower_is_better": true,
+      "fixed_time_mean": 71.33333333333333,
+      "fixed_time_std": 3.0550504633038935,
+      "dqn_mean": 69.66666666666667,
+      "dqn_std": 0.5773502691896257,
+      "difference": -1.6666666666666572,
+      "improvement_percent": 2.336448598130828,
+      "dqn_better": true
+    },
+    {
+      "metric": "throughput",
+      "label": "Throughput (vehicles completed)",
+      "lower_is_better": false,
+      "fixed_time_mean": 1351.3333333333333,
+      "fixed_time_std": 3.511884584284246,
+      "dqn_mean": 1343.0,
+      "dqn_std": 5.196152422706632,
+      "difference": -8.333333333333258,
+      "improvement_percent": -0.6166748889985144,
+      "dqn_better": false
+    },
+    {
+      "metric": "vehicles_still_in_network",
+      "label": "Vehicles still in network",
+      "lower_is_better": true,
+      "fixed_time_mean": 95.66666666666667,
+      "fixed_time_std": 3.7859388972001824,
+      "dqn_mean": 119.0,
+      "dqn_std": 0.0,
+      "difference": 23.33333333333333,
+      "improvement_percent": -24.390243902439018,
+      "dqn_better": false
+    },
+    {
+      "metric": "teleports",
+      "label": "Teleports",
+      "lower_is_better": true,
+      "fixed_time_mean": 0.0,
+      "fixed_time_std": 0.0,
+      "dqn_mean": 0.0,
+      "dqn_std": 0.0,
+      "difference": 0.0,
+      "improvement_percent": null,
+      "dqn_better": null
+    }
+  ],
+  "recorded_baseline": {
+    "scenario": "heavy",
+    "vehicles": 1445,
+    "average_waiting_time": 51.9,
+    "average_queue_length": 40.39,
+    "throughput": 1351,
+    "simulation_time": 1800.0,
+    "max_queue_length": 72,
+    "vehicles_departed": 1445,
+    "vehicles_still_in_network": 94,
+    "teleports": 0,
+    "config_file": "heavy.yaml",
+    "_path": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\results\\csv\\heavy_results.csv"
+  },
+  "duration": 1800,
+  "raw_csv": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\candidate\\comparison_heavy_raw.csv",
+  "aggregated_csv": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\candidate\\comparison_heavy_aggregated.csv",
+  "improvement_csv": "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\evaluation\\reference\\candidate\\comparison_heavy_improvement.csv",
+  "plots": [
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\plots\\reference\\heavy_waiting_time.png",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\plots\\reference\\heavy_queue_length.png",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\plots\\reference\\heavy_throughput.png",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\plots\\reference\\heavy_max_queue.png",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\plots\\reference\\heavy_queue_over_time.png",
+    "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\plots\\reference\\heavy_summary.png"
+  ]
+}

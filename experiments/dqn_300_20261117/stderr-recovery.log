@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal\experiments\dqn_300_20261117\run_experiment.py", line 142, in <module>
+    main()
+  File "C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal\experiments\dqn_300_20261117\run_experiment.py", line 98, in main
+    summary = train(scenario=scenario, config=load_dqn_config(episodes=300, seed=42),
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal\experiments\dqn_300_20261117\resumable_training.py", line 214, in train
+    _save_resume(resume_path, agent, scenario, config, env_contract, history,
+  File "C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal\experiments\dqn_300_20261117\resumable_training.py", line 89, in _save_resume
+    atomic_save(payload, path)
+  File "C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal\experiments\dqn_300_20261117\resumable_training.py", line 38, in atomic_save
+    os.replace(temporary, path)
+PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\resume.pt.tmp' -> 'C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\dqn_300_20261117\\heavy\\resume.pt'
+object address  : 000001F13E1C3F40
+object refcount : 3
+object type     : 00007FFC0EBCB570
+object type name: PermissionError
+object repr     : PermissionError(13, 'Access is denied')
+lost sys.stderr
+Exception ignored in: Exception ignored in sys.unraisablehook

@@ -1,0 +1,35 @@
+EXPERIMENT_STATUS {"stage": "training", "updated_at": "2026-11-17 15:09:34", "scenario": "heavy", "episodes": 300}
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN training
+==========================================================================
+  Scenario            : heavy
+  Episode             : 1800 simulated seconds = 180 decisions
+  Observation         : 10 values (from env.observation_space)
+  Actions             : 2 (0 = keep green, 1 = switch)
+  Network             : 10 -> 64 -> 64 -> 2  (4994 parameters)
+  Exploration         : linear 1.0 -> 0.05 over 27000 steps
+  Models              : experiments\dqn_300_20261117\heavy\models
+--------------------------------------------------------------------------
+  hidden layers            : [64, 64]
+  episodes                 : 300
+  gamma (discount)         : 0.9
+  learning rate            : 0.001
+  batch size               : 64
+  loss                     : huber
+  replay capacity          : 50000
+  learning starts after    : 500 transitions
+  train frequency          : every 1 step(s)
+  target update frequency  : every 500 gradient step(s)
+  epsilon                  : 1.0 -> 0.05 (linear)
+  seed                     : 42
+--------------------------------------------------------------------------
+  ep      return    avg loss   eps     queue   wait(s)  thru  switch
+    1/300  -1589.04          -  0.994   48.17    61.36  1352    54
+   10/300  -1320.42    1.26157  0.937   46.41    59.40  1325    61
+   20/300   -943.66    1.54779  0.873   41.19    51.82  1357    69
+   30/300  -1022.07    1.56652  0.810   46.74    59.27  1351    69
+   40/300   -948.44    1.58695  0.747   42.98    54.33  1357    68
+   50/300  -1007.84    1.53247  0.683   44.85    56.34  1354    72
+   60/300   -792.82    1.51995  0.620   37.77    47.49  1363    73
+   70/300   -812.97    1.51656  0.557   39.58    49.91  1360    75
+   80/300   -723.53    1.44824  0.493   38.33    48.43  1354    78

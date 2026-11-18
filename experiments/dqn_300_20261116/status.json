@@ -1,6 +1,13 @@
 {
-  "stage": "training",
-  "updated_at": "2026-11-16 14:24:59",
+  "stage": "interrupted",
+  "inspected_on": "2026-11-17",
   "scenario": "heavy",
-  "episodes": 300
+  "episodes_requested": 300,
+  "episodes_logged": 233,
+  "latest_periodic_checkpoint_episode": 230,
+  "best_checkpoint_episode": 228,
+  "exact_resume_possible": false,
+  "reason": "Process no longer running; legacy checkpoints omit replay memory and random-generator state.",
+  "replacement_experiment": "experiments/dqn_300_20261117",
+  "artifacts_preserved": true
 }
