@@ -32,6 +32,7 @@ DEFAULTS: Dict[str, Any] = {
     "environment": {
         "decision_interval": 5,
         "min_green": 5,
+        "clearance_outside_interval": False,
         "max_green": 60,
         "episode_duration": None,
         "yellow_time": None,
@@ -120,7 +121,8 @@ def validate_rl_config(config: Dict[str, Any]) -> None:
 
     yellow = env.get("yellow_time")
     all_red = env.get("all_red_time")
-    if yellow is not None and all_red is not None:
+    outside = bool(env.get("clearance_outside_interval", False))
+    if yellow is not None and all_red is not None and not outside:
         transition = float(yellow) + float(all_red)
         if transition >= interval:
             raise RLConfigError(

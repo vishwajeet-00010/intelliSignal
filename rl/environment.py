@@ -166,6 +166,8 @@ class IntelliSignalEnv(gym.Env):
                 "interval ({:.0f} s).".format(self.episode_duration,
                                               self.decision_interval))
 
+        self.clearance_outside_interval = bool(
+            env_cfg.get("clearance_outside_interval", False))
         self.controller = ActionController(
             decision_interval=self.decision_interval,
             yellow_time=env_cfg["yellow_time"],
@@ -173,6 +175,7 @@ class IntelliSignalEnv(gym.Env):
             min_green=env_cfg["min_green"],
             max_green=env_cfg["max_green"],
             step_length=self.step_length,
+            clearance_outside_interval=self.clearance_outside_interval,
         )
         self.state_extractor = StateExtractor(
             max_queue_per_approach=obs_cfg["max_queue_per_approach"],
@@ -192,6 +195,7 @@ class IntelliSignalEnv(gym.Env):
         self._conn = None
         self._label = "intellisignal_rl_{}_{}".format(scenario, id(self))
         self._decision = 0
+        self._simulated_seconds = 0.0
         self._sumo_seed = seed if seed is not None else int(
             self.scenario_config["simulation"]["seed"])
         self._files = None
@@ -214,6 +218,7 @@ class IntelliSignalEnv(gym.Env):
 
         self.controller.reset(PHASE_NS)
         self._decision = 0
+        self._simulated_seconds = 0.0
         self._cumulative_reward = 0.0
 
         # Show the starting green before the first step, then warm up.
@@ -257,6 +262,10 @@ class IntelliSignalEnv(gym.Env):
 
         self.controller.commit(effective_action)
         self._decision += 1
+        # A decision no longer always lasts one interval: when the clearance is
+        # served outside it, a switch costs interval + yellow + all-red. Count
+        # the seconds actually simulated so the episode still ends on time.
+        self._simulated_seconds += len(samples) * self.step_length
 
         raw = samples[-1]
         averaged = self._average(samples)
@@ -270,7 +279,11 @@ class IntelliSignalEnv(gym.Env):
         # --- episode end ----------------------------------------------
         no_traffic_left = self._conn.simulation.getMinExpectedNumber() <= 0
         terminated = bool(no_traffic_left)
-        truncated = bool(self._decision >= self.max_decisions)
+        if self.clearance_outside_interval:
+            # Decisions vary in length, so the episode ends on simulated time.
+            truncated = bool(self._simulated_seconds >= self.episode_duration)
+        else:
+            truncated = bool(self._decision >= self.max_decisions)
 
         action_info["effective_action"] = effective_action
         info = self._build_info(raw, reward_parts, action_info, averaged)

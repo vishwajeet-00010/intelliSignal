@@ -77,20 +77,38 @@ class ActionController:
 
     def __init__(self, decision_interval: float, yellow_time: float,
                  all_red_time: float, min_green: float, max_green: float,
-                 step_length: float = 1.0):
+                 step_length: float = 1.0,
+                 clearance_outside_interval: bool = False):
         self.decision_interval = float(decision_interval)
         self.yellow_time = float(yellow_time)
         self.all_red_time = float(all_red_time)
         self.min_green = float(min_green)
         self.max_green = float(max_green)
         self.step_length = float(step_length)
+        self.clearance_outside_interval = bool(clearance_outside_interval)
 
         transition = self.yellow_time + self.all_red_time
-        if transition >= self.decision_interval:
+        if self.clearance_outside_interval:
+            # The clearance is served in ADDITION to the interval, so a
+            # switching decision lasts interval + yellow + all-red seconds and
+            # always delivers a full interval of green. This decouples the
+            # green quantum from the clearance: greens become whole multiples
+            # of decision_interval instead of (interval - clearance) + k*interval.
+            #
+            # Why that matters here: with the clearance inside the interval the
+            # reachable greens are {interval - 4, 2*interval - 4, ...}, so the
+            # two directions can only ever differ by a whole interval. Measured
+            # on heavy traffic, the best fixed plan gives north-south 7 s and
+            # east-west 6 s (5.72 s mean waiting against 12.82 s for the best
+            # symmetric plan), and a one-second difference between the two
+            # directions is unreachable unless the interval is one second.
+            if self.decision_interval <= 0:
+                raise ValueError("decision_interval must be positive.")
+        elif transition >= self.decision_interval:
             raise ValueError(
                 "decision_interval ({:.0f} s) must be longer than "
-                "yellow + all-red ({:.0f} s).".format(
-                    self.decision_interval, transition))
+                "yellow + all-red ({:.0f} s), or clearance_outside_interval "
+                "must be enabled.".format(self.decision_interval, transition))
 
         self.phase = PHASE_NS        # the intersection starts North-South green
         self.green_elapsed = 0.0     # seconds the current green has been on
@@ -138,7 +156,11 @@ class ActionController:
 
         yellow_steps = self._steps(self.yellow_time)
         all_red_steps = self._steps(self.all_red_time)
-        green_steps = total_steps - yellow_steps - all_red_steps
+        if self.clearance_outside_interval:
+            # The clearance is extra time, not time taken from the green.
+            green_steps = total_steps
+        else:
+            green_steps = total_steps - yellow_steps - all_red_steps
 
         other = self.other_phase()
         segments = [(YELLOW_STATE[self.phase], yellow_steps)]
@@ -153,9 +175,14 @@ class ActionController:
         if effective_action == ACTION_SWITCH:
             self.phase = self.other_phase()
             self.switch_count += 1
-            # Only the green part of the interval counted as green time.
-            self.green_elapsed = (self.decision_interval
-                                  - self.yellow_time - self.all_red_time)
+            if self.clearance_outside_interval:
+                # The clearance did not eat into the green, so the new green
+                # has had a full interval.
+                self.green_elapsed = self.decision_interval
+            else:
+                # Only the green part of the interval counted as green time.
+                self.green_elapsed = (self.decision_interval
+                                      - self.yellow_time - self.all_red_time)
         else:
             self.green_elapsed += self.decision_interval
 

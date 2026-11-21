@@ -84,8 +84,16 @@ def run_fixed_time_plan(scenario: str, green: float, seed: int,
                         duration: float = 1800.0,
                         yellow: Optional[float] = None,
                         all_red: Optional[float] = None,
+                        ew_green: Optional[float] = None,
+                        tag: str = "",
                         quiet: bool = True) -> Dict[str, object]:
-    """Run one episode under a symmetric fixed-time plan and measure it.
+    """Run one episode under a fixed-time plan and measure it.
+
+    `green` sets the north-south green. `ew_green` sets the east-west green
+    separately; leave it None for a symmetric plan. Asymmetric plans matter
+    here because demand is not symmetric - heavy traffic is 850 veh/h on each
+    of north and south against 650 on each of east and west - so the best
+    fixed plan need not give both directions the same time.
 
     `yellow` and `all_red` default to the scenario's own `signal:` values, so
     the plan differs from the Stage 1 baseline only in green duration. Override
@@ -97,11 +105,15 @@ def run_fixed_time_plan(scenario: str, green: float, seed: int,
     import traci
 
     config = load_config(scenario)
-    config["scenario"]["name"] = scenario + SWEEP_SUFFIX
+    # `tag` keeps concurrent sweeps apart. Two runs sharing a scenario name
+    # regenerate the same SUMO inputs, and one can overwrite the other's files
+    # between build_scenario() and SUMO reading them.
+    config["scenario"]["name"] = scenario + SWEEP_SUFFIX + str(tag)
     config["simulation"]["duration"] = float(duration)
     config["simulation"]["seed"] = int(seed)
+    east_west = float(green if ew_green is None else ew_green)
     config["signal"]["ns_green"] = float(green)
-    config["signal"]["ew_green"] = float(green)
+    config["signal"]["ew_green"] = east_west
     if yellow is not None:
         config["signal"]["yellow"] = float(yellow)
     if all_red is not None:
@@ -126,19 +138,24 @@ def run_fixed_time_plan(scenario: str, green: float, seed: int,
 
     row = collector.summary(scenario)
     sig = config["signal"]
+    clearance = float(sig["yellow"]) + float(sig["all_red"])
+    label = ("fixed_time_green{:g}".format(green) if ew_green is None
+             else "fixed_time_ns{:g}_ew{:g}".format(green, east_west))
     row.update({
-        "controller": "fixed_time_green{:g}".format(green),
+        "controller": label,
         "green": float(green),
+        "ns_green": float(green),
+        "ew_green": east_west,
         "yellow": float(sig["yellow"]),
         "all_red": float(sig["all_red"]),
-        "cycle": 2.0 * (float(green) + float(sig["yellow"]) + float(sig["all_red"])),
+        "cycle": float(green) + east_west + 2.0 * clearance,
         "seed": int(seed),
         "signal_program": "sumo_tls",
     })
     if not quiet:
-        print("{} green={:g} cycle={:g} seed={} wait={:.3f} queue={:.3f} "
-              "throughput={}".format(scenario, green, row["cycle"], seed,
-                                     row["average_waiting_time"],
+        print("{} ns={:g} ew={:g} cycle={:g} seed={} wait={:.3f} queue={:.3f} "
+              "throughput={}".format(scenario, green, east_west, row["cycle"],
+                                     seed, row["average_waiting_time"],
                                      row["average_queue_length"],
                                      row["throughput"]), flush=True)
     return row
@@ -157,15 +174,17 @@ def sweep(scenario: str, greens: Sequence[float], seeds: Sequence[int],
 
 
 # ---------------------------------------------------------------------------
-def cleanup_generated_inputs(scenario: Optional[str] = None) -> None:
+def cleanup_generated_inputs(scenario: Optional[str] = None,
+                             tag: str = "") -> None:
     """Remove the throwaway SUMO inputs this module generated.
 
-    `scenario` scopes the deletion to one scenario's files. Leave it unset only
-    when nothing else is running: two sweeps started concurrently share this
-    directory, and an unscoped cleanup would delete the other run's inputs
-    between its `build_scenario` call and SUMO reading them.
+    `scenario` and `tag` scope the deletion to one run's files. Leave them
+    unset only when nothing else is running: two sweeps started concurrently
+    share this directory, and an unscoped cleanup would delete the other run's
+    inputs between its `build_scenario` call and SUMO reading them.
     """
-    stem = "{}{}".format(scenario, SWEEP_SUFFIX) if scenario else "*" + SWEEP_SUFFIX
+    stem = ("{}{}{}".format(scenario, SWEEP_SUFFIX, tag) if scenario
+            else "*" + SWEEP_SUFFIX)
     for pattern in ("sumo/routes/{}*".format(stem),
                     "sumo/config/{}*".format(stem),
                     "sumo/additional/{}*".format(stem)):
