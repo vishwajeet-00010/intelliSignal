@@ -757,6 +757,10 @@ def test_training_replay_uses_executed_action_and_masks_unavailable_switch(monke
     class FakeController:
         green_elapsed = 0.0
         min_green = 5.0
+        # The training loop reads max_green to decide whether KEEP is still
+        # available (training/train_dqn.py). Without it the double raises
+        # AttributeError before the assertions below are ever reached.
+        max_green = 60.0
 
     class FakeEnvironment:
         scenario = "moderate"
@@ -767,9 +771,12 @@ def test_training_replay_uses_executed_action_and_masks_unavailable_switch(monke
 
         def step(self, action):
             assert action == 0
+            # The green has only just started, so the NEXT decision cannot
+            # switch either. The loop derives that from these three fields.
             return np.zeros(OBS, dtype=np.float32), 1.0, True, False, {
                 "effective_action": 0, "switch_blocked": False,
                 "forced_switch": False, "switch_count": 0,
+                "green_elapsed": 1.0, "min_green": 5.0, "max_green": 60.0,
             }
 
         def reset(self, seed):
@@ -792,6 +799,7 @@ def test_training_replay_uses_executed_action_and_masks_unavailable_switch(monke
         def __init__(self):
             self.memory = []
             self.valid_actions = None
+            self.next_valid_actions = None
 
         def set_epsilon(self, value):
             self.epsilon = value
@@ -800,8 +808,10 @@ def test_training_replay_uses_executed_action_and_masks_unavailable_switch(monke
             self.valid_actions = valid_actions
             return 0
 
-        def remember(self, observation, action, reward, next_observation, done):
+        def remember(self, observation, action, reward, next_observation, done,
+                     next_valid_actions=None):
             self.memory.append(action)
+            self.next_valid_actions = next_valid_actions
 
         def learn(self):
             return None
@@ -812,8 +822,13 @@ def test_training_replay_uses_executed_action_and_masks_unavailable_switch(monke
     schedule = type("Schedule", (), {"value": lambda self, step: 1.0})()
     train_dqn._run_episode(FakeEnvironment(), agent, schedule, config,
                            episode=1, episode_seed=42, global_step=0, max_steps=1)
-    assert agent.valid_actions == [0]
-    assert agent.memory == [0]
+    assert agent.valid_actions == [0], (
+        "a switch before min_green must not be offered to the agent")
+    assert agent.memory == [0], (
+        "the replay buffer must store the action the environment executed")
+    assert agent.next_valid_actions == [0], (
+        "the stored transition must carry the next state's action mask, so "
+        "the bootstrap target cannot use an action the signal would refuse")
 
 
 def test_validation_degradation_tolerance_is_strict_and_bounded():
