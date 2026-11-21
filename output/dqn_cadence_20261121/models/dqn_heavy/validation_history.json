@@ -1,0 +1,871 @@
+[
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 14.153333333333334,
+    "mean_throughput": 1437.0,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 12.06,
+        "average_queue_length": 9.82,
+        "throughput": 1440,
+        "simulation_time": 1793.0,
+        "max_queue_length": 29,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 56,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -96.4364,
+        "decisions": 163,
+        "switch_count": 162,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 161,
+          "11.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 14.3,
+        "average_queue_length": 11.69,
+        "throughput": 1438,
+        "simulation_time": 1793.0,
+        "max_queue_length": 30,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 58,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -114.0145,
+        "decisions": 163,
+        "switch_count": 162,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 161,
+          "11.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 16.1,
+        "average_queue_length": 13.19,
+        "throughput": 1433,
+        "simulation_time": 1793.0,
+        "max_queue_length": 31,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 63,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -126.99,
+        "decisions": 163,
+        "switch_count": 162,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 161,
+          "11.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 10
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 17.006666666666664,
+    "mean_throughput": 1421.3333333333333,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 18.58,
+        "average_queue_length": 15.12,
+        "throughput": 1421,
+        "simulation_time": 1793.0,
+        "max_queue_length": 34,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 75,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -144.8655,
+        "decisions": 163,
+        "switch_count": 151,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 140,
+          "18.0": 10,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 14.84,
+        "average_queue_length": 11.74,
+        "throughput": 1420,
+        "simulation_time": 1793.0,
+        "max_queue_length": 35,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 76,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -123.9027,
+        "decisions": 163,
+        "switch_count": 133,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 104,
+          "18.0": 28,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 17.6,
+        "average_queue_length": 14.22,
+        "throughput": 1423,
+        "simulation_time": 1793.0,
+        "max_queue_length": 34,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 73,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -143.0627,
+        "decisions": 163,
+        "switch_count": 144,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 126,
+          "18.0": 17,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 20
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 18.976666666666667,
+    "mean_throughput": 1410.0,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.8,
+        "average_queue_length": 15.94,
+        "throughput": 1400,
+        "simulation_time": 1793.0,
+        "max_queue_length": 35,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 96,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -155.1336,
+        "decisions": 163,
+        "switch_count": 141,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 120,
+          "18.0": 20,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 17.27,
+        "average_queue_length": 13.88,
+        "throughput": 1420,
+        "simulation_time": 1793.0,
+        "max_queue_length": 34,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 76,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -142.6973,
+        "decisions": 163,
+        "switch_count": 138,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 114,
+          "18.0": 23,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.86,
+        "average_queue_length": 16.06,
+        "throughput": 1410,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 86,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -158.3918,
+        "decisions": 163,
+        "switch_count": 142,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 122,
+          "18.0": 19,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 30
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 21.58666666666667,
+    "mean_throughput": 1411.6666666666667,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.64,
+        "average_queue_length": 15.85,
+        "throughput": 1420,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 76,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -161.9482,
+        "decisions": 163,
+        "switch_count": 142,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 122,
+          "18.0": 19,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 22.14,
+        "average_queue_length": 18.02,
+        "throughput": 1410,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 86,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -173.3209,
+        "decisions": 163,
+        "switch_count": 146,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 130,
+          "18.0": 15,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 22.98,
+        "average_queue_length": 18.72,
+        "throughput": 1405,
+        "simulation_time": 1793.0,
+        "max_queue_length": 34,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 91,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -175.9973,
+        "decisions": 163,
+        "switch_count": 149,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 136,
+          "18.0": 12,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 40
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 17.923333333333336,
+    "mean_throughput": 1419.6666666666667,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.19,
+        "average_queue_length": 15.51,
+        "throughput": 1413,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 83,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -149.0973,
+        "decisions": 163,
+        "switch_count": 145,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 128,
+          "18.0": 16,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.46,
+        "average_queue_length": 15.75,
+        "throughput": 1415,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 81,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -154.2364,
+        "decisions": 163,
+        "switch_count": 142,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 122,
+          "18.0": 19,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 15.12,
+        "average_queue_length": 12.08,
+        "throughput": 1431,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 65,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -125.8091,
+        "decisions": 163,
+        "switch_count": 138,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 114,
+          "18.0": 23,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 50
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 18.80666666666667,
+    "mean_throughput": 1426.6666666666667,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 17.51,
+        "average_queue_length": 13.81,
+        "throughput": 1439,
+        "simulation_time": 1793.0,
+        "max_queue_length": 29,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 57,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -167.8891,
+        "decisions": 163,
+        "switch_count": 124,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 86,
+          "18.0": 37,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 21.11,
+        "average_queue_length": 17.05,
+        "throughput": 1413,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 83,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -176.2491,
+        "decisions": 163,
+        "switch_count": 140,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 118,
+          "18.0": 21,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 17.8,
+        "average_queue_length": 14.13,
+        "throughput": 1428,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 68,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -163.7764,
+        "decisions": 163,
+        "switch_count": 130,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 98,
+          "18.0": 31,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 60
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 20.066666666666666,
+    "mean_throughput": 1409.6666666666667,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 18.27,
+        "average_queue_length": 14.58,
+        "throughput": 1417,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 79,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -156.7455,
+        "decisions": 163,
+        "switch_count": 133,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 106,
+          "18.0": 24,
+          "22.0": 1,
+          "29.0": 2
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 20.12,
+        "average_queue_length": 16.16,
+        "throughput": 1400,
+        "simulation_time": 1793.0,
+        "max_queue_length": 35,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 96,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -163.9109,
+        "decisions": 163,
+        "switch_count": 137,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 112,
+          "18.0": 24,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 21.81,
+        "average_queue_length": 17.71,
+        "throughput": 1412,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 84,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -174.39,
+        "decisions": 163,
+        "switch_count": 144,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 127,
+          "18.0": 15,
+          "22.0": 1,
+          "29.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 70
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 19.853333333333335,
+    "mean_throughput": 1412.6666666666667,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.0,
+        "average_queue_length": 15.36,
+        "throughput": 1417,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 79,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -151.8936,
+        "decisions": 163,
+        "switch_count": 144,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 126,
+          "18.0": 17,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 20.88,
+        "average_queue_length": 16.99,
+        "throughput": 1414,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 82,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -164.1773,
+        "decisions": 163,
+        "switch_count": 147,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 132,
+          "18.0": 14,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 19.68,
+        "average_queue_length": 15.86,
+        "throughput": 1407,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 89,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -159.0109,
+        "decisions": 163,
+        "switch_count": 141,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 120,
+          "18.0": 20,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 80
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 17.823333333333334,
+    "mean_throughput": 1419.0,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 16.51,
+        "average_queue_length": 13.19,
+        "throughput": 1421,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 75,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -135.5527,
+        "decisions": 163,
+        "switch_count": 137,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 112,
+          "18.0": 24,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 16.83,
+        "average_queue_length": 13.5,
+        "throughput": 1422,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 74,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -137.9718,
+        "decisions": 163,
+        "switch_count": 138,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 114,
+          "18.0": 23,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 20.13,
+        "average_queue_length": 16.29,
+        "throughput": 1414,
+        "simulation_time": 1793.0,
+        "max_queue_length": 33,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 82,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -157.6745,
+        "decisions": 163,
+        "switch_count": 144,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 126,
+          "18.0": 17,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 90
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "mean_waiting_time": 18.53,
+    "mean_throughput": 1416.3333333333333,
+    "rows": [
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 18.18,
+        "average_queue_length": 14.59,
+        "throughput": 1422,
+        "simulation_time": 1793.0,
+        "max_queue_length": 35,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 74,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2001,
+        "episode_duration": 1800.0,
+        "episode_return": -150.9891,
+        "decisions": 163,
+        "switch_count": 138,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 114,
+          "18.0": 23,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 20.43,
+        "average_queue_length": 16.42,
+        "throughput": 1409,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 87,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2002,
+        "episode_duration": 1800.0,
+        "episode_return": -169.7345,
+        "decisions": 163,
+        "switch_count": 138,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 114,
+          "18.0": 23,
+          "22.0": 1
+        },
+        "terminated_early": false
+      },
+      {
+        "scenario": "heavy",
+        "vehicles": 1496,
+        "average_waiting_time": 16.98,
+        "average_queue_length": 13.48,
+        "throughput": 1418,
+        "simulation_time": 1793.0,
+        "max_queue_length": 32,
+        "vehicles_departed": 1496,
+        "vehicles_still_in_network": 78,
+        "teleports": 0,
+        "controller": "dqn",
+        "seed": 2003,
+        "episode_duration": 1800.0,
+        "episode_return": -147.3445,
+        "decisions": 163,
+        "switch_count": 132,
+        "blocked_switches": 0,
+        "completed_green_duration_counts": {
+          "7.0": 102,
+          "18.0": 29,
+          "22.0": 1
+        },
+        "terminated_early": false
+      }
+    ],
+    "episode": 100
+  }
+]
