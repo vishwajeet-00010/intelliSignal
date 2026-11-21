@@ -1,0 +1,4 @@
+{
+  "sha256": "56bc1766d1f7b21bdcbf4a025595b99cc8fff9e856290dd702da2f749faff7cb",
+  "review_changes": "checkpoint hash enforcement and inference state proof before validation; no gate/seed changes"
+}

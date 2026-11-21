@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IntelliSignal Stage 1 - generated from config/moderate_rl.yaml -->
+<!-- Do not edit by hand: change the YAML file and re-run the scenario. -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
+
+    <vType id="car" vClass="passenger" accel="2.6" decel="4.5" sigma="0.5" length="5.0" minGap="2.5" maxSpeed="13.89" guiShape="passenger"/>
+
+    <!-- Routes: one per approach and turning movement -->
+    <route id="north_right" edges="N2C C2W"/>
+    <route id="north_straight" edges="N2C C2S"/>
+    <route id="north_left" edges="N2C C2E"/>
+    <route id="south_right" edges="S2C C2E"/>
+    <route id="south_straight" edges="S2C C2N"/>
+    <route id="south_left" edges="S2C C2W"/>
+    <route id="east_right" edges="E2C C2N"/>
+    <route id="east_straight" edges="E2C C2W"/>
+    <route id="east_left" edges="E2C C2S"/>
+    <route id="west_right" edges="W2C C2S"/>
+    <route id="west_straight" edges="W2C C2E"/>
+    <route id="west_left" edges="W2C C2N"/>
+
+    <!-- Flows: vehicles per hour, taken from the YAML demand -->
+    <flow id="f_north_right" type="car" route="north_right" begin="0" end="1810" vehsPerHour="100.0" departLane="best" departSpeed="max"/>
+    <flow id="f_north_straight" type="car" route="north_straight" begin="0" end="1810" vehsPerHour="220.0" departLane="best" departSpeed="max"/>
+    <flow id="f_north_left" type="car" route="north_left" begin="0" end="1810" vehsPerHour="80.0" departLane="best" departSpeed="max"/>
+    <flow id="f_south_right" type="car" route="south_right" begin="0" end="1810" vehsPerHour="100.0" departLane="best" departSpeed="max"/>
+    <flow id="f_south_straight" type="car" route="south_straight" begin="0" end="1810" vehsPerHour="220.0" departLane="best" departSpeed="max"/>
+    <flow id="f_south_left" type="car" route="south_left" begin="0" end="1810" vehsPerHour="80.0" departLane="best" departSpeed="max"/>
+    <flow id="f_east_right" type="car" route="east_right" begin="0" end="1810" vehsPerHour="75.0" departLane="best" departSpeed="max"/>
+    <flow id="f_east_straight" type="car" route="east_straight" begin="0" end="1810" vehsPerHour="165.0" departLane="best" departSpeed="max"/>
+    <flow id="f_east_left" type="car" route="east_left" begin="0" end="1810" vehsPerHour="60.0" departLane="best" departSpeed="max"/>
+    <flow id="f_west_right" type="car" route="west_right" begin="0" end="1810" vehsPerHour="75.0" departLane="best" departSpeed="max"/>
+    <flow id="f_west_straight" type="car" route="west_straight" begin="0" end="1810" vehsPerHour="165.0" departLane="best" departSpeed="max"/>
+    <flow id="f_west_left" type="car" route="west_left" begin="0" end="1810" vehsPerHour="60.0" departLane="best" departSpeed="max"/>
+
+</routes>

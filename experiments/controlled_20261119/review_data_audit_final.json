@@ -1,0 +1,1030 @@
+{
+  "reviewer": "/root/review",
+  "partition": "final",
+  "result": "passed",
+  "runs": 200,
+  "decisions": 28800,
+  "checks": [
+    "1800-second metric/time-series coverage",
+    "greedy request and safety override accounting",
+    "clipping from raw observation",
+    "reward components and exact queue relationship",
+    "offline TD arithmetic with termination-only mask",
+    "all saved Q values and 179/180 next-target values independently recomputed from checkpoints",
+    "phase/elapsed transitions and end-of-episode mask"
+  ],
+  "records": [
+    {
+      "path": "final\\heavy\\fixed_time\\3001.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3002.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3003.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3004.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3005.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3006.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3007.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3008.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3009.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3010.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3011.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3012.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3013.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3014.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3015.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3016.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3017.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3018.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3019.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\fixed_time\\3020.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3001.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3002.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3003.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3004.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3005.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3006.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3007.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3008.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3009.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3010.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3011.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3012.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3013.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3014.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3015.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3016.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3017.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3018.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3019.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\incumbent\\3020.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\heavy\\selected\\3001.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3002.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3003.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3004.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3005.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3006.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3007.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3008.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3009.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3010.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3011.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3012.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3013.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3014.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3015.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3016.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3017.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3018.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3019.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\selected\\3020.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3001.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3002.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3003.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3004.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3005.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3006.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3007.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3008.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3009.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3010.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3011.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3012.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3013.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3014.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3015.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3016.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3017.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3018.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3019.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained\\3020.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3001.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3002.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3003.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3004.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3005.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3006.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3007.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3008.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3009.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3010.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3011.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3012.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3013.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3014.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3015.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3016.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3017.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3018.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3019.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\heavy\\untrained_historical0\\3020.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3001.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3002.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3003.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3004.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3005.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3006.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3007.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3008.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3009.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3010.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3011.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3012.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3013.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3014.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3015.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3016.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3017.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3018.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3019.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\fixed_time\\3020.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3001.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3002.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3003.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3004.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3005.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3006.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3007.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3008.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3009.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3010.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3011.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3012.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3013.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3014.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3015.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3016.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3017.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3018.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3019.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\incumbent\\3020.json",
+      "decisions": 180,
+      "controller": "incumbent"
+    },
+    {
+      "path": "final\\moderate\\selected\\3001.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3002.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3003.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3004.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3005.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3006.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3007.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3008.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3009.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3010.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3011.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3012.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3013.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3014.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3015.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3016.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3017.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3018.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3019.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\selected\\3020.json",
+      "decisions": 180,
+      "controller": "selected"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3001.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3002.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3003.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3004.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3005.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3006.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3007.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3008.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3009.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3010.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3011.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3012.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3013.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3014.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3015.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3016.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3017.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3018.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3019.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained\\3020.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3001.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3002.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3003.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3004.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3005.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3006.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3007.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3008.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3009.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3010.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3011.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3012.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3013.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3014.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3015.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3016.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3017.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3018.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3019.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    },
+    {
+      "path": "final\\moderate\\untrained_historical0\\3020.json",
+      "decisions": 180,
+      "controller": "untrained_historical0"
+    }
+  ],
+  "decision_audit": {
+    "heavy": {
+      "traffic_seeds": 20,
+      "learned_training_replicates": 1,
+      "means_and_paired_guardrails_recomputed": true
+    },
+    "moderate": {
+      "traffic_seeds": 20,
+      "learned_training_replicates": 1,
+      "means_and_paired_guardrails_recomputed": true
+    }
+  }
+}

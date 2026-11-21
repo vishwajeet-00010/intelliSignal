@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IntelliSignal Stage 1 - generated from config/moderate_rl.yaml -->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="../../../../../../../sumo/network/intersection.net.xml"/>
+        <route-files value="../routes/moderate_rl.rou.xml"/>
+        <additional-files value="../additional/moderate_rl_tls.add.xml"/>
+    </input>
+
+    <time>
+        <begin value="0"/>
+        <end value="1810"/>
+        <step-length value="1.0"/>
+    </time>
+
+    <processing>
+        <!-- Remember the whole simulation when accumulating waiting time -->
+        <waiting-time-memory value="1810"/>
+        <time-to-teleport value="300"/>
+    </processing>
+
+    <report>
+        <no-step-log value="true"/>
+        <duration-log.statistics value="true"/>
+    </report>
+
+    <random_number>
+        <seed value="3020"/>
+    </random_number>
+
+</configuration>

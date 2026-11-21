@@ -1,0 +1,31 @@
+scenario,controller,seed,vehicles,average_waiting_time,average_queue_length,max_queue_length,throughput,vehicles_still_in_network,teleports,simulation_time,vehicles_departed,episode_return,switch_count,decisions,model
+heavy,fixed_time,1001,1447,53.37,41.57,75,1350,97,0,1800.0,1447,,52,180,
+heavy,dqn,1001,1463,48.5,38.26,71,1343,120,0,1800.0,1463,-602.833,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1001,1138,103.04,64.57,101,1026,112,0,1800.0,1138,-3620.431,39,180,random weights (control)
+heavy,fixed_time,1002,1443,52.11,40.48,70,1355,88,0,1800.0,1443,,52,180,
+heavy,dqn,1002,1460,47.45,37.42,71,1338,122,0,1800.0,1460,-587.441,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1002,1175,94.24,60.92,102,1062,113,0,1800.0,1175,-3391.614,39,180,random weights (control)
+heavy,fixed_time,1003,1439,54.99,42.62,71,1343,96,0,1800.0,1439,,52,180,
+heavy,dqn,1003,1463,46.57,36.73,69,1347,116,0,1800.0,1463,-578.188,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1003,1440,62.23,48.55,101,1328,112,0,1800.0,1440,-2283.937,33,180,random weights (control)
+heavy,fixed_time,1004,1444,53.48,41.56,71,1351,93,0,1800.0,1444,,52,180,
+heavy,dqn,1004,1463,51.58,40.71,72,1341,122,0,1800.0,1463,-641.354,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1004,1141,102.12,64.14,101,1027,114,0,1800.0,1141,-3616.613,39,180,random weights (control)
+heavy,fixed_time,1005,1438,56.39,43.72,72,1340,98,0,1800.0,1438,,52,180,
+heavy,dqn,1005,1468,43.56,34.5,68,1355,113,0,1800.0,1468,-543.115,87,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1005,1132,104.39,65.16,102,1020,112,0,1800.0,1132,-3699.244,39,180,random weights (control)
+heavy,fixed_time,1006,1442,51.66,40.12,71,1350,92,0,1800.0,1442,,52,180,
+heavy,dqn,1006,1471,47.03,37.27,70,1354,117,0,1800.0,1471,-587.947,87,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1006,1140,101.81,63.95,101,1027,113,0,1800.0,1140,-3630.321,39,180,random weights (control)
+heavy,fixed_time,1007,1451,51.94,40.59,74,1355,96,0,1800.0,1451,,52,180,
+heavy,dqn,1007,1463,46.18,36.48,68,1349,114,0,1800.0,1463,-569.846,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1007,1129,105.19,65.43,101,1017,112,0,1800.0,1129,-3658.143,39,180,random weights (control)
+heavy,fixed_time,1008,1442,54.74,42.48,73,1342,100,0,1800.0,1442,,52,180,
+heavy,dqn,1008,1454,50.76,39.83,71,1334,120,0,1800.0,1454,-623.569,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1008,1136,102.72,64.25,101,1027,109,0,1800.0,1136,-3631.07,39,180,random weights (control)
+heavy,fixed_time,1009,1444,55.47,43.15,74,1344,100,0,1800.0,1444,,52,180,
+heavy,dqn,1009,1460,49.16,38.79,68,1342,118,0,1800.0,1460,-610.566,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1009,1144,100.44,63.34,101,1034,110,0,1800.0,1144,-3583.804,39,180,random weights (control)
+heavy,fixed_time,1010,1443,54.36,42.22,72,1347,96,0,1800.0,1443,,52,180,
+heavy,dqn,1010,1461,46.46,36.68,67,1346,115,0,1800.0,1461,-574.125,88,180,experiments\dqn_300_20261117\heavy\models\best.pt
+heavy,dqn_untrained,1010,1178,93.44,60.43,101,1066,112,0,1800.0,1178,-3322.153,37,180,random weights (control)

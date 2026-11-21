@@ -1,0 +1,36 @@
+{
+  "launcher_pid": 32252,
+  "attempt": "1795155701305132000",
+  "started_utc": "2026-11-20T06:21:41Z",
+  "freeze_sha256": "f93c14addd160fadbdc7315a690fcd4039206d4a61659471fd63a296282c916a",
+  "workers": [
+    {
+      "scenario": "heavy",
+      "pid": 25976,
+      "command": [
+        "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\.venv-stage3\\Scripts\\python.exe",
+        "-B",
+        "-u",
+        "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\controlled_20261119\\final_evaluate.py",
+        "--evaluate",
+        "--scenario",
+        "heavy"
+      ],
+      "log": "final-heavy.log"
+    },
+    {
+      "scenario": "moderate",
+      "pid": 21384,
+      "command": [
+        "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\.venv-stage3\\Scripts\\python.exe",
+        "-B",
+        "-u",
+        "C:\\Users\\Vishwajeet\\OneDrive\\Desktop\\project\\intelliSignal\\experiments\\controlled_20261119\\final_evaluate.py",
+        "--evaluate",
+        "--scenario",
+        "moderate"
+      ],
+      "log": "final-moderate.log"
+    }
+  ]
+}

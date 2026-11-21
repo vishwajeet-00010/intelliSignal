@@ -1,0 +1,26 @@
+{
+  "reviewer": "/root/review",
+  "result": "passed",
+  "command": ".\\.venv-stage3\\Scripts\\python.exe -B experiments/controlled_20261119/verify_review.py",
+  "resume": {
+    "result": "passed",
+    "checks": [
+      "uninterrupted vs interrupted/resumed CPU weights exactly equal",
+      "optimizer, target network, replay, all RNG states and action traces equal",
+      "best checkpoint rollback and final checkpoint equal",
+      "completed resume performs no extra episodes",
+      "changed configuration/scenario refused"
+    ],
+    "sumo_runs": 0
+  },
+  "retry_checks": [
+    "transient locks retried and atomic replacement succeeded",
+    "exhausted retry preserves complete source and prior destination"
+  ],
+  "artifact_checks": [
+    "identical completed JSON is idempotent; different artifact refused",
+    "malformed and null partial JSON preserved before isolated retry"
+  ],
+  "sumo_runs": 0,
+  "scope": "CPU full-state recovery and retained file-lock retry; synthetic episodes, not real SUMO replay"
+}

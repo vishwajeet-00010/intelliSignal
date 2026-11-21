@@ -1,0 +1,510 @@
+{
+  "pages": [
+    {
+      "title": "IntelliSignal<br/>Controlled comparison",
+      "subtitle": "Good results, bad results, and the evidence for the decision",
+      "blocks": [
+        {
+          "type": "body",
+          "text": "Incumbent models remain unchanged. Heavy: fails the declared final criteria; retain the incumbent. Moderate: passes the declared final criteria; eligible for human consideration only."
+        },
+        {
+          "type": "chart",
+          "panels": [
+            {
+              "title": "Heavy traffic",
+              "maximum": 120,
+              "rows": [
+                {
+                  "label": "Fixed-time",
+                  "value": 52.472
+                },
+                {
+                  "label": "Incumbent",
+                  "value": 46.973959612981176
+                },
+                {
+                  "label": "Challenger",
+                  "value": 47.62387006598142
+                },
+                {
+                  "label": "Untrained (seed 0)",
+                  "value": 95.29251711052925
+                }
+              ]
+            },
+            {
+              "title": "Moderate traffic",
+              "maximum": 15,
+              "rows": [
+                {
+                  "label": "Fixed-time",
+                  "value": 9.869
+                },
+                {
+                  "label": "Incumbent",
+                  "value": 5.718732193732194
+                },
+                {
+                  "label": "Challenger",
+                  "value": 5.43119658119658
+                },
+                {
+                  "label": "Untrained (seed 0)",
+                  "value": 10.908760683760686
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Frozen final test: 20 paired traffic seeds"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Scenario / controller",
+            "Wait s",
+            "Queue",
+            "Done",
+            "In",
+            "Left",
+            "TP"
+          ],
+          "rows": [
+            [
+              "Heavy / Incumbent",
+              "46.974",
+              "37.033",
+              "1345.000",
+              "1458.850",
+              "113.850",
+              "0.000"
+            ],
+            [
+              "Heavy / Frozen challenger",
+              "47.624",
+              "37.547",
+              "1345.850",
+              "1461.250",
+              "115.400",
+              "0.000"
+            ],
+            [
+              "Heavy / Fixed-time",
+              "52.472",
+              "40.853",
+              "1351.550",
+              "1446.250",
+              "94.700",
+              "0.000"
+            ],
+            [
+              "Heavy / Untrained (seed 42)",
+              "61.301",
+              "47.965",
+              "1346.850",
+              "1445.750",
+              "98.900",
+              "0.000"
+            ],
+            [
+              "Heavy / Untrained (seed 0)",
+              "95.293",
+              "61.090",
+              "1063.150",
+              "1175.400",
+              "112.250",
+              "0.000"
+            ],
+            [
+              "Moderate / Incumbent",
+              "5.719",
+              "2.077",
+              "690.000",
+              "702.000",
+              "12.000",
+              "0.000"
+            ],
+            [
+              "Moderate / Frozen challenger",
+              "5.431",
+              "1.999",
+              "690.350",
+              "702.000",
+              "11.650",
+              "0.000"
+            ],
+            [
+              "Moderate / Fixed-time",
+              "9.869",
+              "3.650",
+              "692.850",
+              "702.000",
+              "9.150",
+              "0.000"
+            ],
+            [
+              "Moderate / Untrained (seed 42)",
+              "19.893",
+              "7.477",
+              "683.200",
+              "702.000",
+              "18.800",
+              "0.000"
+            ],
+            [
+              "Moderate / Untrained (seed 0)",
+              "10.909",
+              "4.076",
+              "688.150",
+              "702.000",
+              "13.850",
+              "0.000"
+            ]
+          ],
+          "widths": [
+            31,
+            13,
+            12,
+            11,
+            11,
+            11,
+            8
+          ]
+        },
+        {
+          "type": "small",
+          "text": "Done: completed; In: inserted; Left: remaining; TP: teleports. Means across 1800-second episodes. Read admission and remaining counts together with throughput."
+        },
+        {
+          "type": "small",
+          "text": "Untrained initialization 0 reproduces the historical control definition. Initialization 42 is the additional diagnostic control; both are preserved. Neither control affects selection or promotion."
+        }
+      ]
+    },
+    {
+      "title": "The good and bad",
+      "subtitle": "Challenger minus incumbent; negative waiting and queue deltas are preferable",
+      "blocks": [
+        {
+          "type": "body",
+          "text": "<b>Heavy - good:</b> frozen-challenger waiting is 9.24% below fixed-time on the final seeds. Against the incumbent, waiting changes by +0.650 s and completed vehicles by +0.85. Maximum queue changes by -0.30 vehicles; throughput is 5.70 below fixed-time. <b>Bad / limit:</b> failed incumbent guardrails: lower waiting, waiting wins more than half, queue no worse."
+        },
+        {
+          "type": "body",
+          "text": "<b>Moderate - good:</b> frozen-challenger waiting is 44.97% below fixed-time on the final seeds. Against the incumbent, waiting changes by -0.288 s and completed vehicles by +0.35. Maximum queue changes by +0.50 vehicles; throughput is 2.50 below fixed-time. <b>Bad / limit:</b> passing this finite test does not establish general superiority."
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Scenario",
+            "Metric",
+            "Mean delta",
+            "Paired SD"
+          ],
+          "rows": [
+            [
+              "Heavy",
+              "Waiting (s/vehicle)",
+              "+0.650",
+              "2.465"
+            ],
+            [
+              "Heavy",
+              "Mean queue (vehicles)",
+              "+0.514",
+              "1.815"
+            ],
+            [
+              "Heavy",
+              "Maximum queue",
+              "-0.300",
+              "1.689"
+            ],
+            [
+              "Heavy",
+              "Completed vehicles",
+              "+0.850",
+              "7.569"
+            ],
+            [
+              "Heavy",
+              "Inserted vehicles",
+              "+2.400",
+              "6.754"
+            ],
+            [
+              "Heavy",
+              "Remaining vehicles",
+              "+1.550",
+              "3.620"
+            ],
+            [
+              "Heavy",
+              "Teleports",
+              "+0.000",
+              "0.000"
+            ],
+            [
+              "Moderate",
+              "Waiting (s/vehicle)",
+              "-0.288",
+              "0.184"
+            ],
+            [
+              "Moderate",
+              "Mean queue (vehicles)",
+              "-0.078",
+              "0.065"
+            ],
+            [
+              "Moderate",
+              "Maximum queue",
+              "+0.500",
+              "0.889"
+            ],
+            [
+              "Moderate",
+              "Completed vehicles",
+              "+0.350",
+              "1.424"
+            ],
+            [
+              "Moderate",
+              "Inserted vehicles",
+              "+0.000",
+              "0.000"
+            ],
+            [
+              "Moderate",
+              "Remaining vehicles",
+              "-0.350",
+              "1.424"
+            ],
+            [
+              "Moderate",
+              "Teleports",
+              "+0.000",
+              "0.000"
+            ]
+          ],
+          "widths": [
+            18,
+            41,
+            20,
+            21
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Scenario",
+            "Waiting wins / ties / losses",
+            "Failed criteria"
+          ],
+          "rows": [
+            [
+              "Heavy",
+              "7/0/13",
+              "lower waiting, waiting wins more than half, queue no worse"
+            ],
+            [
+              "Moderate",
+              "18/0/2",
+              "None"
+            ]
+          ],
+          "widths": [
+            18,
+            35,
+            47
+          ]
+        },
+        {
+          "type": "small",
+          "text": "Traffic SD describes variability over 20 matched traffic seeds. Shared traffic seeds and multiple checkpoints are correlated observations. They do not create independent training replicates. Fixed-time waiting/queue retain the collector's two-decimal per-run precision; learned-policy guardrails use unrounded values. Inserted and remaining vehicles are context measures and must be read with throughput. Zero observed teleports is a simulator result."
+        }
+      ]
+    },
+    {
+      "title": "What the policies do",
+      "subtitle": "Measured on validation traffic before any new training",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Scenario / model",
+            "Req. switch",
+            "Effective",
+            "Blocked",
+            "Forced",
+            "Green mean (range), s"
+          ],
+          "rows": [
+            [
+              "Heavy / Incumbent best",
+              "1701",
+              "890",
+              "811",
+              "0",
+              "16.0 (16-20)"
+            ],
+            [
+              "Heavy / Prior best",
+              "1428",
+              "877",
+              "551",
+              "0",
+              "16.4 (16-30)"
+            ],
+            [
+              "Moderate / Incumbent best",
+              "1522",
+              "880",
+              "642",
+              "0",
+              "16.4 (16-26)"
+            ],
+            [
+              "Moderate / Incumbent final",
+              "1789",
+              "890",
+              "899",
+              "0",
+              "16.0 (16-20)"
+            ]
+          ],
+          "widths": [
+            28,
+            12,
+            12,
+            12,
+            12,
+            24
+          ]
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Scenario / model",
+            "Queue / wait clip",
+            "Elapsed clip",
+            "Q range",
+            "Q gap",
+            "Abs TD mean / p95"
+          ],
+          "rows": [
+            [
+              "Heavy / Incumbent best",
+              "0.00% / 0.00%",
+              "0.00%",
+              "-57.51 to -9.10",
+              "3.730",
+              "1.508 / 4.261"
+            ],
+            [
+              "Heavy / Prior best",
+              "0.00% / 0.00%",
+              "0.00%",
+              "-58.71 to -9.95",
+              "3.492",
+              "1.435 / 4.086"
+            ],
+            [
+              "Moderate / Incumbent best",
+              "0.00% / 0.00%",
+              "0.00%",
+              "-3.45 to -1.42",
+              "0.278",
+              "0.096 / 0.237"
+            ],
+            [
+              "Moderate / Incumbent final",
+              "0.00% / 0.00%",
+              "0.00%",
+              "-2.97 to -1.43",
+              "0.290",
+              "0.087 / 0.211"
+            ]
+          ],
+          "widths": [
+            25,
+            18,
+            13,
+            17,
+            10,
+            17
+          ]
+        },
+        {
+          "type": "small",
+          "text": "Each diagnostic row covers 1800 decisions over ten validation episodes. Green values are completed durations; censored final greens are retained in diagnostics.json. Clip rates above are the maximum across the four queue/wait dimensions, not pooled rates. Exact-boundary saturation is separate. The binary phase is categorical. Q gaps and TD values are descriptive; TD is offline residual error under the stored target network and checkpoint gamma, bootstrapping at time limits. Original training-minibatch TD errors were not logged."
+        },
+        {
+          "type": "body",
+          "text": "Moderate incumbent/prior-best effective actions agree on 100.000% of common-observation probes from their two rollout corpora. This measures decisions in the tested states, not equality on all possible states. weight_comparison.json separately records tensor and closed-loop trace comparisons. Their weights differ; identical effective decisions do not imply identical networks. Best versus incumbent-final effective agreement is 97.222% over 12600 evaluated state visits across all diagnostic rollouts; the best-checkpoint comparison does not describe every moderate policy."
+        },
+        {
+          "type": "small",
+          "text": "Heavy: current-waiting penalties account for 88.49% of incumbent reward cost. Descriptive reward correlations: waiting -0.988, queue -0.991, throughput 0.665."
+        },
+        {
+          "type": "small",
+          "text": "Moderate: current-waiting penalties account for 87.88% of incumbent reward cost. Descriptive reward correlations: waiting -0.964, queue -0.991, throughput 0.292."
+        },
+        {
+          "type": "body",
+          "text": "Measured: reward uses interval-average current waiting on incoming lanes; reported waiting uses accumulated waiting per entered vehicle. Queue samples are shared, but throughput is not rewarded directly. There were 4 paired checkpoint/seed reward-waiting ranking reversals in this validation corpus. Possible explanation: these objective differences and similar action choices can limit the benefit of more training. The measurements do not prove the cause of any performance difference."
+        }
+      ]
+    },
+    {
+      "title": "How to trust the result",
+      "subtitle": "Fixed rules, preserved originals, and reproducible evidence",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Selection and final-test separation"
+        },
+        {
+          "type": "body",
+          "text": "Validation: seeds 2001-2010, greedy actions, six predeclared existing checkpoints per scenario plus fixed-time and seed-42 untrained controls. The repository seed audit found no prior recorded use of validation or final seeds; deleted/external runs cannot be ruled out. Historical seeds 1001-1010 were not treated as untouched. Training traffic, if used, is confined to seeds 42-343."
+        },
+        {
+          "type": "body",
+          "text": "Validation eligibility requires lower mean waiting, more than 5/10 waiting wins, and no worse mean queue, throughput or teleports against the incumbent. Eligible checkpoints rank by waiting, queue, throughput and declared order. If none qualify, the challenger is diagnostic only. No selection uses exploratory training return alone."
+        },
+        {
+          "type": "body",
+          "text": "freeze.json fixes every checkpoint hash, source hash and recipe before the 200 final evaluation episodes on seeds 3001-3020. Promotion requires lower waiting, more than 10/20 waiting wins and no worse mean queue, throughput or teleports. A newly trained recipe must also beat its matched validation-selected control, improve in at least two of three training seeds, and have a negative upper bound for the predeclared 95% t interval across training-seed mean waiting differences. No thresholds were relaxed; no model is replaced automatically."
+        },
+        {
+          "type": "heading",
+          "text": "Checks and limitations"
+        },
+        {
+          "type": "body",
+          "text": "Protected files: 745; changed: 0; missing: 0. Scenario settings, safety logic, baselines, incumbent models and all prior experiment artifacts were preserved. Greedy evaluation verifies RNG, weights, replay and learning-counter invariance. Independent review and reproducible full-state/retry checks are retained."
+        },
+        {
+          "type": "body",
+          "text": "No new training was run: existing checkpoints passed the validation gate in both scenarios, satisfying the predeclared condition for avoiding retraining. The conditional control/lower-learning-rate experiment was therefore not triggered. The evaluated historical checkpoints use training seed 42 only; training-seed variability is unavailable, not zero."
+        },
+        {
+          "type": "heading",
+          "text": "Evidence and commands"
+        },
+        {
+          "type": "small",
+          "text": "Experiment: <b>experiments/controlled_20261119/</b><br/>REPORT.md and final_decision.json: outcomes and criteria.<br/>paired_final_metrics.csv and training_traffic_variability.csv: paired effects and variability.<br/>diagnostics.json and weight_comparison.json: reward, actions, clipping, Q and TD evidence.<br/>manifest.json, selection.json and freeze.json: predeclared rules and frozen hashes.<br/>REVIEW.md and integrity.json: independent review and preservation.<br/>COMMANDS.md: exact commands; verification scripts inspect saved records.<br/>validation/ and final/: complete per-seed measurements and traces."
+        },
+        {
+          "type": "small",
+          "text": "No monotonic improvement is promised. Training completion and increased reward are not promotion evidence."
+        }
+      ]
+    }
+  ]
+}

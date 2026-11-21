@@ -1,0 +1,818 @@
+{
+  "reviewer": "/root/review",
+  "partition": "validation",
+  "result": "passed",
+  "runs": 160,
+  "decisions": 25200,
+  "checks": [
+    "1800-second metric/time-series coverage",
+    "greedy request and safety override accounting",
+    "clipping from raw observation",
+    "reward components and exact queue relationship",
+    "offline TD arithmetic with termination-only mask",
+    "all saved Q values and 179/180 next-target values independently recomputed from checkpoints",
+    "phase/elapsed transitions and end-of-episode mask"
+  ],
+  "records": [
+    {
+      "path": "validation\\heavy\\fixed_time\\2001.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2002.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2003.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2004.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2005.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2006.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2007.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2008.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2009.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\fixed_time\\2010.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2001.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2002.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2003.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2004.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2005.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2006.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2007.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2008.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2009.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_best\\2010.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2001.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2002.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2003.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2004.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2005.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2006.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2007.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2008.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2009.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\incumbent_final\\2010.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2001.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2002.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2003.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2004.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2005.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2006.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2007.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2008.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2009.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_best\\2010.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2001.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2002.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2003.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2004.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2005.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2006.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2007.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2008.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2009.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep100\\2010.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2001.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2002.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2003.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2004.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2005.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2006.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2007.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2008.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2009.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_ep200\\2010.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2001.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2002.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2003.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2004.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2005.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2006.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2007.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2008.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2009.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\prior_final\\2010.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2001.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2002.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2003.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2004.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2005.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2006.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2007.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2008.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2009.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\heavy\\untrained\\2010.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2001.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2002.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2003.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2004.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2005.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2006.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2007.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2008.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2009.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\fixed_time\\2010.json",
+      "decisions": 0,
+      "controller": "fixed_time"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2001.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2002.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2003.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2004.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2005.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2006.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2007.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2008.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2009.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_best\\2010.json",
+      "decisions": 180,
+      "controller": "incumbent_best"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2001.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2002.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2003.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2004.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2005.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2006.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2007.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2008.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2009.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\incumbent_final\\2010.json",
+      "decisions": 180,
+      "controller": "incumbent_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2001.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2002.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2003.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2004.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2005.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2006.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2007.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2008.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2009.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_best\\2010.json",
+      "decisions": 180,
+      "controller": "prior_best"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2001.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2002.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2003.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2004.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2005.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2006.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2007.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2008.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2009.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep100\\2010.json",
+      "decisions": 180,
+      "controller": "prior_ep100"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2001.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2002.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2003.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2004.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2005.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2006.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2007.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2008.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2009.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_ep200\\2010.json",
+      "decisions": 180,
+      "controller": "prior_ep200"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2001.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2002.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2003.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2004.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2005.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2006.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2007.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2008.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2009.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\prior_final\\2010.json",
+      "decisions": 180,
+      "controller": "prior_final"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2001.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2002.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2003.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2004.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2005.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2006.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2007.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2008.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2009.json",
+      "decisions": 180,
+      "controller": "untrained"
+    },
+    {
+      "path": "validation\\moderate\\untrained\\2010.json",
+      "decisions": 180,
+      "controller": "untrained"
+    }
+  ]
+}

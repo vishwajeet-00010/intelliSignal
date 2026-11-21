@@ -1,0 +1,11 @@
+scenario,controller,seed,vehicles,average_waiting_time,average_queue_length,max_queue_length,throughput,vehicles_still_in_network,teleports,simulation_time,vehicles_departed,episode_return,switch_count,decisions,model
+heavy,dqn,1001,1459,45.78,36.14,66,1350,109,0,1800.0,1459,-560.421,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1002,1452,47.67,37.42,69,1341,111,0,1800.0,1452,-583.339,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1003,1462,45.79,36.16,67,1349,113,0,1800.0,1462,-561.555,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1004,1457,47.55,37.44,66,1343,114,0,1800.0,1457,-584.996,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1005,1459,45.72,36.12,70,1346,113,0,1800.0,1459,-559.766,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1006,1458,47.51,37.46,70,1343,115,0,1800.0,1458,-586.5,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1007,1459,46.51,36.73,67,1349,110,0,1800.0,1459,-570.98,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1008,1459,47.71,37.6,69,1340,119,0,1800.0,1459,-590.592,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1009,1458,47.25,37.25,67,1346,112,0,1800.0,1458,-578.434,89,180,models\dqn_heavy\best.pt
+heavy,dqn,1010,1461,45.27,35.73,70,1348,113,0,1800.0,1461,-558.256,89,180,models\dqn_heavy\best.pt

@@ -1,0 +1,5 @@
+{
+  "source_sha256": "43e1ca5eac6ca4e4227f52e30ac5114339530a5e3e5a4f8c4f6f42b96366ea66",
+  "reason": "Reviewer requested expanded seed-field audit and checkpoint-direct diagnostic gamma; no evaluation yet",
+  "reserved_seed_hits": []
+}

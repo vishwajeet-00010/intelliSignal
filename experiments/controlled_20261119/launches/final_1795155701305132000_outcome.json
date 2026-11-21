@@ -1,0 +1,9 @@
+{
+  "attempt": "1795155701305132000",
+  "worker_exit_codes": {
+    "heavy": 0,
+    "moderate": 0
+  },
+  "completed_utc": "2026-11-20T07:23:39Z",
+  "all_workers_succeeded": true
+}

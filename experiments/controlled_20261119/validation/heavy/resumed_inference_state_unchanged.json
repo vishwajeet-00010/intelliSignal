@@ -1,0 +1,76 @@
+{
+  "before": {
+    "incumbent_best": {
+      "learn_steps": 16601,
+      "replay_size": 0,
+      "policy_sha256": "2d2c6a5e4cb3851344ac4a24a4bc7b7167fdd0641cf9c99b6d6f562c33c40f4e"
+    },
+    "incumbent_final": {
+      "learn_steps": 17501,
+      "replay_size": 0,
+      "policy_sha256": "475b9ac5195e01ef2df272fc861247208e77b2a6eab5a549b4d2b9954d901134"
+    },
+    "prior_best": {
+      "learn_steps": 48641,
+      "replay_size": 0,
+      "policy_sha256": "43dc20bd646e0cb03342050dbda3c897bfd852113f46f29aa452e5bd2e51f7c7"
+    },
+    "prior_final": {
+      "learn_steps": 53501,
+      "replay_size": 0,
+      "policy_sha256": "5e2dc3e6a2f62170216d7cf44de164ae7ec8a59ebe5981d4906a819906b82756"
+    },
+    "prior_ep100": {
+      "learn_steps": 17501,
+      "replay_size": 0,
+      "policy_sha256": "9da3b97865cb49ebd9054bf428423841f789d0737cce10271bfe15ed49ad6eba"
+    },
+    "prior_ep200": {
+      "learn_steps": 35501,
+      "replay_size": 0,
+      "policy_sha256": "e27a1dbe239306297d2ff60219218f8394ad1daf19fc6f21965a7a83810b9e31"
+    },
+    "untrained": {
+      "learn_steps": 0,
+      "replay_size": 0,
+      "policy_sha256": "d3c4523554761fcf98b88513016b6c6b6476970dc1bfaad3f52b41f1a9e0ff8e"
+    }
+  },
+  "after": {
+    "incumbent_best": {
+      "learn_steps": 16601,
+      "replay_size": 0,
+      "policy_sha256": "2d2c6a5e4cb3851344ac4a24a4bc7b7167fdd0641cf9c99b6d6f562c33c40f4e"
+    },
+    "incumbent_final": {
+      "learn_steps": 17501,
+      "replay_size": 0,
+      "policy_sha256": "475b9ac5195e01ef2df272fc861247208e77b2a6eab5a549b4d2b9954d901134"
+    },
+    "prior_best": {
+      "learn_steps": 48641,
+      "replay_size": 0,
+      "policy_sha256": "43dc20bd646e0cb03342050dbda3c897bfd852113f46f29aa452e5bd2e51f7c7"
+    },
+    "prior_final": {
+      "learn_steps": 53501,
+      "replay_size": 0,
+      "policy_sha256": "5e2dc3e6a2f62170216d7cf44de164ae7ec8a59ebe5981d4906a819906b82756"
+    },
+    "prior_ep100": {
+      "learn_steps": 17501,
+      "replay_size": 0,
+      "policy_sha256": "9da3b97865cb49ebd9054bf428423841f789d0737cce10271bfe15ed49ad6eba"
+    },
+    "prior_ep200": {
+      "learn_steps": 35501,
+      "replay_size": 0,
+      "policy_sha256": "e27a1dbe239306297d2ff60219218f8394ad1daf19fc6f21965a7a83810b9e31"
+    },
+    "untrained": {
+      "learn_steps": 0,
+      "replay_size": 0,
+      "policy_sha256": "d3c4523554761fcf98b88513016b6c6b6476970dc1bfaad3f52b41f1a9e0ff8e"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "scenario": "heavy",
+    "checkpoint": "best",
+    "episode": 273,
+    "finite": true
+  },
+  {
+    "scenario": "heavy",
+    "checkpoint": "final",
+    "episode": 300,
+    "finite": true
+  },
+  {
+    "scenario": "moderate",
+    "checkpoint": "best",
+    "episode": 248,
+    "finite": true
+  },
+  {
+    "scenario": "moderate",
+    "checkpoint": "final",
+    "episode": 300,
+    "finite": true
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "reason": "Historical compare_controllers.py untrained uses initialization seed0; frozen validation runner used initialization seed42. Preserve those measured validation controls and identify them correctly. Add historical seed0 control for final evaluation while retaining seed42 as a separate additional control.",
+  "historical_source": {
+    "path": "evaluation/compare_controllers.py",
+    "sha256": "ecf471995078d7044dad7cf5b59dfa8858db535051f7e7c2a8eb1dc6f2d174d7"
+  },
+  "final_untrained_controls": [
+    {
+      "label": "untrained_historical0",
+      "initialization_seed": 0,
+      "role": "primary historical control"
+    },
+    {
+      "label": "untrained",
+      "initialization_seed": 42,
+      "role": "additional new initialization control used in validation"
+    }
+  ],
+  "added_final_episodes": 40,
+  "promotion_thresholds_changed": false,
+  "checkpoint_selection_changed": false,
+  "created_before_any_final_result": true
+}

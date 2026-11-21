@@ -1,0 +1,234 @@
+{
+  "heavy": {
+    "candidate": "prior_best",
+    "validation_gate": {
+      "eligible": true,
+      "checks": {
+        "waiting_lower": true,
+        "waiting_majority": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": true,
+        "teleports_no_worse": true
+      },
+      "paired_mean_delta": {
+        "waiting": -0.8883460848638804,
+        "queue": -0.5879999999999995,
+        "throughput": 4.7,
+        "teleports": 0.0
+      },
+      "waiting_wins": 7,
+      "traffic_seed_count": 10
+    },
+    "all_candidate_gates": {
+      "incumbent_final": {
+        "eligible": true,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": true,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.8646656355877631,
+          "queue": -0.5568333333333335,
+          "throughput": 4.0,
+          "teleports": 0.0
+        },
+        "waiting_wins": 7,
+        "traffic_seed_count": 10
+      },
+      "prior_best": {
+        "eligible": true,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": true,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.8883460848638804,
+          "queue": -0.5879999999999995,
+          "throughput": 4.7,
+          "teleports": 0.0
+        },
+        "waiting_wins": 7,
+        "traffic_seed_count": 10
+      },
+      "prior_final": {
+        "eligible": false,
+        "checks": {
+          "waiting_lower": false,
+          "waiting_majority": false,
+          "queue_no_worse": false,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": 0.04284656867792123,
+          "queue": 0.08616666666666717,
+          "throughput": 2.8,
+          "teleports": 0.0
+        },
+        "waiting_wins": 4,
+        "traffic_seed_count": 10
+      },
+      "prior_ep100": {
+        "eligible": false,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": false,
+          "queue_no_worse": true,
+          "throughput_no_worse": false,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.2897329765100444,
+          "queue": -0.261944444444444,
+          "throughput": -0.3,
+          "teleports": 0.0
+        },
+        "waiting_wins": 5,
+        "traffic_seed_count": 10
+      },
+      "prior_ep200": {
+        "eligible": false,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": false,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.1302490665433737,
+          "queue": -0.004944444444443974,
+          "throughput": 3.4,
+          "teleports": 0.0
+        },
+        "waiting_wins": 5,
+        "traffic_seed_count": 10
+      }
+    },
+    "incumbent_prior_best_effective_common_observation_agreement": 0.9780555555555556,
+    "new_training_needed": false,
+    "reason": "Validation-gate-eligible checkpoint available; avoid retraining"
+  },
+  "moderate": {
+    "candidate": "incumbent_final",
+    "validation_gate": {
+      "eligible": true,
+      "checks": {
+        "waiting_lower": true,
+        "waiting_majority": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": true,
+        "teleports_no_worse": true
+      },
+      "paired_mean_delta": {
+        "waiting": -0.31908831908831903,
+        "queue": -0.09372222222222229,
+        "throughput": 0.9,
+        "teleports": 0.0
+      },
+      "waiting_wins": 9,
+      "traffic_seed_count": 10
+    },
+    "all_candidate_gates": {
+      "incumbent_final": {
+        "eligible": true,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": true,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.31908831908831903,
+          "queue": -0.09372222222222229,
+          "throughput": 0.9,
+          "teleports": 0.0
+        },
+        "waiting_wins": 9,
+        "traffic_seed_count": 10
+      },
+      "prior_best": {
+        "eligible": false,
+        "checks": {
+          "waiting_lower": false,
+          "waiting_majority": false,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": 0.0,
+          "queue": 0.0,
+          "throughput": 0.0,
+          "teleports": 0.0
+        },
+        "waiting_wins": 0,
+        "traffic_seed_count": 10
+      },
+      "prior_final": {
+        "eligible": true,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": true,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.31908831908831903,
+          "queue": -0.09372222222222229,
+          "throughput": 0.9,
+          "teleports": 0.0
+        },
+        "waiting_wins": 9,
+        "traffic_seed_count": 10
+      },
+      "prior_ep100": {
+        "eligible": false,
+        "checks": {
+          "waiting_lower": false,
+          "waiting_majority": false,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": 0.0,
+          "queue": 0.0,
+          "throughput": 0.0,
+          "teleports": 0.0
+        },
+        "waiting_wins": 0,
+        "traffic_seed_count": 10
+      },
+      "prior_ep200": {
+        "eligible": true,
+        "checks": {
+          "waiting_lower": true,
+          "waiting_majority": true,
+          "queue_no_worse": true,
+          "throughput_no_worse": true,
+          "teleports_no_worse": true
+        },
+        "paired_mean_delta": {
+          "waiting": -0.31908831908831903,
+          "queue": -0.09372222222222229,
+          "throughput": 0.9,
+          "teleports": 0.0
+        },
+        "waiting_wins": 9,
+        "traffic_seed_count": 10
+      }
+    },
+    "incumbent_prior_best_effective_common_observation_agreement": 1.0,
+    "new_training_needed": false,
+    "reason": "Validation-gate-eligible checkpoint available; avoid retraining"
+  }
+}

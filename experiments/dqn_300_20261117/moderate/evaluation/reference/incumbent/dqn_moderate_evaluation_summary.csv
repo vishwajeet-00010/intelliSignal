@@ -1,0 +1,7 @@
+scenario,controller,metric,mean,std,min,max,seeds
+moderate,dqn,average_waiting_time,5.713333333333334,0.09865765724632518,5.6,5.78,3
+moderate,dqn,average_queue_length,2.0833333333333335,0.04725815626252625,2.03,2.12,3
+moderate,dqn,max_queue_length,7.0,0.0,7.0,7.0,3
+moderate,dqn,throughput,691.0,1.7320508075688772,689.0,692.0,3
+moderate,dqn,vehicles_still_in_network,11.0,1.7320508075688772,10.0,13.0,3
+moderate,dqn,teleports,0.0,0.0,0.0,0.0,3

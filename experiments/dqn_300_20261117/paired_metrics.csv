@@ -1,0 +1,29 @@
+scenario,seed_set,metric,label,preferred_direction,n,incumbent_mean,incumbent_std,candidate_mean,candidate_std,candidate_minus_incumbent_mean,paired_difference_std,improvement_percent_vs_incumbent,candidate_lower_seeds,candidate_equal_seeds,candidate_higher_seeds,fixed_time_mean,untrained_mean
+heavy,reference,average_waiting_time,Waiting (s/vehicle),lower,3,47.91,1.99501879690393,47.64000000000001,1.7421538393609202,-0.2699999999999984,3.195950562821647,0.5635566687539103,2,0,1,52.596666666666664,88.20666666666666
+heavy,reference,average_queue_length,Average queue (vehicles),lower,3,37.75,1.4804053498957646,37.56666666666667,1.3150031685639911,-0.18333333333333238,2.436931130199075,0.4856512141280328,2,0,1,40.983333333333334,57.949999999999996
+heavy,reference,max_queue_length,Maximum queue (vehicles),lower,3,69.66666666666667,2.309401076758503,69.66666666666667,0.5773502691896257,0.0,2.6457513110645907,-0.0,2,0,1,71.33333333333333,101.0
+heavy,reference,throughput,Completed vehicles,higher,3,1343.6666666666667,5.773502691896257,1343.0,5.196152422706632,-0.6666666666666666,5.507570547286102,-0.04961548002976929,1,0,2,1351.3333333333333,1089.3333333333333
+heavy,reference,vehicles,Inserted vehicles,context,3,1459.3333333333333,3.7859388972001824,1462.0,5.196152422706632,2.6666666666666665,4.163331998932265,,1,0,2,1447.0,1200.3333333333333
+heavy,reference,vehicles_still_in_network,Vehicles remaining,context,3,115.66666666666667,2.0816659994661326,119.0,0.0,3.3333333333333335,2.0816659994661326,,0,0,3,95.66666666666667,111.0
+heavy,reference,teleports,Teleports,lower,3,0.0,0.0,0.0,0.0,0.0,0.0,,0,3,0,0.0,0.0
+heavy,holdout,average_waiting_time,Waiting (s/vehicle),lower,10,46.676,0.9633414071172616,47.725,2.35606192146509,1.0490000000000002,1.9050718854911703,-2.247407661324878,4,0,6,53.851,96.962
+heavy,holdout,average_queue_length,Average queue (vehicles),lower,10,36.805,0.7094011559054594,37.667,1.79693597239548,0.8620000000000004,1.454944061544024,-2.3420730878956677,3,1,6,41.851,62.074
+heavy,holdout,max_queue_length,Maximum queue (vehicles),lower,10,68.1,1.66332999331662,69.5,1.7159383568311668,1.4,2.756809750418044,-2.0558002936857562,2,1,7,72.3,101.2
+heavy,holdout,throughput,Completed vehicles,higher,10,1345.5,3.5668224265054493,1344.9,6.6741624526560965,-0.6,5.966573556070519,-0.04459308807134894,7,1,2,1347.7,1063.4
+heavy,holdout,vehicles,Inserted vehicles,context,10,1458.4,2.6749870196985173,1462.6,4.5995168828427575,4.2,5.116422361159971,,1,1,8,1443.3,1175.3
+heavy,holdout,vehicles_still_in_network,Vehicles remaining,context,10,112.9,2.8067379246694513,117.7,3.2335051500740732,4.8,4.022160834399561,,0,1,9,95.6,111.9
+heavy,holdout,teleports,Teleports,lower,10,0.0,0.0,0.0,0.0,0.0,0.0,,0,10,0,0.0,0.0
+moderate,reference,average_waiting_time,Waiting (s/vehicle),lower,3,5.713333333333334,0.09865765724632518,5.713333333333334,0.09865765724632518,0.0,0.0,-0.0,0,3,0,9.909999999999998,10.910000000000002
+moderate,reference,average_queue_length,Average queue (vehicles),lower,3,2.0833333333333335,0.04725815626252625,2.0833333333333335,0.04725815626252625,0.0,0.0,-0.0,0,3,0,3.6566666666666667,4.086666666666667
+moderate,reference,max_queue_length,Maximum queue (vehicles),lower,3,7.0,0.0,7.0,0.0,0.0,0.0,-0.0,0,3,0,9.666666666666666,11.0
+moderate,reference,throughput,Completed vehicles,higher,3,691.0,1.7320508075688772,691.0,1.7320508075688772,0.0,0.0,0.0,0,3,0,693.0,688.6666666666666
+moderate,reference,vehicles,Inserted vehicles,context,3,702.0,0.0,702.0,0.0,0.0,0.0,,0,3,0,702.0,702.0
+moderate,reference,vehicles_still_in_network,Vehicles remaining,context,3,11.0,1.7320508075688772,11.0,1.7320508075688772,0.0,0.0,,0,3,0,9.0,13.333333333333334
+moderate,reference,teleports,Teleports,lower,3,0.0,0.0,0.0,0.0,0.0,0.0,,0,3,0,0.0,0.0
+moderate,holdout,average_waiting_time,Waiting (s/vehicle),lower,10,5.726,0.15826840774105524,5.726,0.15826840774105524,0.0,0.0,-0.0,0,10,0,9.862,10.866
+moderate,holdout,average_queue_length,Average queue (vehicles),lower,10,2.082,0.0619677335393187,2.082,0.0619677335393187,0.0,0.0,-0.0,0,10,0,3.65,4.046
+moderate,holdout,max_queue_length,Maximum queue (vehicles),lower,10,7.3,0.6749485577105528,7.3,0.6749485577105528,0.0,0.0,-0.0,0,10,0,10.3,11.2
+moderate,holdout,throughput,Completed vehicles,higher,10,690.6,1.0749676997731399,690.6,1.0749676997731399,0.0,0.0,0.0,0,10,0,693.4,688.7
+moderate,holdout,vehicles,Inserted vehicles,context,10,702.0,0.0,702.0,0.0,0.0,0.0,,0,10,0,702.0,702.0
+moderate,holdout,vehicles_still_in_network,Vehicles remaining,context,10,11.4,1.0749676997731399,11.4,1.0749676997731399,0.0,0.0,,0,10,0,8.6,13.3
+moderate,holdout,teleports,Teleports,lower,10,0.0,0.0,0.0,0.0,0.0,0.0,,0,10,0,0.0,0.0

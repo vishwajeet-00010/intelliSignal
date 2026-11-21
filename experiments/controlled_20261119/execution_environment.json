@@ -1,0 +1,29 @@
+{
+  "python": "3.12.13 (main, Apr  7 2026, 20:53:22) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "packages": {
+    "torch": "2.14.1",
+    "numpy": "2.5.4",
+    "gymnasium": "1.4.0",
+    "eclipse-sumo": "1.28.0",
+    "traci": "1.28.0",
+    "sumolib": "1.28.0"
+  },
+  "inference_torch_threads": 1,
+  "seed_roles": {
+    "historical": [
+      1001,
+      1010
+    ],
+    "validation": [
+      2001,
+      2010
+    ],
+    "final": [
+      3001,
+      3020
+    ]
+  },
+  "initial_sandbox_failure": "WinError10013 connecting localhost:56377; no successful validation record before main-chat approved rerun",
+  "models_replaced": false
+}

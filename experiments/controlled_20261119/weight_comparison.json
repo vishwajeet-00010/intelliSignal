@@ -1,0 +1,192 @@
+{
+  "heavy": {
+    "tensor_digests": {
+      "incumbent_best": "53879f3b27ff84cac1787ef0fb7ac81ae5b9cbb14d1fe386b64cc582edb217b6",
+      "incumbent_final": "e14f82eab619a1d25fb62433c5e0053f99bd159e97ccf268ef37925d11efc4a8",
+      "prior_best": "70a460b722db94471be35a0bbdbf3ff3cdee12d41288b4d0c309a802d2129c1e",
+      "prior_final": "568e11dc076c88679f1a9b040f76833e0e38016e14eecb427a3e0b02242f7660",
+      "prior_ep100": "ebd0056ab58d7495e5307bb2e9e5d412269ecfa2e2fd1b5359d3807da62b8e7f",
+      "prior_ep200": "791955b7c29d837eab22e115a9780f40b0fc5682009a7a6b013cf19f961920bb"
+    },
+    "incumbent_prior_best_all_policy_tensors_equal": false,
+    "incumbent_prior_best_max_abs_parameter_difference": 4.24227237701416,
+    "actual_trace_comparison": [
+      {
+        "traffic_seed": 2001,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2002,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2003,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2004,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2005,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2006,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2007,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2008,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2009,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      },
+      {
+        "traffic_seed": 2010,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": false,
+        "phase_sequence_equal": false,
+        "observation_sequence_equal": false
+      }
+    ],
+    "scope": "Measured validation rollout states only; equality here does not imply equality on all possible observations."
+  },
+  "moderate": {
+    "tensor_digests": {
+      "incumbent_best": "d01992aa87bc60de7dbe6d9b9359256254e82f4920efda68250a5bc5e82119a0",
+      "incumbent_final": "10b02248d82e1e51290b3b39ba9a3c1c87d5f0bdbc3a3340c3f0a37468b0f007",
+      "prior_best": "c829ed3768ed68eaba6dde14342e6e7dd1cda22a6d2c1b56a781f78f6842f14c",
+      "prior_final": "4b4bb93188e80935b2fdcc8982541a377146e6d5700b1d372cc6be11fee10599",
+      "prior_ep100": "d47cabcb5e7e0b2f8dc13488c0311f01b07c31f0a2230ff3e30aa45554af4a9d",
+      "prior_ep200": "026dbd7aba3d85c8617320572c70db10926231d3238ebae86f7988cff7f95af6"
+    },
+    "incumbent_prior_best_all_policy_tensors_equal": false,
+    "incumbent_prior_best_max_abs_parameter_difference": 5.92095422744751,
+    "actual_trace_comparison": [
+      {
+        "traffic_seed": 2001,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2002,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2003,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2004,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2005,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2006,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2007,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2008,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2009,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      },
+      {
+        "traffic_seed": 2010,
+        "decisions": 180,
+        "requested_sequence_equal": false,
+        "effective_sequence_equal": true,
+        "phase_sequence_equal": true,
+        "observation_sequence_equal": true
+      }
+    ],
+    "scope": "Measured validation rollout states only; equality here does not imply equality on all possible observations."
+  }
+}

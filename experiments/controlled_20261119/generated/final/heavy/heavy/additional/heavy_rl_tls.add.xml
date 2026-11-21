@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- IntelliSignal Stage 1 - fixed-time signal program -->
+<!-- Generated from config/heavy_rl.yaml - do not edit by hand. -->
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+
+    <tlLogic id="C" type="static" programID="fixed" offset="0">
+        <phase duration="30" state="GGGgrrrrGGGgrrrr"/>  <!-- North-South green -->
+        <phase duration="4" state="yyyyrrrryyyyrrrr"/>  <!-- North-South yellow -->
+        <phase duration="30" state="rrrrGGGgrrrrGGGg"/>  <!-- East-West green -->
+        <phase duration="4" state="rrrryyyyrrrryyyy"/>  <!-- East-West yellow -->
+    </tlLogic>
+
+    <!-- Activate the program above at time 0 -->
+    <WAUT refTime="0" id="intelliSignal_waut" startProg="fixed">
+        <wautSwitch time="0" to="fixed"/>
+    </WAUT>
+    <wautJunction wautID="intelliSignal_waut" junctionID="C"/>
+
+</additional>

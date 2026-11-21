@@ -1,0 +1,105 @@
+{
+  "frozen_utc": "2026-11-19T16:18:59Z",
+  "final_traffic_seeds": [
+    3001,
+    3002,
+    3003,
+    3004,
+    3005,
+    3006,
+    3007,
+    3008,
+    3009,
+    3010,
+    3011,
+    3012,
+    3013,
+    3014,
+    3015,
+    3016,
+    3017,
+    3018,
+    3019,
+    3020
+  ],
+  "selection_sha256": "ed3169dc6015a5c9007dcf1254adb8a648a5c02fd6a95a7f943d7b4ce4d2e985",
+  "recipe_selection_sha256": null,
+  "manifest_sha256": "20c70c3ef58e343a3c4aa6b6eac77ddb8672b40c5be9dbcc7b8e13350928ea40",
+  "prefinal_control_amendment_sha256": "28ade9914db32c67324321419f27c4167a0a22b220d01dd9302df8b6ea45a811",
+  "source_sha256": {
+    "final_evaluate.py": "77e162340fe68ff08a4b842cfd836e2e72cd8fd8f2316e6922b9aec874121e8d",
+    "run_controlled.py": "56bc1766d1f7b21bdcbf4a025595b99cc8fff9e856290dd702da2f749faff7cb",
+    "artifact_io.py": "44725ae9fc101eae3214ff5a5531d4c114339778adcc838b9521d55470feb642",
+    "analyze_controlled.py": "2cab6f64244354914b0c3380e47165678b05b7d4a9625ef4e097ab958fe27927",
+    "run_final_parallel.py": "333458c7fa7a5b17951d7307009d6f22ec87f63a75fc668542023b9e9f1e66e4"
+  },
+  "entries": {
+    "heavy": [
+      {
+        "label": "incumbent",
+        "recipe": "incumbent",
+        "train_seed": 42,
+        "path": "models/dqn_heavy/best.pt",
+        "sha256": "c9f525c13e22f3821e314d9eebc80ae8d262ebe69ef2efd70e217b0455fa485d"
+      },
+      {
+        "label": "selected",
+        "recipe": "prior_best",
+        "role": "selected",
+        "train_seed": 42,
+        "path": "experiments/dqn_300_20261117/heavy/models/best.pt",
+        "sha256": "5c541432ecdd30973af9f283873ba119d9dba957f1ac5be2dd4289472decb1b1"
+      }
+    ],
+    "moderate": [
+      {
+        "label": "incumbent",
+        "recipe": "incumbent",
+        "train_seed": 42,
+        "path": "models/dqn_moderate/best.pt",
+        "sha256": "07d5631f4e3f4de7468fde9ce90e1bb322fce2e76356ebaed26d36d45bf1ca49"
+      },
+      {
+        "label": "selected",
+        "recipe": "incumbent_final",
+        "role": "selected",
+        "train_seed": 42,
+        "path": "models/dqn_moderate/final.pt",
+        "sha256": "a04d3a405839a97cc923c99ed404e95ca43eba84fa92b611bb7de74cfbac7b2b"
+      }
+    ]
+  },
+  "selection_eligibility": {
+    "heavy": {
+      "validation_eligible": true,
+      "diagnostic_only": false,
+      "reason": "Original checkpoint validation gate; diagnostic-only checkpoints cannot be rescued by final results."
+    },
+    "moderate": {
+      "validation_eligible": true,
+      "diagnostic_only": false,
+      "reason": "Original checkpoint validation gate; diagnostic-only checkpoints cannot be rescued by final results."
+    }
+  },
+  "untrained_controls": [
+    {
+      "label": "untrained_historical0",
+      "initialization_seed": 0,
+      "role": "primary historical control"
+    },
+    {
+      "label": "untrained",
+      "initialization_seed": 42,
+      "role": "additional new initialization control used in validation"
+    }
+  ],
+  "promotion": "Original manifest thresholds unchanged. Validation-ineligible diagnostic challengers cannot qualify for promotion from final results. No automatic incumbent replacement.",
+  "numerical_precision": "Waiting and queue gates and mean/SD outputs use unrounded per-run values when available. All learned policies and untrained have unrounded values; fixed-time collector output is rounded2decimals and comparisons to fixed-time are descriptive. Raw reported collector values remain in final_metrics.csv. Numerical equality tolerance1e-10 avoids floating-point artifacts.",
+  "evaluation_budget_episodes": 200,
+  "execution": {
+    "max_concurrent_scenario_workers": 2,
+    "torch_threads_per_worker": 1,
+    "isolation": "One process per scenario with private generated inputs and per-scenario logs. Never concurrent runs within the same scenario.",
+    "launcher": "run_final_parallel.py"
+  }
+}

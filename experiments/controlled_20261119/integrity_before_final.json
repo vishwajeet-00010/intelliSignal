@@ -1,0 +1,12 @@
+{
+  "protected_files": 745,
+  "changed": [],
+  "missing": [],
+  "snapshot_conflicts": [],
+  "passed": true,
+  "snapshots": [
+    "protected_before.json",
+    "protected_source_before.json"
+  ],
+  "policy": "No protected file repaired/replaced; changes are reported as found."
+}

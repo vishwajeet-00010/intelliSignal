@@ -1,0 +1,106 @@
+{
+  "before": {
+    "incumbent_best": [
+      12461,
+      0,
+      "f6d45119dfb7dca53bc843e9044ce33ef2f0af934d9395d1ad5470c445bf2edf"
+    ],
+    "incumbent_final": [
+      17501,
+      0,
+      "8434c3ef0448cb0ccd65f466b3d449cee668bf3c6a13f1ee16cba5e04d4d246d"
+    ],
+    "prior_best": [
+      44141,
+      0,
+      "f96a8d39028efd45732cc96d1cf7069cc04ed8ba7ce7ee411fbedd0e0ff91c22"
+    ],
+    "prior_final": [
+      53501,
+      0,
+      "44d30f0140c54f12029767e96a3ebde50940d458482e0d10d8af400271e0d5bf"
+    ],
+    "prior_ep100": [
+      17501,
+      0,
+      "5a539df3c66b4f29d406e9bdefb9444172b246795a9a087d573ea0760fb852b9"
+    ],
+    "prior_ep200": [
+      35501,
+      0,
+      "e6aeb70069e708f2a7fbfd1537e626adcce25afa7804d0a5722bc59dc61d4af3"
+    ],
+    "untrained": [
+      0,
+      0,
+      "d3c4523554761fcf98b88513016b6c6b6476970dc1bfaad3f52b41f1a9e0ff8e"
+    ],
+    "untrained_historical0": [
+      0,
+      0,
+      "0a4b3dbc3cd0c3e04e53bd813547ebf56f7fe2dab6a113d2742dbfdc9991612f"
+    ],
+    "incumbent": [
+      12461,
+      0,
+      "f6d45119dfb7dca53bc843e9044ce33ef2f0af934d9395d1ad5470c445bf2edf"
+    ],
+    "selected": [
+      17501,
+      0,
+      "8434c3ef0448cb0ccd65f466b3d449cee668bf3c6a13f1ee16cba5e04d4d246d"
+    ]
+  },
+  "after": {
+    "incumbent_best": [
+      12461,
+      0,
+      "f6d45119dfb7dca53bc843e9044ce33ef2f0af934d9395d1ad5470c445bf2edf"
+    ],
+    "incumbent_final": [
+      17501,
+      0,
+      "8434c3ef0448cb0ccd65f466b3d449cee668bf3c6a13f1ee16cba5e04d4d246d"
+    ],
+    "prior_best": [
+      44141,
+      0,
+      "f96a8d39028efd45732cc96d1cf7069cc04ed8ba7ce7ee411fbedd0e0ff91c22"
+    ],
+    "prior_final": [
+      53501,
+      0,
+      "44d30f0140c54f12029767e96a3ebde50940d458482e0d10d8af400271e0d5bf"
+    ],
+    "prior_ep100": [
+      17501,
+      0,
+      "5a539df3c66b4f29d406e9bdefb9444172b246795a9a087d573ea0760fb852b9"
+    ],
+    "prior_ep200": [
+      35501,
+      0,
+      "e6aeb70069e708f2a7fbfd1537e626adcce25afa7804d0a5722bc59dc61d4af3"
+    ],
+    "untrained": [
+      0,
+      0,
+      "d3c4523554761fcf98b88513016b6c6b6476970dc1bfaad3f52b41f1a9e0ff8e"
+    ],
+    "untrained_historical0": [
+      0,
+      0,
+      "0a4b3dbc3cd0c3e04e53bd813547ebf56f7fe2dab6a113d2742dbfdc9991612f"
+    ],
+    "incumbent": [
+      12461,
+      0,
+      "f6d45119dfb7dca53bc843e9044ce33ef2f0af934d9395d1ad5470c445bf2edf"
+    ],
+    "selected": [
+      17501,
+      0,
+      "8434c3ef0448cb0ccd65f466b3d449cee668bf3c6a13f1ee16cba5e04d4d246d"
+    ]
+  }
+}

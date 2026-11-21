@@ -1,0 +1,262 @@
+{
+  "heavy": {
+    "selected_recipe": "prior_best",
+    "selected_training_seeds": [
+      42
+    ],
+    "incumbent_comparison": {
+      "checks": {
+        "lower_waiting": false,
+        "waiting_wins_more_than_half": false,
+        "queue_no_worse": false,
+        "throughput_no_worse": true,
+        "teleports_no_worse": true
+      },
+      "passes": false,
+      "waiting_wins": 7,
+      "waiting_ties": 0,
+      "waiting_losses": 13,
+      "mean_deltas": {
+        "average_waiting_time": 0.6499104530002324,
+        "average_queue_length": 0.5140555555555547,
+        "max_queue_length": -0.3,
+        "throughput": 0.85,
+        "teleports": 0.0,
+        "vehicles_departed": 2.4,
+        "vehicles_still_in_network": 1.55
+      }
+    },
+    "fixed_time_comparison": {
+      "checks": {
+        "lower_waiting": true,
+        "waiting_wins_more_than_half": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": false,
+        "teleports_no_worse": true
+      },
+      "passes": false,
+      "waiting_wins": 19,
+      "waiting_ties": 0,
+      "waiting_losses": 1,
+      "mean_deltas": {
+        "average_waiting_time": -4.848129934018584,
+        "average_queue_length": -3.306111111111112,
+        "max_queue_length": -1.8,
+        "throughput": -5.7,
+        "teleports": 0.0,
+        "vehicles_departed": 15.0,
+        "vehicles_still_in_network": 20.7
+      }
+    },
+    "untrained_comparison": {
+      "checks": {
+        "lower_waiting": true,
+        "waiting_wins_more_than_half": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": true,
+        "teleports_no_worse": true
+      },
+      "passes": true,
+      "waiting_wins": 20,
+      "waiting_ties": 0,
+      "waiting_losses": 0,
+      "mean_deltas": {
+        "average_waiting_time": -47.66864704454784,
+        "average_queue_length": -23.54288888888889,
+        "max_queue_length": -32.05,
+        "throughput": 282.7,
+        "teleports": 0.0,
+        "vehicles_departed": 285.85,
+        "vehicles_still_in_network": 3.15
+      }
+    },
+    "untrained_control_definition": "Primary untrained initializationseed0 historical recipe; extra initializationseed42 reported separately",
+    "control_comparison": null,
+    "training_uncertainty": null,
+    "validation_eligibility": {
+      "validation_eligible": true,
+      "diagnostic_only": false,
+      "reason": "Original checkpoint validation gate; diagnostic-only checkpoints cannot be rescued by final results."
+    },
+    "final_guardrails_passed": false,
+    "promotion_criteria_passed": false,
+    "decision": "RETAIN INCUMBENT: improvement not demonstrated under declared criteria",
+    "means": {
+      "selected": {
+        "average_waiting_time": 47.62387006598142,
+        "average_queue_length": 37.54688888888889,
+        "max_queue_length": 68.9,
+        "throughput": 1345.85,
+        "teleports": 0.0,
+        "vehicles_departed": 1461.25,
+        "vehicles_still_in_network": 115.4
+      },
+      "incumbent": {
+        "average_waiting_time": 46.973959612981176,
+        "average_queue_length": 37.032833333333336,
+        "max_queue_length": 69.2,
+        "throughput": 1345.0,
+        "teleports": 0.0,
+        "vehicles_departed": 1458.85,
+        "vehicles_still_in_network": 113.85
+      },
+      "fixed_time": {
+        "average_waiting_time": 52.472,
+        "average_queue_length": 40.853,
+        "max_queue_length": 70.7,
+        "throughput": 1351.55,
+        "teleports": 0.0,
+        "vehicles_departed": 1446.25,
+        "vehicles_still_in_network": 94.7
+      },
+      "untrained": {
+        "average_waiting_time": 61.30073003957116,
+        "average_queue_length": 47.965333333333334,
+        "max_queue_length": 81.65,
+        "throughput": 1346.85,
+        "teleports": 0.0,
+        "vehicles_departed": 1445.75,
+        "vehicles_still_in_network": 98.9
+      },
+      "untrained_historical0": {
+        "average_waiting_time": 95.29251711052925,
+        "average_queue_length": 61.08977777777777,
+        "max_queue_length": 100.95,
+        "throughput": 1063.15,
+        "teleports": 0.0,
+        "vehicles_departed": 1175.4,
+        "vehicles_still_in_network": 112.25
+      }
+    }
+  },
+  "moderate": {
+    "selected_recipe": "incumbent_final",
+    "selected_training_seeds": [
+      42
+    ],
+    "incumbent_comparison": {
+      "checks": {
+        "lower_waiting": true,
+        "waiting_wins_more_than_half": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": true,
+        "teleports_no_worse": true
+      },
+      "passes": true,
+      "waiting_wins": 18,
+      "waiting_ties": 0,
+      "waiting_losses": 2,
+      "mean_deltas": {
+        "average_waiting_time": -0.28753561253561255,
+        "average_queue_length": -0.07758333333333334,
+        "max_queue_length": 0.5,
+        "throughput": 0.35,
+        "teleports": 0.0,
+        "vehicles_departed": 0.0,
+        "vehicles_still_in_network": -0.35
+      }
+    },
+    "fixed_time_comparison": {
+      "checks": {
+        "lower_waiting": true,
+        "waiting_wins_more_than_half": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": false,
+        "teleports_no_worse": true
+      },
+      "passes": false,
+      "waiting_wins": 20,
+      "waiting_ties": 0,
+      "waiting_losses": 0,
+      "mean_deltas": {
+        "average_waiting_time": -4.437803418803418,
+        "average_queue_length": -1.6506666666666667,
+        "max_queue_length": -2.45,
+        "throughput": -2.5,
+        "teleports": 0.0,
+        "vehicles_departed": 0.0,
+        "vehicles_still_in_network": 2.5
+      }
+    },
+    "untrained_comparison": {
+      "checks": {
+        "lower_waiting": true,
+        "waiting_wins_more_than_half": true,
+        "queue_no_worse": true,
+        "throughput_no_worse": true,
+        "teleports_no_worse": true
+      },
+      "passes": true,
+      "waiting_wins": 20,
+      "waiting_ties": 0,
+      "waiting_losses": 0,
+      "mean_deltas": {
+        "average_waiting_time": -5.477564102564103,
+        "average_queue_length": -2.0766944444444446,
+        "max_queue_length": -3.6,
+        "throughput": 2.2,
+        "teleports": 0.0,
+        "vehicles_departed": 0.0,
+        "vehicles_still_in_network": -2.2
+      }
+    },
+    "untrained_control_definition": "Primary untrained initializationseed0 historical recipe; extra initializationseed42 reported separately",
+    "control_comparison": null,
+    "training_uncertainty": null,
+    "validation_eligibility": {
+      "validation_eligible": true,
+      "diagnostic_only": false,
+      "reason": "Original checkpoint validation gate; diagnostic-only checkpoints cannot be rescued by final results."
+    },
+    "final_guardrails_passed": true,
+    "promotion_criteria_passed": true,
+    "decision": "Eligible for human consideration; incumbent preserved",
+    "means": {
+      "selected": {
+        "average_waiting_time": 5.43119658119658,
+        "average_queue_length": 1.9993333333333332,
+        "max_queue_length": 7.6,
+        "throughput": 690.35,
+        "teleports": 0.0,
+        "vehicles_departed": 702.0,
+        "vehicles_still_in_network": 11.65
+      },
+      "incumbent": {
+        "average_waiting_time": 5.718732193732194,
+        "average_queue_length": 2.0769166666666665,
+        "max_queue_length": 7.1,
+        "throughput": 690.0,
+        "teleports": 0.0,
+        "vehicles_departed": 702.0,
+        "vehicles_still_in_network": 12.0
+      },
+      "fixed_time": {
+        "average_waiting_time": 9.869,
+        "average_queue_length": 3.65,
+        "max_queue_length": 10.05,
+        "throughput": 692.85,
+        "teleports": 0.0,
+        "vehicles_departed": 702.0,
+        "vehicles_still_in_network": 9.15
+      },
+      "untrained": {
+        "average_waiting_time": 19.89316239316239,
+        "average_queue_length": 7.47663888888889,
+        "max_queue_length": 18.0,
+        "throughput": 683.2,
+        "teleports": 0.0,
+        "vehicles_departed": 702.0,
+        "vehicles_still_in_network": 18.8
+      },
+      "untrained_historical0": {
+        "average_waiting_time": 10.908760683760686,
+        "average_queue_length": 4.076027777777778,
+        "max_queue_length": 11.2,
+        "throughput": 688.15,
+        "teleports": 0.0,
+        "vehicles_departed": 702.0,
+        "vehicles_still_in_network": 13.85
+      }
+    }
+  }
+}
