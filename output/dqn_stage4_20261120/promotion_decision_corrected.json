@@ -1,0 +1,173 @@
+{
+ "document": "Stage 4 promotion decision, corrected",
+ "supersedes": "output/dqn_stage4_20261120/promotion_decision.json",
+ "correction": "output/dqn_stage4_20261120/CORRECTION.md",
+ "decision": "NO_CANDIDATE_PROMOTED",
+ "decision_unchanged": true,
+ "what_changed": "Only the fixed_time_tuned row. No candidate passed the validation gate in the original run and none does here; the promotion outcome is unaffected. What changes is the recommended best overall controller.",
+ "scenarios": {
+  "moderate": {
+   "scenario": "moderate",
+   "confirmatory_seeds": [
+    6101,
+    6102,
+    6103,
+    6104,
+    6105,
+    6106,
+    6107,
+    6108,
+    6109,
+    6110,
+    6111,
+    6112,
+    6113,
+    6114,
+    6115,
+    6116,
+    6117,
+    6118,
+    6119,
+    6120
+   ],
+   "seed_sets_match": true,
+   "tuned_fixed_time_plan": {
+    "green_seconds": 5.0,
+    "yellow_seconds": 4.0,
+    "cycle_seconds": 18.0,
+    "execution": "SUMO TLS program via evaluation/fixed_time_sweep.py"
+   },
+   "superseded_fixed_time_tuned": {
+    "means": {
+     "average_waiting_time": 3.56,
+     "average_queue_length": 1.304,
+     "max_queue_length": 5.3,
+     "throughput": 689.55,
+     "vehicles_still_in_network": 12.45
+    },
+    "why": "FixedTimeAgent driven through IntelliSignalEnv, which quantised the 7 s request to an 11 s green, and ran a 3 s yellow where the scenario defines 4 s."
+   },
+   "all_controller_means": {
+    "fixed_time_original": {
+     "average_waiting_time": 9.863,
+     "average_queue_length": 3.653,
+     "max_queue_length": 10.05,
+     "throughput": 692.9,
+     "vehicles_still_in_network": 9.1
+    },
+    "actuated_tuned": {
+     "average_waiting_time": 3.3310000000000004,
+     "average_queue_length": 1.22,
+     "max_queue_length": 5.75,
+     "throughput": 689.8,
+     "vehicles_still_in_network": 12.2
+    },
+    "incumbent_dqn": {
+     "average_waiting_time": 2.9185,
+     "average_queue_length": 1.0690000000000002,
+     "max_queue_length": 6.6,
+     "throughput": 690.8,
+     "vehicles_still_in_network": 11.2
+    },
+    "starting_dqn": {
+     "average_waiting_time": 29.540499999999998,
+     "average_queue_length": 11.2875,
+     "max_queue_length": 31.1,
+     "throughput": 680.4,
+     "vehicles_still_in_network": 21.6
+    },
+    "fixed_time_tuned": {
+     "average_waiting_time": 3.042,
+     "average_queue_length": 1.086,
+     "max_queue_length": 6.15,
+     "throughput": 689.95,
+     "vehicles_still_in_network": 12.05
+    }
+   },
+   "recommend_best_overall_controller": "incumbent_dqn",
+   "incumbent_dqn_gap_vs_best": null
+  },
+  "heavy": {
+   "scenario": "heavy",
+   "confirmatory_seeds": [
+    6101,
+    6102,
+    6103,
+    6104,
+    6105,
+    6106,
+    6107,
+    6108,
+    6109,
+    6110,
+    6111,
+    6112,
+    6113,
+    6114,
+    6115,
+    6116,
+    6117,
+    6118,
+    6119,
+    6120
+   ],
+   "seed_sets_match": true,
+   "tuned_fixed_time_plan": {
+    "green_seconds": 7.0,
+    "yellow_seconds": 4.0,
+    "cycle_seconds": 22.0,
+    "execution": "SUMO TLS program via evaluation/fixed_time_sweep.py"
+   },
+   "superseded_fixed_time_tuned": {
+    "means": {
+     "average_waiting_time": 36.798500000000004,
+     "average_queue_length": 29.241000000000003,
+     "max_queue_length": 50.95,
+     "throughput": 1359.2,
+     "vehicles_still_in_network": 109.55
+    },
+    "why": "FixedTimeAgent driven through IntelliSignalEnv, which quantised the 7 s request to an 11 s green, and ran a 3 s yellow where the scenario defines 4 s."
+   },
+   "all_controller_means": {
+    "fixed_time_original": {
+     "average_waiting_time": 53.0295,
+     "average_queue_length": 41.2645,
+     "max_queue_length": 71.0,
+     "throughput": 1349.8,
+     "vehicles_still_in_network": 95.5
+    },
+    "actuated_tuned": {
+     "average_waiting_time": 16.700499999999998,
+     "average_queue_length": 13.498500000000002,
+     "max_queue_length": 31.55,
+     "throughput": 1439.05,
+     "vehicles_still_in_network": 64.95
+    },
+    "incumbent_dqn": {
+     "average_waiting_time": 16.469,
+     "average_queue_length": 13.477,
+     "max_queue_length": 32.45,
+     "throughput": 1420.55,
+     "vehicles_still_in_network": 82.3
+    },
+    "starting_dqn": {
+     "average_waiting_time": 19.411,
+     "average_queue_length": 16.0025,
+     "max_queue_length": 35.9,
+     "throughput": 1406.2,
+     "vehicles_still_in_network": 96.8
+    },
+    "fixed_time_tuned": {
+     "average_waiting_time": 12.638,
+     "average_queue_length": 10.3215,
+     "max_queue_length": 30.75,
+     "throughput": 1441.3,
+     "vehicles_still_in_network": 62.7
+    }
+   },
+   "recommend_best_overall_controller": "fixed_time_tuned",
+   "incumbent_dqn_gap_vs_best": 0.30313340718468124
+  }
+ },
+ "promotion_note": "No automatic checkpoint replacement was performed."
+}

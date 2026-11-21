@@ -776,8 +776,16 @@ class DQNAgent(TrafficAgent):
             next_q_values = next_q_values.masked_fill(
                 ~next_action_masks, -torch.inf)
             next_q = next_q_values.max(dim=1).values
-            # A terminal transition has no future, so the future term is zeroed.
-            target_q = rewards + self.config.gamma * next_q * (1.0 - dones)
+            # A terminal transition has no future, so only the reward remains.
+            #
+            # `torch.where` rather than `next_q * (1.0 - dones)`: a row whose
+            # mask excludes every action yields -inf, and -inf * 0.0 is NaN,
+            # which would silently poison the whole batch - including the
+            # transitions that were fine. ReplayBuffer.push refuses an empty
+            # mask, so that row should never exist, but the failure mode is
+            # invisible and the guard costs nothing.
+            target_q = torch.where(
+                dones.bool(), rewards, rewards + self.config.gamma * next_q)
 
         if self.config.loss == "mse":
             loss = F.mse_loss(current_q, target_q)

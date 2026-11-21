@@ -385,6 +385,48 @@ def test_learning_produces_a_finite_loss_and_changes_the_policy_network():
         "a gradient step must actually change the policy network")
 
 
+def test_replay_buffer_refuses_a_mask_with_no_valid_action():
+    """The first line of defence: an empty next-action mask is rejected."""
+    buffer = ReplayBuffer(capacity=4, num_actions=2)
+    with pytest.raises(ValueError):
+        buffer.push(np.zeros(OBS), 0, -1.0, np.zeros(OBS), False,
+                    next_valid_actions=[])
+
+
+def test_a_degenerate_next_action_mask_cannot_produce_a_nan_target():
+    """The second line of defence: the target stays finite even so.
+
+    The masked target fills unavailable actions with -inf. Zeroing the future
+    term for a terminal transition by multiplying by (1 - done) would evaluate
+    -inf * 0.0 = NaN, which propagates through the mean in the loss and
+    poisons every sample in the batch, not just the offending one.
+
+    `ReplayBuffer.push` rejects an empty mask, so this row cannot arise through
+    the public API today. It is written directly into storage here because the
+    failure mode is silent, and an action-space change is exactly the kind of
+    edit that could reintroduce it.
+    """
+    agent = fresh_agent()
+    rng = np.random.default_rng(11)
+    for index in range(60):
+        agent.remember(rng.random(OBS), index % 2, -rng.random(),
+                       rng.random(OBS), index % 3 == 0)
+
+    # Replace every stored transition with a terminal one whose next state
+    # allows no action at all, so the -inf path is taken for the whole batch.
+    storage = agent.memory._storage
+    for index, transition in enumerate(storage):
+        storage[index] = transition._replace(
+            done=True, next_action_mask=np.zeros(2, dtype=np.bool_))
+
+    losses = [agent.learn() for _ in range(5)]
+    assert all(loss is not None and np.isfinite(loss) for loss in losses), (
+        "an all-masked terminal transition must not produce a non-finite loss")
+    for parameter in agent.policy_net.parameters():
+        assert torch.isfinite(parameter).all(), (
+            "a non-finite target leaked into the policy network weights")
+
+
 def test_target_network_starts_identical_and_is_refreshed_periodically():
     agent = fresh_agent(target_update_frequency=5)
     for key, policy in agent.policy_net.state_dict().items():
