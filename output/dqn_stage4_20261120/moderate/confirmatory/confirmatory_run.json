@@ -1,0 +1,28 @@
+{
+  "scenario": "moderate",
+  "seeds": [
+    6101,
+    6102,
+    6103,
+    6104,
+    6105,
+    6106,
+    6107,
+    6108,
+    6109,
+    6110,
+    6111,
+    6112,
+    6113,
+    6114,
+    6115,
+    6116,
+    6117,
+    6118,
+    6119,
+    6120
+  ],
+  "duration_seconds": 1800,
+  "candidate_included": false,
+  "rows_csv": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\confirmatory\\confirmatory_rows.csv"
+}

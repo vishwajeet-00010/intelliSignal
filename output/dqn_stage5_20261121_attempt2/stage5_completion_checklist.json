@@ -1,0 +1,16 @@
+{
+  "training_cells_complete": false,
+  "primary_cells": {
+    "complete": 0,
+    "partial": 1,
+    "not_started": 19
+  },
+  "interruption": "SUMO/TraCI local socket WinError 10013 in sandbox; runner stopped",
+  "validation_complete": false,
+  "confirmatory_complete_when_required": false,
+  "tests_passed": "not run",
+  "protected_integrity_passed": "not checked after interruption",
+  "report_created": false,
+  "technical_gates_pass": false,
+  "stage6_allowed": false
+}

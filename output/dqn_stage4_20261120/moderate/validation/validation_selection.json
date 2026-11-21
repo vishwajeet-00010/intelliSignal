@@ -1,0 +1,277 @@
+{
+  "scenario": "moderate",
+  "validation_seeds": [
+    5101,
+    5102,
+    5103,
+    5104,
+    5105
+  ],
+  "calibration_seeds": [
+    5201,
+    5202,
+    5203,
+    5204,
+    5205,
+    5206,
+    5207,
+    5208,
+    5209,
+    5210
+  ],
+  "duration_seconds": 1800,
+  "candidate_checks": {
+    "55": {
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\models\\best.pt",
+      "mean_waiting_time": 3.386,
+      "mean_average_queue": 1.234,
+      "mean_max_queue": 6.0,
+      "mean_throughput": 690.4,
+      "mean_vehicles_left": 11.6,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_gate": false
+    },
+    "56": {
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed56\\models\\best.pt",
+      "mean_waiting_time": 2.98,
+      "mean_average_queue": 1.0859999999999999,
+      "mean_max_queue": 6.4,
+      "mean_throughput": 690.6,
+      "mean_vehicles_left": 11.4,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_gate": true
+    }
+  },
+  "observation_stats": {
+    "55": {
+      "path": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\validation\\observation_stats_seed55.json",
+      "percentiles": {
+        "queues": {
+          "north": {
+            "p95": 2.0,
+            "p99": 2.0,
+            "max": 3.0
+          },
+          "east": {
+            "p95": 1.0,
+            "p99": 2.0,
+            "max": 3.0
+          },
+          "south": {
+            "p95": 2.0,
+            "p99": 2.0,
+            "max": 3.0
+          },
+          "west": {
+            "p95": 1.0,
+            "p99": 2.0,
+            "max": 3.0
+          }
+        },
+        "waiting": {
+          "north": {
+            "p95": 9.0,
+            "p99": 14.0,
+            "max": 21.0
+          },
+          "east": {
+            "p95": 7.0,
+            "p99": 11.0,
+            "max": 27.0
+          },
+          "south": {
+            "p95": 9.0,
+            "p99": 14.0,
+            "max": 26.0
+          },
+          "west": {
+            "p95": 7.0,
+            "p99": 11.0,
+            "max": 32.0
+          }
+        }
+      }
+    },
+    "56": {
+      "path": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\validation\\observation_stats_seed56.json",
+      "percentiles": {
+        "queues": {
+          "north": {
+            "p95": 2.0,
+            "p99": 3.0,
+            "max": 3.0
+          },
+          "east": {
+            "p95": 1.0,
+            "p99": 2.0,
+            "max": 3.0
+          },
+          "south": {
+            "p95": 2.0,
+            "p99": 3.0,
+            "max": 3.0
+          },
+          "west": {
+            "p95": 1.0,
+            "p99": 2.0,
+            "max": 3.0
+          }
+        },
+        "waiting": {
+          "north": {
+            "p95": 9.0,
+            "p99": 15.0,
+            "max": 24.0
+          },
+          "east": {
+            "p95": 6.0,
+            "p99": 10.0,
+            "max": 19.0
+          },
+          "south": {
+            "p95": 8.0,
+            "p99": 14.0,
+            "max": 27.0
+          },
+          "west": {
+            "p95": 6.0,
+            "p99": 10.0,
+            "max": 20.0
+          }
+        }
+      }
+    }
+  },
+  "all_independent_candidates_pass": false,
+  "selected_candidate_seed": null,
+  "actuated_tuning_grid": [
+    {
+      "switch_margin": 0.0,
+      "max_green": 30.0,
+      "mean_waiting_time": 3.386,
+      "mean_average_queue": 1.234,
+      "mean_max_queue": 6.0,
+      "mean_throughput": 690.4,
+      "mean_vehicles_left": 11.6,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false,
+      "selected_within_declared_guardrails": false,
+      "selected_label": "actuated_m0_g30"
+    },
+    {
+      "switch_margin": 0.0,
+      "max_green": 40.0,
+      "mean_waiting_time": 3.386,
+      "mean_average_queue": 1.234,
+      "mean_max_queue": 6.0,
+      "mean_throughput": 690.4,
+      "mean_vehicles_left": 11.6,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 0.0,
+      "max_green": 50.0,
+      "mean_waiting_time": 3.386,
+      "mean_average_queue": 1.234,
+      "mean_max_queue": 6.0,
+      "mean_throughput": 690.4,
+      "mean_vehicles_left": 11.6,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 2.0,
+      "max_green": 30.0,
+      "mean_waiting_time": 4.192,
+      "mean_average_queue": 1.506,
+      "mean_max_queue": 7.0,
+      "mean_throughput": 691.2,
+      "mean_vehicles_left": 10.8,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 2.0,
+      "max_green": 40.0,
+      "mean_waiting_time": 4.192,
+      "mean_average_queue": 1.506,
+      "mean_max_queue": 7.0,
+      "mean_throughput": 691.2,
+      "mean_vehicles_left": 10.8,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 2.0,
+      "max_green": 50.0,
+      "mean_waiting_time": 4.192,
+      "mean_average_queue": 1.506,
+      "mean_max_queue": 7.0,
+      "mean_throughput": 691.2,
+      "mean_vehicles_left": 10.8,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 4.0,
+      "max_green": 30.0,
+      "mean_waiting_time": 6.308,
+      "mean_average_queue": 2.286,
+      "mean_max_queue": 8.4,
+      "mean_throughput": 689.0,
+      "mean_vehicles_left": 13.0,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 4.0,
+      "max_green": 40.0,
+      "mean_waiting_time": 6.378,
+      "mean_average_queue": 2.332,
+      "mean_max_queue": 9.2,
+      "mean_throughput": 689.6,
+      "mean_vehicles_left": 12.4,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    },
+    {
+      "switch_margin": 4.0,
+      "max_green": 50.0,
+      "mean_waiting_time": 6.378,
+      "mean_average_queue": 2.332,
+      "mean_max_queue": 9.2,
+      "mean_throughput": 689.6,
+      "mean_vehicles_left": 12.4,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false
+    }
+  ],
+  "selected_actuated": {
+    "switch_margin": 0.0,
+    "max_green": 30.0,
+    "mean_waiting_time": 3.386,
+    "mean_average_queue": 1.234,
+    "mean_max_queue": 6.0,
+    "mean_throughput": 690.4,
+    "mean_vehicles_left": 11.6,
+    "blocked_switches": 0,
+    "teleports": 0,
+    "passes_validation_safety_and_tradeoff_guard": false,
+    "selected_within_declared_guardrails": false,
+    "selected_label": "actuated_m0_g30"
+  },
+  "confirmatory_candidate_allowed": false,
+  "rows_csv": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\validation\\validation_rows.csv"
+}

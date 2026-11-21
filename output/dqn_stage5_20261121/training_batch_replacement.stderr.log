@@ -1,0 +1,76 @@
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6202' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6203' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6203' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6204' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6204' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6205' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6205' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6206' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6206' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6202' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6202' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6203' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6203' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6204' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6204' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6205' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6205' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6206' (choose from 6207, 6208, 6209, 6210, 6211)
+usage: train_candidate.py [-h] --scenario {moderate,heavy} --arm
+                          {control,treatment} --seed
+                          {6207,6208,6209,6210,6211}
+train_candidate.py: error: argument --seed: invalid choice: '6206' (choose from 6207, 6208, 6209, 6210, 6211)

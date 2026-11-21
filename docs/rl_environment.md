@@ -1,8 +1,9 @@
 # IntelliSignal — The Reinforcement-Learning Environment (Stage 2)
 
-> **Stage 2 builds the environment a DQN will use. It does not build the DQN.**
-> There is no neural network, no replay buffer, no target network and no
-> training anywhere in `rl/`. That is Stage 3.
+> This is the environment reference. The DQN was added in Stage 3 and its
+> training and evaluation are described in `docs/dqn_training.md`. The active
+> timing and normalization values are read from the current YAML configuration;
+> the older Stage 2 reports remain historical snapshots.
 
 ---
 
@@ -46,7 +47,7 @@ plus `env.observation_space` and `env.action_space`, which describe the shape
 and the valid range of what goes in and out.
 
 Following that contract is what makes the project future-proof. Stable-Baselines3,
-which will provide the DQN in Stage 3, accepts any environment that satisfies it.
+which the Stage 3 DQN uses, accepts any environment that satisfies it.
 `IntelliSignalEnv` is checked against the contract automatically by
 `gymnasium.utils.env_checker.check_env` in the test suite.
 
@@ -106,7 +107,7 @@ point already exists and is tested.
         (rl/state.py)                            (rl/reward.py)
                   |                                   ^
                   v                                   |
-             [ the agent ]  <-- Stage 3, not built yet |
+             [ the agent ]  <-- Stage 3 DQN |
                   |                                   |
                 Action                                |
             (rl/action.py)                            |
@@ -172,29 +173,27 @@ agent more about how long the episode has run than about the traffic. Current
 waiting time resets when a vehicle moves again, so it stays in a bounded range
 and actually describes the situation at the junction.
 
-**Normalisation.** Every entry is divided by a constant and clipped into
-`[0, 1]`, so the observation can never fall outside the declared space. The
-constants are not guesses — both scenarios were run for a full 1800 s episode
-under a random policy and under a keep-only policy, and the per-approach values
-were measured:
+**Normalisation.** Every entry is divided by a scale and clipped into
+`[0, 1]`. The current scenario-specific queue and waiting scales were measured
+from ten greedy incumbent rollouts on seeds 2001–2010 after the 5-second
+decision cadence and action mask were introduced:
 
-| Scenario / policy | max queue / approach | max waiting / approach |
-|---|---|---|
-| moderate, random | 8 | 319 |
-| moderate, keep-only | 9 | 299 |
-| heavy, random | **50** | **1848** |
-| heavy, keep-only | 40 | 1715 |
+| Scenario | queue scale / approach | waiting scale / approach |
+|---|---:|---:|
+| moderate | 3 vehicles | 14 vehicle-seconds |
+| heavy | 16 vehicles | 142 vehicle-seconds |
 
-The chosen divisors are `max_queue_per_approach: 50` and
-`max_waiting_per_approach: 1500`. 50 vehicles is also close to the physical
-capacity of one approach (2 lanes × 200 m), so the queue entry effectively
-reads as "how full is this approach". The same constants are used for both
-scenarios on purpose, so a single trained agent can later be evaluated on both.
+These are divisors, not hard limits. Values above the scale saturate at 1.0.
+Because the scales differ by scenario, the trained checkpoint is scenario
+specific; a single model should not be moved across scenarios without
+recalibration and evaluation. The fallback values in
+`config/rl/environment.yaml` apply only when a scenario has no override.
 
-A consequence worth knowing: in the moderate scenario the waiting entries sit
-around 0.01–0.05 rather than spanning the full range. That is real information,
-not a bug — moderate traffic genuinely produces one-tenth the delay of heavy
-traffic, and a shared scale is what lets the two be compared.
+Standalone environment instances retain the legacy 20-second phase-age scale
+for compatibility. New DQN training defaults to the full 60-second
+`max_green` range and writes that scale into the checkpoint contract. A loaded
+policy supplies its recorded scale to evaluation; changing the observation
+scale of an existing model would change its inputs and requires retraining.
 
 ---
 
@@ -226,13 +225,13 @@ interval exactly:
 
 ```
 action = 0 (KEEP)
-    [ (current green, 10 s) ]
+    [ (current green, 5 s) ]
 
 action = 1 (SWITCH), with yellow = 4 s and all-red = 0 s
-    [ (current yellow, 4 s), (other green, 6 s) ]
+    [ (current yellow, 4 s), (other green, 1 s) ]
 
-action = 1 (SWITCH), if all-red were set to 2 s
-    [ (current yellow, 4 s), (all red, 2 s), (other green, 4 s) ]
+action = 1 (SWITCH), with a hypothetical 7 s interval and 2 s all-red
+    [ (current yellow, 4 s), (all red, 2 s), (other green, 1 s) ]
 ```
 
 ### Safety rules — a switch is never instantaneous and never rapid
@@ -303,7 +302,7 @@ approach, which discourages ignoring a quiet direction even within the
 
 ## 8. The decision interval
 
-`decision_interval: 10` seconds (configurable in `config/rl/environment.yaml`).
+`decision_interval: 5` seconds (configurable in `config/rl/environment.yaml`).
 
 **Why it exists.**
 
@@ -311,20 +310,20 @@ approach, which discourages ignoring a quiet direction even within the
    to change every step could flicker between directions — physically
    meaningless and dangerous.
 2. *Learning difficulty.* At one decision per second an 1800 s episode is 1800
-   decisions, most of which change nothing. At 10 s it is 180 decisions, each
+   decisions, most of which change nothing. At 5 s it is 360 decisions, each
    of which actually matters. Fewer, more meaningful decisions make the
    learning problem dramatically easier.
 3. *Credit assignment.* The effect of a green phase on queues takes several
    seconds to appear. A decision interval long enough to contain that effect
    means the reward genuinely reflects the action that caused it.
 
-**Why 10 and not 5.** The Stage 1 signal design uses a 4-second yellow, and
-the RL environment inherits it so both controllers clear the intersection the
-same way. With a 5-second interval a switch would spend 4 seconds on yellow and
-leave 1 second of green — almost no vehicles would get through. 10 seconds
-leaves 6 seconds of real green after a switch. The configuration loader
-enforces `decision_interval > yellow_time + all_red_time` and refuses to start
-otherwise.
+The 5-second setting is an explicit trade-off: a decision that switches spends
+4 seconds in yellow and only 1 second in the new green during that interval.
+`min_green: 5` then prevents another early switch. This increases control
+frequency and changes the reward horizon compared with the historical 10-second
+setup; comparisons must use the same current environment. The configuration
+loader enforces `decision_interval > yellow_time + all_red_time` and refuses to
+start otherwise.
 
 Between decisions SUMO keeps simulating normally, one second at a time, and the
 environment samples the queues and waiting times on every one of those seconds
@@ -449,8 +448,10 @@ what can be explained line by line in a report.
 
 ### The three additive seams Stage 3 opened here
 
-All optional, all backwards compatible, none of them touching the
-observation, the action, the reward or the safety rules:
+These integration seams are optional and preserve the original environment
+contract. Later releases separately changed timing and observation scales;
+those active settings are described above and are not historical Stage 2
+defaults.
 
 | Addition | Purpose |
 |---|---|
@@ -461,10 +462,10 @@ observation, the action, the reward or the safety rules:
 
 ### What the agent is still not allowed to do
 
-The DQN returns 0 or 1. `rl/action.py` decides what that means, exactly as in
-Stage 2: a switch always runs the yellow clearance, a switch before
-`min_green` is refused and recorded as refused, and a `keep` after `max_green`
-is overridden into a switch. A Stage 3 test drives the network with pure
+The DQN returns 0 or 1. The training policy masks switches before `min_green`,
+and `rl/action.py` remains the final safety guard: a switch always runs the
+yellow clearance, an early switch request is refused and recorded, and a
+`keep` after `max_green` is overridden into a switch. A Stage 3 test drives the network with pure
 exploration for 300 simulated seconds and asserts that no green → green
 transition appears anywhere in the recorded signal states.
 

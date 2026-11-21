@@ -42,7 +42,7 @@ from rl.config import RLConfigError, load_rl_config, validate_rl_config  # noqa:
 from rl.environment import IntelliSignalEnv                          # noqa: E402
 from rl.reward import RewardFunction                                 # noqa: E402
 from rl.state import (APPROACH_LANES, APPROACH_ORDER,                # noqa: E402
-                      OBSERVATION_LABELS, OBSERVATION_SIZE)
+                      OBSERVATION_LABELS, OBSERVATION_SIZE, StateExtractor)
 from utils.config_loader import available_scenarios, load_config     # noqa: E402
 from utils.scenario_builder import (ALL_RED, EW_GREEN, EW_YELLOW,    # noqa: E402
                                     NS_GREEN, NS_YELLOW, TLS_ID)
@@ -52,6 +52,37 @@ SCENARIOS = ["moderate", "heavy"]
 # Short episodes keep the suite fast.
 SHORT_EPISODE = 60.0     # 6 decisions at a 10 s decision interval
 MEDIUM_EPISODE = 120.0   # 12 decisions
+
+
+def test_phase_elapsed_scale_can_cover_full_legal_green_without_changing_legacy_default():
+    raw = {"queues": dict.fromkeys(APPROACH_ORDER, 0),
+           "waiting": dict.fromkeys(APPROACH_ORDER, 0)}
+    legacy = StateExtractor(3, 14, max_green=60, min_green=5)
+    full_range = StateExtractor(3, 14, max_green=60, min_green=5,
+                                phase_elapsed_scale=60)
+
+    # Existing behavior remains compatible, but the experimental scale
+    # retains information about phase age after the legacy 20-second cap.
+    assert legacy.observe(raw, phase_index=0, green_elapsed=30)[9] == 1.0
+    assert full_range.observe(raw, phase_index=0, green_elapsed=30)[9] == 0.5
+    assert full_range.observe(raw, phase_index=0, green_elapsed=60)[9] == 1.0
+
+
+def test_phase_elapsed_scale_must_be_positive():
+    with pytest.raises(ValueError, match="phase_elapsed_scale must be positive"):
+        StateExtractor(3, 14, max_green=60, min_green=5,
+                       phase_elapsed_scale=0)
+
+
+def test_environment_accepts_experimental_phase_elapsed_scale_without_starting_sumo():
+    legacy = IntelliSignalEnv(scenario="moderate")
+    treatment = IntelliSignalEnv(scenario="moderate", phase_elapsed_scale=60)
+    try:
+        assert legacy.state_extractor.phase_elapsed_scale == 20
+        assert treatment.state_extractor.phase_elapsed_scale == 60
+    finally:
+        legacy.close()
+        treatment.close()
 
 
 @pytest.fixture

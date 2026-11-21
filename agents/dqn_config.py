@@ -39,7 +39,7 @@ DEFAULTS: Dict[str, Any] = {
         "max_steps_per_episode": None,
         "batch_size": 64,
         "learning_rate": 0.001,
-        "gamma": 0.9,
+        "gamma": 0.98,
         "loss": "huber",
         "gradient_clip": 10.0,
         "replay_capacity": 50000,
@@ -84,7 +84,7 @@ class DQNConfig:
     max_steps_per_episode: Optional[int] = None
     batch_size: int = 64
     learning_rate: float = 0.001
-    gamma: float = 0.9
+    gamma: float = 0.98
     loss: str = "huber"
     gradient_clip: float = 10.0
     replay_capacity: int = 50000

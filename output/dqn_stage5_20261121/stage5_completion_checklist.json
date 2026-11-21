@@ -1,0 +1,15 @@
+{
+  "training_cells_complete": false,
+  "primary_cells": {
+    "complete": 1,
+    "partial": 1,
+    "not_started": 18
+  },
+  "run_reconciliation": "output\\dqn_stage5_20261121\\run_reconciliation.md",
+  "tests_passed": "not run during status reconciliation",
+  "validation_complete": false,
+  "confirmatory_complete_when_required": false,
+  "technical_gates_pass": false,
+  "user_signoff": "pending",
+  "stage6_allowed": false
+}

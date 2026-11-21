@@ -7,6 +7,14 @@ is trained and evaluated, and what the results do and do not show.
 It is written to be read start to finish by someone who has not seen the code,
 and to be defensible in a project presentation.
 
+Stage 3 reports are historical. The active configuration uses a 5-second
+decision interval, 5-second minimum green, gamma 0.98, and scenario-specific
+observation scales.
+
+For exact reproduction of the verified Windows environment, use
+`requirements-win-py312.lock` with Python 3.12.13. `requirements.txt` remains
+the portable minimum-version list.
+
 ---
 
 ## 1. The one-paragraph summary
@@ -14,7 +22,7 @@ and to be defensible in a project presentation.
 A conventional traffic signal runs a fixed timetable: 30 seconds of green for
 North–South, then 30 seconds for East–West, forever, whether a direction is
 empty or jammed. IntelliSignal replaces that timetable with a small neural
-network that looks at the live traffic every 10 seconds and answers one
+network that looks at the live traffic every 5 seconds and answers one
 question — *hold this green, or change it?* The network is trained by trial and
 error inside the SUMO simulator: it tries decisions, is rewarded for less
 congestion, and gradually learns which decision is better in which situation.
@@ -80,7 +88,7 @@ The choice follows from the environment that Stage 2 built, not from fashion:
 |---|---|
 | The action space is **discrete** and tiny: `keep` or `switch` | DQN outputs one Q-value per action, which needs a finite action list. Two actions is the easiest possible case. |
 | The state is **continuous** (queues, waiting times) | A Q-table is impossible; a function approximator is required. |
-| The reward is **dense** — every 10-second decision produces one | Value-based learning has a usable signal at every step, instead of one reward at the end of an episode. |
+| The reward is **dense** — every 5-second decision produces one | Value-based learning has a usable signal at every step, instead of one reward at the end of an episode. |
 | Experience is **expensive** (every episode is a 1800-second SUMO run) | A replay buffer lets each simulated decision train the network many times, which matters on a student laptop. |
 | The project must be **explainable** in a report and a viva | The whole update rule fits in the five lines above, and the two Q-values behind any decision can be shown on screen. |
 
@@ -141,18 +149,26 @@ Two things are worth noticing about this diagram:
 
 ## 5. The state: 10 numbers
 
-Defined in `rl/state.py` (Stage 2) and **not changed by Stage 3**:
+The current 10-number observation is defined in `rl/state.py`:
 
 | Index | Value | Normalised by |
 |---|---|---|
-| 0–3 | halting vehicles on the North, East, South, West approach | 50 vehicles |
-| 4–7 | summed current waiting time on each approach | 1500 vehicle-seconds |
+| 0–3 | halting vehicles on the North, East, South, West approach | moderate 3; heavy 16 vehicles |
+| 4–7 | summed current waiting time on each approach | moderate 14; heavy 142 vehicle-seconds |
 | 8 | current phase: 0.0 = NS green, 1.0 = EW green | — |
-| 9 | how long the current green has been running | `max_green` = 60 s |
+| 9 | how long the current green has been running | scale stored with each model; clipped at 1.0 |
 
-Every entry is scaled into `[0, 1]` and clipped, so the network sees inputs of
-comparable magnitude — which is what makes a small network trainable without
-any further feature engineering.
+Queue and waiting scales are scenario-specific and come from measured rollout
+distributions. A checkpoint trained for one scenario is not directly
+interchangeable with the other. Standalone `IntelliSignalEnv` instances retain
+the legacy 20-second phase-age scale. New DQN training defaults to
+`max_green=60` seconds so the policy can distinguish phase ages across the
+full legal range; pass `--phase-elapsed-scale 20` to reproduce the legacy
+training scale. The dashboard's validated Stage 4 incumbent remains on scale
+20 because that is the scale used to train its weights. Stage 5's 20-vs-60
+study is still incomplete, so scale 60 is the new-training default, not an
+experiment result or an automatic incumbent replacement. Rollouts use the
+checkpoint's recorded scale.
 
 The network's input size is read from `env.observation_space.shape`, never
 typed in. If an eleventh value were added to the observation, the network
@@ -178,7 +194,7 @@ controller, which enforces:
 * **Yellow clearance.** A switch always runs the Stage 1 yellow state (4 s)
   before the other direction turns green. Green can never turn directly into
   the conflicting direction's green.
-* **`min_green` = 10 s.** A switch requested too early is refused and recorded
+* **`min_green` = 5 s.** A switch requested too early is refused and recorded
   as refused — it is not hidden.
 * **`max_green` = 60 s.** A `keep` after 60 s of green is overridden into a
   switch. No approach can be starved, whatever the network wants.
@@ -199,7 +215,7 @@ comparison meaningless:
 reward = -0.01 × (total current waiting time + total queue length)
 ```
 
-averaged over every simulated second of the 10-second decision interval.
+averaged over every simulated second of the 5-second decision interval.
 
 * It is always ≤ 0: congestion is a cost and zero is perfection.
 * Maximising it means reducing waiting and queues — the project's actual goal.
@@ -243,10 +259,10 @@ sizes are not configurable on purpose, because they belong to the environment.
 ## 9. The replay buffer
 
 `agents/replay_buffer.py`. A fixed-size ring buffer of up to 50,000
-transitions, each one `(state, action, reward, next_state, done)`.
+transitions, each one `(state, action, reward, next_state, done, next action mask)`.
 
 **Why it is necessary.** Consecutive traffic observations are nearly
-identical — the queue 10 seconds from now looks much like the queue now.
+identical — the queue 5 seconds from now looks much like the queue now.
 Training a network on that stream in order makes successive gradient steps
 strongly correlated and the learning unstable. The buffer fixes this two ways:
 
@@ -266,7 +282,8 @@ near-identical samples.
 Two networks with identical architecture:
 
 * **`policy_net`** — chooses actions and receives every gradient step.
-* **`target_net`** — used *only* to compute `max Q(s', a')` in the target.
+* **`target_net`** — used *only* to compute the maximum Q-value over actions
+  allowed by the next state's min/max-green timing rules.
 
 `target_net` starts as an exact copy of `policy_net` and is refreshed from it
 every 500 gradient steps.
@@ -284,19 +301,17 @@ not, and that the refresh happens on schedule.
 ## 11. Gamma — the discount factor
 
 ```
-gamma = 0.9     (the project's planned value; configurable, never silently changed)
+gamma = 0.98    (the active value in config/dqn/training.yaml)
 ```
 
 Gamma says how much the agent values future reward compared with immediate
 reward. At `gamma = 0`, the agent is myopic: it would only care about the next
-10 seconds and would happily create a jam just after. At `gamma → 1`, rewards
+5 seconds and would happily create a jam just after. At `gamma → 1`, rewards
 far in the future count almost as much as the present.
 
-At 0.9, one decision interval later is worth 0.9, ten intervals (100 simulated
-seconds) later about 0.35, and thirty intervals about 0.04. In other words the
-agent effectively plans a few minutes ahead — long enough to understand that
-clearing one direction creates a queue in the other, short enough to learn
-from a 180-decision episode.
+At 0.98, one decision interval later is worth 0.98, ten intervals (50 simulated
+seconds) later about 0.82, and thirty intervals about 0.55. Future reward now
+decays more slowly than it did under the historical gamma 0.9 configuration.
 
 ---
 
@@ -343,11 +358,11 @@ evaluation" is checked, not promised.
 ```
 for each episode:
     observation = env.reset(seed = base_seed + episode)
-    repeat until the episode ends (180 decisions = 1800 simulated seconds):
+    repeat until the episode ends (360 decisions = 1800 simulated seconds):
         epsilon = schedule(global_step)
-        action  = epsilon-greedy over Q(observation)
+        action  = epsilon-greedy over legal actions for the current green age
         observation', reward, terminated, truncated = env.step(action)
-        buffer.push(observation, action, reward, observation', terminated)
+        buffer.push(observation, executed_action, reward, observation', terminated)
         every train_frequency steps : one gradient step on a random batch
         every 500 gradient steps    : target_net <- policy_net
     record the episode's metrics, save checkpoints
@@ -437,18 +452,29 @@ which the tests check, not "these exact numbers will appear everywhere".
 `models/dqn_<scenario>/` contains:
 
 ```
-best.pt                 best mean return over the last 5 episodes
+best.pt                 lowest mean waiting on the configured validation seeds
 final.pt                the last episode
 checkpoint_ep010.pt …   every 10 episodes
 metadata.json           human-readable record of the run
 ```
 
+**Dashboard default:** `models/active_models.json` pins the validated Stage 4
+incumbent checkpoints under `output/dqn_retraining_20261120/models/`. The
+registry records each file's SHA-256 and observation/timing contract. The
+original Stage 3 files remain in `models/dqn_<scenario>/` for provenance, but
+their 10-second timing and shared 50/1500 queue/wait scales do not match the
+current scenario settings. They have no verified observation contract and
+the loader rejects them when a scenario is specified.
+
 Each `.pt` file stores the policy network, the target network, the optimiser
 state, epsilon, the episode counter, the full configuration, the architecture
-string, the observation and action sizes, the seed, the save time and the
-PyTorch version. `metadata.json` repeats the important parts in plain text and
-adds the training date and the final/best returns. There is deliberately no
-anonymous bag of weights anywhere in the project.
+string, the observation and action sizes, the seed, the save time, the PyTorch
+version, and an observation contract containing the scenario queue/wait scales,
+phase-age scale, signal timings, and selection validation seeds. `metadata.json`
+repeats the contract in plain text. The loader compares it with the active
+scenario config before inference and rejects known mismatches. The frozen Stage
+4 checkpoints use the checked-in registry as their audited contract; their
+source metadata remains untouched.
 
 ---
 
@@ -456,11 +482,13 @@ anonymous bag of weights anywhere in the project.
 
 ```bash
 python evaluation/evaluate_dqn.py --scenario moderate --seeds 42 43 44
-python evaluation/evaluate_dqn.py --scenario heavy --model models/dqn_heavy/best.pt --seeds 42 43 44
+python evaluation/evaluate_dqn.py --scenario heavy --seeds 42 43 44
 ```
 
 * epsilon = 0 — pure `argmax Q`
 * no `remember()`, no `learn()`; asserted afterwards
+* checkpoint-selection seeds are rejected by default in both evaluation and
+  controller comparison; use fresh seeds for independent confirmation
 * the same network, demand and duration as the fixed-time baseline
 * refuses outright if no trained model exists; never evaluates random weights
 
@@ -527,7 +555,7 @@ percentage of zero has no meaning. Nothing is hidden and no sign is flipped.
 python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44 --include-untrained
 ```
 
-The DQN decides every 10 seconds and may switch as often as `min_green`
+The DQN decides every 5 seconds and may switch as often as `min_green`
 allows, while the fixed-time plan holds 30 s per direction. **Part of any
 improvement could therefore come from the shorter decision interval rather
 than from anything the network learned.** `--include-untrained` runs the same
@@ -632,7 +660,6 @@ python training/plot_training.py --scenario moderate --seed 42
 
 # evaluate (greedy, no learning)
 python evaluation/evaluate_dqn.py --scenario moderate --seeds 42 43 44
-python evaluation/evaluate_dqn.py --scenario moderate --model models/dqn_moderate/final.pt --seed 42
 
 # compare against the fixed-time baseline
 python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44

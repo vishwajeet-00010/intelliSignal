@@ -249,3 +249,402 @@ EXPERIMENT_STATUS {"stage": "evaluating_candidate", "updated_at": "2026-11-18 12
     Fixed-Time                     52.11    40.48     70    1355      0
     DQN                            47.45    37.42     71    1338      0
     DQN (untrained control)        94.24    60.92    102    1062      0
+  seed 1003
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     54.99    42.62     71    1343      0
+    DQN                            46.57    36.73     69    1347      0
+    DQN (untrained control)        62.23    48.55    101    1328      0
+  seed 1004
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     53.48    41.56     71    1351      0
+    DQN                            51.58    40.71     72    1341      0
+    DQN (untrained control)       102.12    64.14    101    1027      0
+  seed 1005
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     56.39    43.72     72    1340      0
+    DQN                            43.56    34.50     68    1355      0
+    DQN (untrained control)       104.39    65.16    102    1020      0
+  seed 1006
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     51.66    40.12     71    1350      0
+    DQN                            47.03    37.27     70    1354      0
+    DQN (untrained control)       101.81    63.95    101    1027      0
+  seed 1007
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     51.94    40.59     74    1355      0
+    DQN                            46.18    36.48     68    1349      0
+    DQN (untrained control)       105.19    65.43    101    1017      0
+  seed 1008
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     54.74    42.48     73    1342      0
+    DQN                            50.76    39.83     71    1334      0
+    DQN (untrained control)       102.72    64.25    101    1027      0
+  seed 1009
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     55.47    43.15     74    1344      0
+    DQN                            49.16    38.79     68    1342      0
+    DQN (untrained control)       100.44    63.34    101    1034      0
+  seed 1010
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     54.36    42.22     72    1347      0
+    DQN                            46.46    36.68     67    1346      0
+    DQN (untrained control)        93.44    60.43    101    1066      0
+------------------------------------------------------------------------------
+  RESULTS - mean ± sample standard deviation over 10 seeds
+------------------------------------------------------------------------------
+  metric                                     Fixed-Time                  DQN DQN (untrained control)   improvement
+  Average waiting time (s/vehicle)         53.85 ± 1.61         47.73 ± 2.36        96.96 ± 12.83       +11.4 %
+  Average queue length (vehicles)          41.85 ± 1.20         37.67 ± 1.80         62.07 ± 5.03       +10.0 %
+  Maximum queue length (vehicles)                72 ± 2               70 ± 2              101 ± 0        +3.9 %
+  Throughput (vehicles completed)              1348 ± 5             1345 ± 7            1063 ± 94        -0.2 %
+  Vehicles still in network                      96 ± 4              118 ± 3              112 ± 1       -23.1 %
+  Teleports                                       0 ± 0                0 ± 0                0 ± 0           n/a
+------------------------------------------------------------------------------
+  A POSITIVE improvement means the DQN did better; a NEGATIVE one
+  means it did worse. Nothing is hidden and no sign is flipped.
+------------------------------------------------------------------------------
+  Reference - the recorded Stage 1 baseline (results/csv/, seed 42, untouched):
+    waiting 51.90 s | queue 40.39 | max queue 72 | throughput 1351
+------------------------------------------------------------------------------
+  Raw results  : experiments\dqn_300_20261117\heavy\evaluation\holdout\candidate\comparison_heavy_raw.csv
+  Aggregated   : experiments\dqn_300_20261117\heavy\evaluation\holdout\candidate\comparison_heavy_aggregated.csv
+  Improvement  : experiments\dqn_300_20261117\heavy\evaluation\holdout\candidate\comparison_heavy_improvement.csv
+  Chart        : experiments\dqn_300_20261117\heavy\plots\holdout\heavy_waiting_time.png
+  Chart        : experiments\dqn_300_20261117\heavy\plots\holdout\heavy_queue_length.png
+  Chart        : experiments\dqn_300_20261117\heavy\plots\holdout\heavy_throughput.png
+  Chart        : experiments\dqn_300_20261117\heavy\plots\holdout\heavy_max_queue.png
+  Chart        : experiments\dqn_300_20261117\heavy\plots\holdout\heavy_queue_over_time.png
+  Chart        : experiments\dqn_300_20261117\heavy\plots\holdout\heavy_summary.png
+==============================================================================
+EXPERIMENT_STATUS {"stage": "evaluating_incumbent", "updated_at": "2026-11-18 12:44:07", "scenario": "heavy", "seed_set": "holdout"}
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN evaluation (greedy, no learning)
+==========================================================================
+  Scenario      : heavy
+  Model         : models\dqn_heavy\best.pt
+  Architecture  : 10 -> 64 -> 64 -> 2
+  Trained for   : 95 episodes
+  Epsilon       : 0.00  (0 = no exploration)
+  Seeds         : 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010
+  Duration      : 1800 s
+--------------------------------------------------------------------------
+  seed   wait(s)   queue   maxQ   thru   left  tele  switches
+  1001     45.78   36.14    66   1350    109     0        89
+  1002     47.67   37.42    69   1341    111     0        89
+  1003     45.79   36.16    67   1349    113     0        89
+  1004     47.55   37.44    66   1343    114     0        89
+  1005     45.72   36.12    70   1346    113     0        89
+  1006     47.51   37.46    70   1343    115     0        89
+  1007     46.51   36.73    67   1349    110     0        89
+  1008     47.71   37.60    69   1340    119     0        89
+  1009     47.25   37.25    67   1346    112     0        89
+  1010     45.27   35.73    70   1348    113     0        89
+--------------------------------------------------------------------------
+  MEAN ± SAMPLE STANDARD DEVIATION over 10 seed(s)
+--------------------------------------------------------------------------
+  Average waiting time (s/vehicle)       46.68 ± 0.96
+  Average queue length (vehicles)        36.80 ± 0.71
+  Maximum queue length (vehicles)        68 ± 2
+  Throughput (vehicles completed)        1346 ± 4
+  Vehicles still in network              113 ± 3
+  Teleports                              0 ± 0
+--------------------------------------------------------------------------
+  Raw results   : experiments\dqn_300_20261117\heavy\evaluation\holdout\incumbent\dqn_heavy_evaluation.csv
+  Aggregated    : experiments\dqn_300_20261117\heavy\evaluation\holdout\incumbent\dqn_heavy_evaluation_summary.csv
+  These are DQN numbers only. They say nothing about whether the
+  DQN beat the fixed-time plan - run compare_controllers.py for that.
+==========================================================================
+EXPERIMENT_STATUS {"stage": "scenario_complete", "updated_at": "2026-11-18 12:55:01", "scenario": "heavy"}
+EXPERIMENT_STATUS {"stage": "training", "updated_at": "2026-11-18 12:55:01", "scenario": "moderate", "episodes": 300}
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN training
+==========================================================================
+  Scenario            : moderate
+  Episode             : 1800 simulated seconds = 180 decisions
+  Observation         : 10 values (from env.observation_space)
+  Actions             : 2 (0 = keep green, 1 = switch)
+  Network             : 10 -> 64 -> 64 -> 2  (4994 parameters)
+  Exploration         : linear 1.0 -> 0.05 over 27000 steps
+  Models              : experiments\dqn_300_20261117\moderate\models
+--------------------------------------------------------------------------
+  hidden layers            : [64, 64]
+  episodes                 : 300
+  gamma (discount)         : 0.9
+  learning rate            : 0.001
+  batch size               : 64
+  loss                     : huber
+  replay capacity          : 50000
+  learning starts after    : 500 transitions
+  train frequency          : every 1 step(s)
+  target update frequency  : every 500 gradient step(s)
+  epsilon                  : 1.0 -> 0.05 (linear)
+  seed                     : 42
+--------------------------------------------------------------------------
+  ep      return    avg loss   eps     queue   wait(s)  thru  switch
+    1/300   -132.70          -  0.994    4.29    11.50   687    54
+   10/300    -99.73    0.02120  0.937    3.69     9.91   693    61
+   20/300    -74.22    0.02539  0.873    3.18     8.54   690    69
+   30/300    -76.38    0.02205  0.810    3.12     8.63   694    69
+   40/300    -63.80    0.02030  0.747    2.88     7.73   689    68
+   50/300    -66.78    0.01738  0.683    3.01     8.18   686    72
+   60/300    -65.97    0.01638  0.620    2.94     7.98   684    72
+   70/300    -60.92    0.01503  0.557    3.01     8.17   686    75
+   80/300    -44.38    0.01467  0.493    2.48     6.76   689    76
+   90/300    -43.86    0.01319  0.430    2.51     6.72   689    81
+  100/300    -36.20    0.01307  0.367    2.16     5.93   690    82
+  110/300    -37.05    0.01199  0.303    2.22     6.07   692    81
+  120/300    -36.44    0.01044  0.240    2.28     6.28   688    84
+  130/300    -32.12    0.01024  0.177    2.07     5.69   689    84
+  140/300    -33.84    0.01182  0.113    2.16     5.98   691    83
+  150/300    -31.75    0.01033  0.050    2.06     5.72   692    85
+  160/300    -30.65    0.01023  0.050    2.06     5.64   690    88
+  170/300    -29.59    0.01025  0.050    2.04     5.63   691    87
+  180/300    -29.22    0.00982  0.050    2.03     5.57   690    88
+  190/300    -33.63    0.01010  0.050    2.17     6.03   690    87
+  200/300    -29.20    0.01040  0.050    1.98     5.39   690    84
+  210/300    -32.13    0.01011  0.050    2.13     5.90   686    86
+  220/300    -32.46    0.00934  0.050    2.15     5.90   691    88
+  230/300    -31.23    0.01094  0.050    2.08     5.68   694    89
+  240/300    -32.31    0.00996  0.050    2.13     5.92   686    88
+  250/300    -33.68    0.00918  0.050    2.23     6.13   690    88
+  260/300    -33.60    0.00938  0.050    2.19     6.10   691    87
+  270/300    -32.76    0.00863  0.050    2.18     6.02   691    88
+  280/300    -31.26    0.00865  0.050    2.12     5.83   686    88
+  290/300    -32.21    0.00814  0.050    2.11     5.73   688    88
+  300/300    -30.00    0.00820  0.050    2.02     5.65   686    86
+--------------------------------------------------------------------------
+  TRAINING FINISHED - 300 episodes in 78321 s of real time
+--------------------------------------------------------------------------
+  Architecture            : 10 -> 64 -> 64 -> 2
+  Gradient steps          : 53501
+  Target network updates  : 107
+  Return, first 5 episodes: -92.13
+  Return, last 5 episodes : -30.82
+  Best single episode     : -27.67
+  Final episode           : -30.00
+  Final mean loss         : 0.008200
+  Final epsilon           : 0.05
+--------------------------------------------------------------------------
+  Model (best)  : experiments\dqn_300_20261117\moderate\models\best.pt
+  Model (final) : experiments\dqn_300_20261117\moderate\models\final.pt
+  History       : experiments\dqn_300_20261117\moderate\training\dqn_moderate_seed42_training.csv
+==========================================================================
+  A finished training run is NOT a result. Evaluate it against the
+  fixed-time baseline before claiming anything:
+    python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44
+==========================================================================
+EXPERIMENT_STATUS {"stage": "evaluating_candidate", "updated_at": "2026-11-19 10:40:23", "scenario": "moderate", "seed_set": "reference"}
+==============================================================================
+  IntelliSignal - Stage 3  |  Fixed-Time vs DQN
+==============================================================================
+  Scenario   : moderate
+  Model      : experiments\dqn_300_20261117\moderate\models\best.pt  (248 episodes trained)
+  Seeds      : 42, 43, 44
+  Duration   : 1800 s
+  Controllers: fixed-time, DQN, untrained control
+  Both controllers run on the SAME generated network, demand and
+  seed, and are measured by the same Stage 1 metrics collector.
+------------------------------------------------------------------------------
+  seed 42
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     10.04     3.70     10     693      0
+    DQN                             5.78     2.10      7     689      0
+    DQN (untrained control)        10.88     4.10     10     689      0
+  seed 43
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.68     3.58     10     693      0
+    DQN                             5.60     2.03      7     692      0
+    DQN (untrained control)        10.99     4.11     12     692      0
+  seed 44
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     10.01     3.69      9     693      0
+    DQN                             5.76     2.12      7     692      0
+    DQN (untrained control)        10.86     4.05     11     685      0
+------------------------------------------------------------------------------
+  RESULTS - mean ± sample standard deviation over 3 seeds
+------------------------------------------------------------------------------
+  metric                                     Fixed-Time                  DQN DQN (untrained control)   improvement
+  Average waiting time (s/vehicle)          9.91 ± 0.20          5.71 ± 0.10         10.91 ± 0.07       +42.3 %
+  Average queue length (vehicles)           3.66 ± 0.07          2.08 ± 0.05          4.09 ± 0.03       +43.0 %
+  Maximum queue length (vehicles)                10 ± 1                7 ± 0               11 ± 1       +27.6 %
+  Throughput (vehicles completed)               693 ± 0              691 ± 2              689 ± 4        -0.3 %
+  Vehicles still in network                       9 ± 0               11 ± 2               13 ± 4       -22.2 %
+  Teleports                                       0 ± 0                0 ± 0                0 ± 0           n/a
+------------------------------------------------------------------------------
+  A POSITIVE improvement means the DQN did better; a NEGATIVE one
+  means it did worse. Nothing is hidden and no sign is flipped.
+------------------------------------------------------------------------------
+  Reference - the recorded Stage 1 baseline (results/csv/, seed 42, untouched):
+    waiting 10.04 s | queue 3.70 | max queue 10 | throughput 693
+------------------------------------------------------------------------------
+  Raw results  : experiments\dqn_300_20261117\moderate\evaluation\reference\candidate\comparison_moderate_raw.csv
+  Aggregated   : experiments\dqn_300_20261117\moderate\evaluation\reference\candidate\comparison_moderate_aggregated.csv
+  Improvement  : experiments\dqn_300_20261117\moderate\evaluation\reference\candidate\comparison_moderate_improvement.csv
+  Chart        : experiments\dqn_300_20261117\moderate\plots\reference\moderate_waiting_time.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\reference\moderate_queue_length.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\reference\moderate_throughput.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\reference\moderate_max_queue.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\reference\moderate_queue_over_time.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\reference\moderate_summary.png
+==============================================================================
+EXPERIMENT_STATUS {"stage": "evaluating_incumbent", "updated_at": "2026-11-19 10:41:07", "scenario": "moderate", "seed_set": "reference"}
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN evaluation (greedy, no learning)
+==========================================================================
+  Scenario      : moderate
+  Model         : models\dqn_moderate\best.pt
+  Architecture  : 10 -> 64 -> 64 -> 2
+  Trained for   : 72 episodes
+  Epsilon       : 0.00  (0 = no exploration)
+  Seeds         : 42, 43, 44
+  Duration      : 1800 s
+--------------------------------------------------------------------------
+  seed   wait(s)   queue   maxQ   thru   left  tele  switches
+    42      5.78    2.10     7    689     13     0        88
+    43      5.60    2.03     7    692     10     0        88
+    44      5.76    2.12     7    692     10     0        88
+--------------------------------------------------------------------------
+  MEAN ± SAMPLE STANDARD DEVIATION over 3 seed(s)
+--------------------------------------------------------------------------
+  Average waiting time (s/vehicle)       5.71 ± 0.10
+  Average queue length (vehicles)        2.08 ± 0.05
+  Maximum queue length (vehicles)        7 ± 0
+  Throughput (vehicles completed)        691 ± 2
+  Vehicles still in network              11 ± 2
+  Teleports                              0 ± 0
+--------------------------------------------------------------------------
+  Raw results   : experiments\dqn_300_20261117\moderate\evaluation\reference\incumbent\dqn_moderate_evaluation.csv
+  Aggregated    : experiments\dqn_300_20261117\moderate\evaluation\reference\incumbent\dqn_moderate_evaluation_summary.csv
+  These are DQN numbers only. They say nothing about whether the
+  DQN beat the fixed-time plan - run compare_controllers.py for that.
+==========================================================================
+EXPERIMENT_STATUS {"stage": "evaluating_candidate", "updated_at": "2026-11-19 10:41:24", "scenario": "moderate", "seed_set": "holdout"}
+==============================================================================
+  IntelliSignal - Stage 3  |  Fixed-Time vs DQN
+==============================================================================
+  Scenario   : moderate
+  Model      : experiments\dqn_300_20261117\moderate\models\best.pt  (248 episodes trained)
+  Seeds      : 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010
+  Duration   : 1800 s
+  Controllers: fixed-time, DQN, untrained control
+  Both controllers run on the SAME generated network, demand and
+  seed, and are measured by the same Stage 1 metrics collector.
+------------------------------------------------------------------------------
+  seed 1001
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.95     3.67     11     693      0
+    DQN                             5.92     2.15      9     689      0
+    DQN (untrained control)        10.99     4.10     12     689      0
+  seed 1002
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     10.10     3.72     11     694      0
+    DQN                             5.77     2.07      7     689      0
+    DQN (untrained control)        10.95     4.04     11     694      0
+  seed 1003
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.77     3.63     10     693      0
+    DQN                             5.74     2.11      7     690      0
+    DQN (untrained control)        11.02     4.10     11     689      0
+  seed 1004
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.50     3.54     10     692      0
+    DQN                             5.87     2.14      7     691      0
+    DQN (untrained control)        10.65     3.96     11     688      0
+  seed 1005
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     10.00     3.67     10     693      0
+    DQN                             5.83     2.12      8     692      0
+    DQN (untrained control)        10.50     3.91     11     689      0
+  seed 1006
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.74     3.63     11     694      0
+    DQN                             5.62     2.05      7     691      0
+    DQN (untrained control)        11.01     4.10     11     684      0
+  seed 1007
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                     10.03     3.71     10     694      0
+    DQN                             5.75     2.09      7     691      0
+    DQN (untrained control)        11.30     4.23     12     687      0
+  seed 1008
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.72     3.62     10     694      0
+    DQN                             5.35     1.93      7     692      0
+    DQN (untrained control)        10.86     4.05     11     694      0
+  seed 1009
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.88     3.64     10     693      0
+    DQN                             5.71     2.08      7     690      0
+    DQN (untrained control)        11.01     4.09     11     689      0
+  seed 1010
+    controller                   wait(s)    queue   maxQ    thru   tele
+    Fixed-Time                      9.93     3.67     10     694      0
+    DQN                             5.70     2.08      7     691      0
+    DQN (untrained control)        10.37     3.88     11     684      0
+------------------------------------------------------------------------------
+  RESULTS - mean ± sample standard deviation over 10 seeds
+------------------------------------------------------------------------------
+  metric                                     Fixed-Time                  DQN DQN (untrained control)   improvement
+  Average waiting time (s/vehicle)          9.86 ± 0.18          5.73 ± 0.16         10.87 ± 0.28       +41.9 %
+  Average queue length (vehicles)           3.65 ± 0.05          2.08 ± 0.06          4.05 ± 0.10       +43.0 %
+  Maximum queue length (vehicles)                10 ± 0                7 ± 1               11 ± 0       +29.1 %
+  Throughput (vehicles completed)               693 ± 1              691 ± 1              689 ± 3        -0.4 %
+  Vehicles still in network                       9 ± 1               11 ± 1               13 ± 3       -32.6 %
+  Teleports                                       0 ± 0                0 ± 0                0 ± 0           n/a
+------------------------------------------------------------------------------
+  A POSITIVE improvement means the DQN did better; a NEGATIVE one
+  means it did worse. Nothing is hidden and no sign is flipped.
+------------------------------------------------------------------------------
+  Reference - the recorded Stage 1 baseline (results/csv/, seed 42, untouched):
+    waiting 10.04 s | queue 3.70 | max queue 10 | throughput 693
+------------------------------------------------------------------------------
+  Raw results  : experiments\dqn_300_20261117\moderate\evaluation\holdout\candidate\comparison_moderate_raw.csv
+  Aggregated   : experiments\dqn_300_20261117\moderate\evaluation\holdout\candidate\comparison_moderate_aggregated.csv
+  Improvement  : experiments\dqn_300_20261117\moderate\evaluation\holdout\candidate\comparison_moderate_improvement.csv
+  Chart        : experiments\dqn_300_20261117\moderate\plots\holdout\moderate_waiting_time.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\holdout\moderate_queue_length.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\holdout\moderate_throughput.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\holdout\moderate_max_queue.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\holdout\moderate_queue_over_time.png
+  Chart        : experiments\dqn_300_20261117\moderate\plots\holdout\moderate_summary.png
+==============================================================================
+EXPERIMENT_STATUS {"stage": "evaluating_incumbent", "updated_at": "2026-11-19 10:48:44", "scenario": "moderate", "seed_set": "holdout"}
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN evaluation (greedy, no learning)
+==========================================================================
+  Scenario      : moderate
+  Model         : models\dqn_moderate\best.pt
+  Architecture  : 10 -> 64 -> 64 -> 2
+  Trained for   : 72 episodes
+  Epsilon       : 0.00  (0 = no exploration)
+  Seeds         : 1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010
+  Duration      : 1800 s
+--------------------------------------------------------------------------
+  seed   wait(s)   queue   maxQ   thru   left  tele  switches
+  1001      5.92    2.15     9    689     13     0        88
+  1002      5.77    2.07     7    689     13     0        88
+  1003      5.74    2.11     7    690     12     0        88
+  1004      5.87    2.14     7    691     11     0        88
+  1005      5.83    2.12     8    692     10     0        88
+  1006      5.62    2.05     7    691     11     0        88
+  1007      5.75    2.09     7    691     11     0        88
+  1008      5.35    1.93     7    692     10     0        88
+  1009      5.71    2.08     7    690     12     0        88
+  1010      5.70    2.08     7    691     11     0        88
+--------------------------------------------------------------------------
+  MEAN ± SAMPLE STANDARD DEVIATION over 10 seed(s)
+--------------------------------------------------------------------------
+  Average waiting time (s/vehicle)       5.73 ± 0.16
+  Average queue length (vehicles)        2.08 ± 0.06
+  Maximum queue length (vehicles)        7 ± 1
+  Throughput (vehicles completed)        691 ± 1
+  Vehicles still in network              11 ± 1
+  Teleports                              0 ± 0
+--------------------------------------------------------------------------
+  Raw results   : experiments\dqn_300_20261117\moderate\evaluation\holdout\incumbent\dqn_moderate_evaluation.csv
+  Aggregated    : experiments\dqn_300_20261117\moderate\evaluation\holdout\incumbent\dqn_moderate_evaluation_summary.csv
+  These are DQN numbers only. They say nothing about whether the
+  DQN beat the fixed-time plan - run compare_controllers.py for that.
+==========================================================================
+EXPERIMENT_STATUS {"stage": "scenario_complete", "updated_at": "2026-11-19 10:52:19", "scenario": "moderate"}
+Analyzed heavy, moderate: C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal\experiments\dqn_300_20261117\REPORT.md
+EXPERIMENT_STATUS {"stage": "complete", "updated_at": "2026-11-19 10:52:25", "protected_files": 163, "protected_artifacts_unchanged": true}

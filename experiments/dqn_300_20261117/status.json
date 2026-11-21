@@ -1,6 +1,6 @@
 {
-  "stage": "evaluating_candidate",
-  "updated_at": "2026-11-18 12:15:12",
-  "scenario": "heavy",
-  "seed_set": "holdout"
+  "stage": "complete",
+  "updated_at": "2026-11-19 10:52:25",
+  "protected_files": 163,
+  "protected_artifacts_unchanged": true
 }

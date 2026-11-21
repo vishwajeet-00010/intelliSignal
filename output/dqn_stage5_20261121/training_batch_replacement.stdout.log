@@ -1,0 +1,99 @@
+
+=== Stage 5 cell: moderate control seed 6202 ===
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN training
+==========================================================================
+  Scenario            : moderate
+  Episode             : 1800 simulated seconds = 360 decisions
+  Observation         : 10 values (from env.observation_space)
+  Actions             : 2 (0 = keep green, 1 = switch)
+  Network             : 10 -> 64 -> 64 -> 2  (4994 parameters)
+  Exploration         : linear 1.0 -> 0.05 over 18000 steps
+  Models              : output\dqn_stage5_20261121\moderate\control\seed6202\models
+--------------------------------------------------------------------------
+  hidden layers            : [64, 64]
+  episodes                 : 100
+  gamma (discount)         : 0.98
+  learning rate            : 0.001
+  batch size               : 64
+  loss                     : huber
+  replay capacity          : 50000
+  learning starts after    : 500 transitions
+  train frequency          : every 1 step(s)
+  target update frequency  : every 500 gradient step(s)
+  epsilon                  : 1.0 -> 0.05 (linear)
+  seed                     : 6202
+--------------------------------------------------------------------------
+  ep      return    avg loss   eps     queue   wait(s)  thru  switch
+    1/100    -57.57          -  0.981    1.90     5.25   692   121
+   10/100    -42.73    0.00646  0.810    1.63     4.48   692   139
+   20/100    -37.51    0.00478  0.620    1.48     4.11   692   150
+   30/100    -30.42    0.00401  0.430    1.36     3.72   692   159
+   40/100    -26.65    0.00417  0.240    1.35     3.72   689   163
+   50/100    -22.84    0.00393  0.050    1.22     3.40   691   176
+   60/100    -24.39    0.00368  0.050    1.28     3.51   690   176
+   70/100    -22.89    0.00338  0.050    1.20     3.31   690   178
+   80/100    -21.56    0.00298  0.050    1.14     3.11   691   178
+   90/100    -24.74    0.00352  0.050    1.29     3.58   689   175
+  100/100    -24.92    0.00317  0.050    1.26     3.44   689   178
+--------------------------------------------------------------------------
+  TRAINING FINISHED - 100 episodes in 4232 s of real time
+--------------------------------------------------------------------------
+  Architecture            : 10 -> 64 -> 64 -> 2
+  Gradient steps          : 35501
+  Target network updates  : 71
+  Return, first 5 episodes: -65.19
+  Return, last 5 episodes : -23.37
+  Best single episode     : -19.33
+  Final episode           : -24.92
+  Final mean loss         : 0.003167
+  Final epsilon           : 0.05
+--------------------------------------------------------------------------
+  Model (best)  : output\dqn_stage5_20261121\moderate\control\seed6202\models\best.pt
+  Model (final) : output\dqn_stage5_20261121\moderate\control\seed6202\models\final.pt
+  History       : output\dqn_stage5_20261121\moderate\control\seed6202\training\dqn_moderate_seed6202_training.csv
+==========================================================================
+  A finished training run is NOT a result. Evaluate it against the
+  fixed-time baseline before claiming anything:
+    python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44
+==========================================================================
+Stage 5 cell saved: D:\intelliSignal\output\dqn_stage5_20261121\moderate\control\seed6202\training_summary.json
+
+=== Stage 5 cell: moderate treatment seed 6202 ===
+
+=== Stage 5 cell: moderate control seed 6203 ===
+
+=== Stage 5 cell: moderate treatment seed 6203 ===
+
+=== Stage 5 cell: moderate control seed 6204 ===
+
+=== Stage 5 cell: moderate treatment seed 6204 ===
+
+=== Stage 5 cell: moderate control seed 6205 ===
+
+=== Stage 5 cell: moderate treatment seed 6205 ===
+
+=== Stage 5 cell: moderate control seed 6206 ===
+
+=== Stage 5 cell: moderate treatment seed 6206 ===
+
+=== Stage 5 cell: heavy control seed 6202 ===
+
+=== Stage 5 cell: heavy treatment seed 6202 ===
+
+=== Stage 5 cell: heavy control seed 6203 ===
+
+=== Stage 5 cell: heavy treatment seed 6203 ===
+
+=== Stage 5 cell: heavy control seed 6204 ===
+
+=== Stage 5 cell: heavy treatment seed 6204 ===
+
+=== Stage 5 cell: heavy control seed 6205 ===
+
+=== Stage 5 cell: heavy treatment seed 6205 ===
+
+=== Stage 5 cell: heavy control seed 6206 ===
+
+=== Stage 5 cell: heavy treatment seed 6206 ===
+Stage 5 training batch finished: 1 complete, 19 failed

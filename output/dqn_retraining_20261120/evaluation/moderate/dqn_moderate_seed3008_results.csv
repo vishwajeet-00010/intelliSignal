@@ -1,0 +1,2 @@
+scenario,controller,seed,vehicles,average_waiting_time,average_queue_length,max_queue_length,throughput,vehicles_still_in_network,teleports,simulation_time,vehicles_departed,episode_return,switch_count
+moderate,dqn,3008,702,2.81,1.04,6,690,12,0,1800.0,702,-19.198,179

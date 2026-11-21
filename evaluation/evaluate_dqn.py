@@ -45,7 +45,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from agents.dqn_agent import (DQNAgent, DQNModelNotFoundError,  # noqa: E402
+from agents.dqn_agent import (DQNAgent, DQNModelCompatibilityError,
+                              DQNModelNotFoundError,  # noqa: E402
                               default_model_path, model_directory, set_seeds)
 from simulation.agent_simulation import (DQN, RESULT_COLUMNS,    # noqa: E402
                                          run_agent_episode)
@@ -97,11 +98,25 @@ def resolve_model(scenario: str, model: Optional[str] = None) -> str:
     return path
 
 
+def reject_validation_overlap(agent, seeds: List[int],
+                              allow_validation_overlap: bool = False) -> None:
+    """Keep checkpoint-selection seeds out of confirmatory evaluations."""
+    selection_seeds = {int(value) for value in
+                       agent.metadata.get("validation_seeds", [])}
+    overlapping_seeds = selection_seeds.intersection(int(seed) for seed in seeds)
+    if overlapping_seeds and not allow_validation_overlap:
+        raise DQNModelCompatibilityError(
+            "Evaluation seeds {} were used to select this checkpoint. Choose "
+            "new confirmatory seeds, or use the explicit overlap override "
+            "only for a diagnostic.".format(sorted(overlapping_seeds)))
+
+
 # ===========================================================================
 def evaluate(scenario: str = "moderate", model: Optional[str] = None,
              seeds: List[int] = None, duration: Optional[float] = None,
              results_dir: Optional[str] = None, save: bool = True,
-             quiet: bool = False, record_decisions: bool = False
+             quiet: bool = False, record_decisions: bool = False,
+             allow_validation_overlap: bool = False
              ) -> Dict[str, Any]:
     """Run the trained policy greedily on one scenario, once per seed."""
     seeds = [int(s) for s in (seeds or [42])]
@@ -110,6 +125,7 @@ def evaluate(scenario: str = "moderate", model: Optional[str] = None,
 
     agent = DQNAgent.load(model_path, scenario=scenario)
     agent.set_epsilon(0.0)                 # greedy, stated explicitly
+    reject_validation_overlap(agent, seeds, allow_validation_overlap)
     gradient_steps_before = agent.learn_steps
     buffer_before = len(agent.memory)
 
@@ -209,7 +225,8 @@ def write_raw(rows: List[Dict[str, Any]], directory: str, stem: str) -> str:
 
     os.makedirs(directory, exist_ok=True)
     columns = list(RESULT_COLUMNS)
-    for extra in ("episode_return", "switch_count", "decisions", "model"):
+    for extra in ("episode_return", "switch_count", "decisions", "model",
+                  "blocked_switches", "completed_green_duration_counts"):
         if extra not in columns:
             columns.append(extra)
     frame = pd.DataFrame(rows)
@@ -314,7 +331,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Scenario to evaluate on (moderate or heavy).")
     parser.add_argument("--model", "-m", default=None,
                         help="Checkpoint to load "
-                             "(default: models/dqn_<scenario>/best.pt).")
+                             "(default: registered active incumbent).")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42],
                         help="One evaluation run per seed, e.g. --seeds 42 43 44.")
     parser.add_argument("--seed", type=int, default=None,
@@ -327,6 +344,8 @@ def build_parser() -> argparse.ArgumentParser:
                              "(default: results/evaluation).")
     parser.add_argument("--no-save", action="store_true",
                         help="Print the results without writing any file.")
+    parser.add_argument("--allow-validation-overlap", action="store_true",
+                        help="Allow a diagnostic rerun on checkpoint-selection seeds; not a confirmatory evaluation.")
     parser.add_argument("--quiet", action="store_true")
     return parser
 
@@ -337,7 +356,8 @@ def main(argv=None) -> int:
     try:
         evaluate(scenario=args.scenario, model=args.model, seeds=seeds,
                  duration=args.duration, results_dir=args.results_dir,
-                 save=not args.no_save, quiet=args.quiet)
+                 save=not args.no_save, quiet=args.quiet,
+                 allow_validation_overlap=args.allow_validation_overlap)
     except DQNModelNotFoundError as error:
         print("\n{}\n".format(error), file=sys.stderr)
         return 2

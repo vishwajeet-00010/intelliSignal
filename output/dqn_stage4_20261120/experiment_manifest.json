@@ -1,0 +1,659 @@
+{
+  "experiment": "dqn_stage4_20261120",
+  "status": "complete_no_candidate_promoted",
+  "protocol": "protocol.md",
+  "seed_plan": {
+    "training": [
+      55,
+      56
+    ],
+    "validation": [
+      5101,
+      5102,
+      5103,
+      5104,
+      5105
+    ],
+    "calibration": [
+      5201,
+      5202,
+      5203,
+      5204,
+      5205,
+      5206,
+      5207,
+      5208,
+      5209,
+      5210
+    ],
+    "confirmatory": [
+      6101,
+      6102,
+      6103,
+      6104,
+      6105,
+      6106,
+      6107,
+      6108,
+      6109,
+      6110,
+      6111,
+      6112,
+      6113,
+      6114,
+      6115,
+      6116,
+      6117,
+      6118,
+      6119,
+      6120
+    ]
+  },
+  "training": {
+    "episodes_per_run": 100,
+    "scenarios": [
+      "moderate",
+      "heavy"
+    ],
+    "checkpoint_every": 10,
+    "validation_degradation_tolerance": 0.1,
+    "validation_degradation_patience": 3
+  },
+  "promotion_gates": {
+    "min_wait_improvement_percent": 2.0,
+    "min_paired_wait_wins_of_20": 11,
+    "max_average_queue_regression_percent": 2.0,
+    "max_max_queue_regression_percent": 5.0,
+    "max_throughput_regression_percent": 1.0,
+    "max_training_seed_validation_wait_regression_percent": 3.0,
+    "blocked_switches": 0,
+    "teleports": 0,
+    "automatic_model_replacement": false
+  },
+  "candidates": {
+    "moderate_seed55": {
+      "status": "completed",
+      "training_summary": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\training\\dqn_moderate_seed55_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\models\\validation_history.json",
+      "episodes_completed": 100,
+      "best_validation_episode": 10,
+      "best_validation_waiting": 3.386,
+      "stop_reason": null,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 55,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "moderate_seed56": {
+      "status": "completed_early_stopped",
+      "training_summary": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed56\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed56\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed56\\training\\dqn_moderate_seed56_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed56\\models\\validation_history.json",
+      "episodes_completed": 70,
+      "best_validation_episode": 40,
+      "best_validation_waiting": 2.98,
+      "stop_reason": "validation waiting exceeded best by 10.0% for 3 consecutive evaluations",
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 56,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "heavy_seed55": {
+      "status": "completed",
+      "training_summary": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed55\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed55\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed55\\training\\dqn_heavy_seed55_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed55\\models\\validation_history.json",
+      "episodes_completed": 100,
+      "best_validation_episode": 50,
+      "best_validation_waiting": 18.182,
+      "stop_reason": null,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 55,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "heavy_seed56": {
+      "status": "completed_early_stopped",
+      "training_summary": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed56\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed56\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed56\\training\\dqn_heavy_seed56_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed56\\models\\validation_history.json",
+      "episodes_completed": 80,
+      "best_validation_episode": 50,
+      "best_validation_waiting": 16.982,
+      "stop_reason": "validation waiting exceeded best by 10.0% for 3 consecutive evaluations",
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 56,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    }
+  },
+  "audit": "audit.md",
+  "initial_integrity_snapshot": "integrity_before.json",
+  "training_runs_started": [
+    "moderate_seed55",
+    "moderate_seed56",
+    "heavy_seed55",
+    "heavy_seed56"
+  ],
+  "tests": {
+    "command": ".venv-stage3\\Scripts\\python.exe -m pytest -q --basetemp tmp/pytest-stage4-final-20261121",
+    "result": "224 passed, 1 skipped",
+    "duration_seconds": 102.0,
+    "status": "passed"
+  },
+  "validation": {
+    "moderate": {
+      "selection_file": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\validation\\validation_selection.json",
+      "candidate_checks": {
+        "55": {
+          "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\models\\best.pt",
+          "mean_waiting_time": 3.386,
+          "mean_average_queue": 1.234,
+          "mean_max_queue": 6.0,
+          "mean_throughput": 690.4,
+          "mean_vehicles_left": 11.6,
+          "blocked_switches": 0,
+          "teleports": 0,
+          "passes_validation_gate": false
+        },
+        "56": {
+          "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed56\\models\\best.pt",
+          "mean_waiting_time": 2.98,
+          "mean_average_queue": 1.0859999999999999,
+          "mean_max_queue": 6.4,
+          "mean_throughput": 690.6,
+          "mean_vehicles_left": 11.4,
+          "blocked_switches": 0,
+          "teleports": 0,
+          "passes_validation_gate": true
+        }
+      },
+      "all_independent_candidates_pass": false,
+      "confirmatory_candidate_allowed": false,
+      "selected_candidate_seed": null,
+      "observation_stats": {
+        "55": {
+          "path": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\validation\\observation_stats_seed55.json",
+          "percentiles": {
+            "queues": {
+              "north": {
+                "p95": 2.0,
+                "p99": 2.0,
+                "max": 3.0
+              },
+              "east": {
+                "p95": 1.0,
+                "p99": 2.0,
+                "max": 3.0
+              },
+              "south": {
+                "p95": 2.0,
+                "p99": 2.0,
+                "max": 3.0
+              },
+              "west": {
+                "p95": 1.0,
+                "p99": 2.0,
+                "max": 3.0
+              }
+            },
+            "waiting": {
+              "north": {
+                "p95": 9.0,
+                "p99": 14.0,
+                "max": 21.0
+              },
+              "east": {
+                "p95": 7.0,
+                "p99": 11.0,
+                "max": 27.0
+              },
+              "south": {
+                "p95": 9.0,
+                "p99": 14.0,
+                "max": 26.0
+              },
+              "west": {
+                "p95": 7.0,
+                "p99": 11.0,
+                "max": 32.0
+              }
+            }
+          }
+        },
+        "56": {
+          "path": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\validation\\observation_stats_seed56.json",
+          "percentiles": {
+            "queues": {
+              "north": {
+                "p95": 2.0,
+                "p99": 3.0,
+                "max": 3.0
+              },
+              "east": {
+                "p95": 1.0,
+                "p99": 2.0,
+                "max": 3.0
+              },
+              "south": {
+                "p95": 2.0,
+                "p99": 3.0,
+                "max": 3.0
+              },
+              "west": {
+                "p95": 1.0,
+                "p99": 2.0,
+                "max": 3.0
+              }
+            },
+            "waiting": {
+              "north": {
+                "p95": 9.0,
+                "p99": 15.0,
+                "max": 24.0
+              },
+              "east": {
+                "p95": 6.0,
+                "p99": 10.0,
+                "max": 19.0
+              },
+              "south": {
+                "p95": 8.0,
+                "p99": 14.0,
+                "max": 27.0
+              },
+              "west": {
+                "p95": 6.0,
+                "p99": 10.0,
+                "max": 20.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "heavy": {
+      "selection_file": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\validation\\validation_selection.json",
+      "candidate_checks": {
+        "55": {
+          "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed55\\models\\best.pt",
+          "mean_waiting_time": 18.182,
+          "mean_average_queue": 14.931999999999999,
+          "mean_max_queue": 32.6,
+          "mean_throughput": 1428.8,
+          "mean_vehicles_left": 75.2,
+          "blocked_switches": 0,
+          "teleports": 0,
+          "passes_validation_gate": false
+        },
+        "56": {
+          "checkpoint": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\seed56\\models\\best.pt",
+          "mean_waiting_time": 16.982,
+          "mean_average_queue": 13.882,
+          "mean_max_queue": 32.4,
+          "mean_throughput": 1426.8,
+          "mean_vehicles_left": 77.2,
+          "blocked_switches": 0,
+          "teleports": 0,
+          "passes_validation_gate": true
+        }
+      },
+      "all_independent_candidates_pass": false,
+      "confirmatory_candidate_allowed": false,
+      "selected_candidate_seed": null,
+      "observation_stats": {
+        "55": {
+          "path": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\validation\\observation_stats_seed55.json",
+          "percentiles": {
+            "queues": {
+              "north": {
+                "p95": 13.0,
+                "p99": 14.0,
+                "max": 16.0
+              },
+              "east": {
+                "p95": 3.0,
+                "p99": 4.0,
+                "max": 6.0
+              },
+              "south": {
+                "p95": 13.0,
+                "p99": 14.0,
+                "max": 18.0
+              },
+              "west": {
+                "p95": 3.0,
+                "p99": 4.0,
+                "max": 6.0
+              }
+            },
+            "waiting": {
+              "north": {
+                "p95": 70.0,
+                "p99": 84.0,
+                "max": 108.0
+              },
+              "east": {
+                "p95": 20.0,
+                "p99": 29.0,
+                "max": 50.0
+              },
+              "south": {
+                "p95": 72.0,
+                "p99": 86.0,
+                "max": 108.0
+              },
+              "west": {
+                "p95": 20.0,
+                "p99": 30.0099999999984,
+                "max": 60.0
+              }
+            }
+          }
+        },
+        "56": {
+          "path": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\validation\\observation_stats_seed56.json",
+          "percentiles": {
+            "queues": {
+              "north": {
+                "p95": 13.0,
+                "p99": 14.0,
+                "max": 16.0
+              },
+              "east": {
+                "p95": 3.0,
+                "p99": 4.0,
+                "max": 5.0
+              },
+              "south": {
+                "p95": 12.0,
+                "p99": 14.0,
+                "max": 17.0
+              },
+              "west": {
+                "p95": 3.0,
+                "p99": 4.0,
+                "max": 6.0
+              }
+            },
+            "waiting": {
+              "north": {
+                "p95": 70.0,
+                "p99": 85.0,
+                "max": 109.0
+              },
+              "east": {
+                "p95": 20.0,
+                "p99": 28.0,
+                "max": 45.0
+              },
+              "south": {
+                "p95": 69.0,
+                "p99": 84.0,
+                "max": 110.0
+              },
+              "west": {
+                "p95": 22.0,
+                "p99": 32.0,
+                "max": 57.0
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "actuated_baseline": {
+    "moderate": {
+      "switch_margin": 0.0,
+      "max_green": 30.0,
+      "mean_waiting_time": 3.386,
+      "mean_average_queue": 1.234,
+      "mean_max_queue": 6.0,
+      "mean_throughput": 690.4,
+      "mean_vehicles_left": 11.6,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": false,
+      "selected_within_declared_guardrails": false,
+      "selected_label": "actuated_m0_g30"
+    },
+    "heavy": {
+      "switch_margin": 0.0,
+      "max_green": 30.0,
+      "mean_waiting_time": 15.303999999999998,
+      "mean_average_queue": 12.372,
+      "mean_max_queue": 30.2,
+      "mean_throughput": 1441.4,
+      "mean_vehicles_left": 62.6,
+      "blocked_switches": 0,
+      "teleports": 0,
+      "passes_validation_safety_and_tradeoff_guard": true,
+      "selected_within_declared_guardrails": true,
+      "selected_label": "actuated_m0_g30"
+    }
+  },
+  "confirmatory": {
+    "moderate": {
+      "scenario": "moderate",
+      "promotion": "NOT_ELIGIBLE",
+      "reason": "No training candidate passed the predeclared validation gate; candidate was not run on confirmatory seeds.",
+      "all_controller_means": {
+        "fixed_time_original": {
+          "average_waiting_time": 9.863,
+          "average_queue_length": 3.653,
+          "max_queue_length": 10.05,
+          "throughput": 692.9,
+          "vehicles_still_in_network": 9.1
+        },
+        "fixed_time_tuned": {
+          "average_waiting_time": 3.56,
+          "average_queue_length": 1.304,
+          "max_queue_length": 5.3,
+          "throughput": 689.55,
+          "vehicles_still_in_network": 12.45
+        },
+        "actuated_tuned": {
+          "average_waiting_time": 3.3310000000000004,
+          "average_queue_length": 1.22,
+          "max_queue_length": 5.75,
+          "throughput": 689.8,
+          "vehicles_still_in_network": 12.2
+        },
+        "incumbent_dqn": {
+          "average_waiting_time": 2.9185,
+          "average_queue_length": 1.0690000000000002,
+          "max_queue_length": 6.6,
+          "throughput": 690.8,
+          "vehicles_still_in_network": 11.2
+        },
+        "starting_dqn": {
+          "average_waiting_time": 29.540499999999998,
+          "average_queue_length": 11.2875,
+          "max_queue_length": 31.1,
+          "throughput": 680.4,
+          "vehicles_still_in_network": 21.6
+        }
+      },
+      "recommend_best_overall_controller": "incumbent_dqn",
+      "rows_csv": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\confirmatory\\confirmatory_rows.csv"
+    },
+    "heavy": {
+      "scenario": "heavy",
+      "promotion": "NOT_ELIGIBLE",
+      "reason": "No training candidate passed the predeclared validation gate; candidate was not run on confirmatory seeds.",
+      "all_controller_means": {
+        "fixed_time_original": {
+          "average_waiting_time": 53.0295,
+          "average_queue_length": 41.2645,
+          "max_queue_length": 71.0,
+          "throughput": 1349.8,
+          "vehicles_still_in_network": 95.5
+        },
+        "fixed_time_tuned": {
+          "average_waiting_time": 36.798500000000004,
+          "average_queue_length": 29.241000000000003,
+          "max_queue_length": 50.95,
+          "throughput": 1359.2,
+          "vehicles_still_in_network": 109.55
+        },
+        "actuated_tuned": {
+          "average_waiting_time": 16.700499999999998,
+          "average_queue_length": 13.498500000000002,
+          "max_queue_length": 31.55,
+          "throughput": 1439.05,
+          "vehicles_still_in_network": 64.95
+        },
+        "incumbent_dqn": {
+          "average_waiting_time": 16.469,
+          "average_queue_length": 13.477,
+          "max_queue_length": 32.45,
+          "throughput": 1420.55,
+          "vehicles_still_in_network": 82.3
+        },
+        "starting_dqn": {
+          "average_waiting_time": 19.411,
+          "average_queue_length": 16.0025,
+          "max_queue_length": 35.9,
+          "throughput": 1406.2,
+          "vehicles_still_in_network": 96.8
+        }
+      },
+      "recommend_best_overall_controller": "incumbent_dqn",
+      "rows_csv": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\heavy\\confirmatory\\confirmatory_rows.csv"
+    }
+  },
+  "integrity": {
+    "before": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\integrity_before.json",
+    "after": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\integrity_after.json",
+    "protected_files_before": 60,
+    "protected_files_after": 60,
+    "changed_files": [],
+    "missing_after": [],
+    "new_after": [],
+    "passed": true
+  },
+  "report": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\stage4_validation_report.pdf",
+  "confirmatory_decision": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\promotion_decision.json",
+  "environment": {
+    "python": "3.12.13",
+    "sumo": "1.28.0",
+    "packages": {
+      "pytest": "9.1.1",
+      "torch": "2.14.1",
+      "gymnasium": "1.4.0",
+      "numpy": "2.5.4",
+      "reportlab": "5.1.0",
+      "pypdf": "7.1.1"
+    }
+  },
+  "commands": [
+    ".venv-stage3\\Scripts\\python.exe -m pytest -q --basetemp tmp/pytest-stage4-final-20261121",
+    ".venv-stage3\\Scripts\\python.exe output\\dqn_stage4_20261120\\stage4_eval.py validation --scenario moderate",
+    ".venv-stage3\\Scripts\\python.exe output\\dqn_stage4_20261120\\stage4_eval.py validation --scenario heavy",
+    ".venv-stage3\\Scripts\\python.exe output\\dqn_stage4_20261120\\stage4_eval.py confirmatory --scenario moderate",
+    ".venv-stage3\\Scripts\\python.exe output\\dqn_stage4_20261120\\stage4_eval.py confirmatory --scenario heavy",
+    ".venv-stage3\\Scripts\\python.exe output\\dqn_stage4_20261120\\analyze_confirmatory.py"
+  ]
+}

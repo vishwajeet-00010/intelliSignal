@@ -1,0 +1,106 @@
+{
+  "experiment": "dqn_retraining_20261120",
+  "objective": "Improve DQN waiting-time performance consistently across final traffic seeds.",
+  "training": {
+    "episodes_per_scenario": 100,
+    "training_seed": 42,
+    "validation_seeds": [
+      2001,
+      2002,
+      2003
+    ],
+    "final_seeds": [
+      3001,
+      3002,
+      3003,
+      3004,
+      3005,
+      3006,
+      3007,
+      3008,
+      3009,
+      3010,
+      3011,
+      3012,
+      3013,
+      3014,
+      3015,
+      3016,
+      3017,
+      3018,
+      3019,
+      3020
+    ],
+    "episode_duration_seconds": 1800,
+    "decision_interval_seconds": 5,
+    "min_green_seconds": 5,
+    "gamma": 0.98,
+    "checkpoint_selection": "lowest mean waiting on held-out validation seeds",
+    "epsilon_floor": 0.05
+  },
+  "normalization_calibration": {
+    "initial_rollouts": 10,
+    "calibration_seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010
+    ],
+    "post_training_rollouts": 10,
+    "moderate_queue_scale": 3,
+    "moderate_waiting_scale": 14,
+    "heavy_queue_scale": 16,
+    "heavy_waiting_scale": 142,
+    "post_training_stats": {
+      "moderate": "moderate_posttrain_observation_stats.json",
+      "heavy": "heavy_posttrain_observation_stats.json"
+    }
+  },
+  "tuned_fixed_time_green_seconds": {
+    "moderate": 5,
+    "heavy": 7
+  },
+  "measured_results": {
+    "moderate": {
+      "mean_waiting": 2.929,
+      "waiting_sd": 0.1478584,
+      "mean_throughput": 690.4,
+      "tuned_fixed_waiting": 3.0075,
+      "starting_dqn_waiting": 5.72,
+      "seeds_regressed_vs_starting": 0
+    },
+    "heavy": {
+      "mean_waiting": 16.637,
+      "waiting_sd": 2.4137372,
+      "mean_throughput": 1419.05,
+      "tuned_fixed_waiting": 12.736,
+      "starting_dqn_waiting": 46.97,
+      "seeds_regressed_vs_starting": 0
+    }
+  },
+  "tests": {
+    "command": "python -m pytest -q --basetemp tmp/pytest-run-final3-20261120",
+    "passed": 223,
+    "skipped": 1,
+    "failed": 0,
+    "errors": 0
+  },
+  "gate_status": {
+    "moderate_waiting_lt_4": "PASS",
+    "heavy_waiting_lt_25": "PASS",
+    "heavy_throughput_gte_1390": "PASS",
+    "blocked_switches_zero": "PASS",
+    "switch_ratio_below_0_90": "PASS",
+    "traffic_normalized_p99_range": "PARTIAL; heavy east/west dimensions remain lower than 0.6, moderate waiting p99 slightly clips",
+    "learning_after_epsilon_floor": "PASS; both scenarios improved for several post-floor blocks",
+    "all_final_seeds_better_than_starting_dqn": "PASS; zero regressions in each scenario"
+  },
+  "report": "dqn_training_comparison.pdf",
+  "integrity_snapshot": "integrity_snapshot.json"
+}

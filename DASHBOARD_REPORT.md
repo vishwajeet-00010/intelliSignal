@@ -1,11 +1,9 @@
 # IntelliSignal — Streamlit Dashboard: Final Report
 
-Only verified facts appear in this report.
+This is a historical dashboard report describing the dashboard before Stage 3 DQN integration. Its original claims below are preserved as a record of that implementation point; they do not describe the current repository. The DQN was implemented and integrated in Stage 3, and subsequent evaluation is documented in `STAGE3_REPORT.md`, `HANDOFF.md`, and `output/dqn_stage4_20261120/stage4_validation_report.pdf`.
 
-> **No DQN has been implemented and no agent has been trained.** There is no
-> neural network, no replay buffer and no target network anywhere in this
-> project. The dashboard lists the DQN control mode, disables it, and explains
-> that it does not exist.
+> **Historical status at the time of this report:** the DQN had not yet been
+> implemented. This status was superseded by Stage 3 and later retraining.
 
 ---
 
@@ -338,4 +336,4 @@ signal is safely changed).
 | Agent interface + fixed-time controller | Implemented |
 | Simulation controller | Implemented |
 | Streamlit dashboard | Implemented and verified in a browser |
-| **DQN agent, training, Fixed-Time vs DQN comparison** | **Not implemented — next stage** |
+| **DQN agent, training, Fixed-Time vs DQN comparison** | Implemented in Stage 3; see the current Stage 3 and Stage 4 reports |

@@ -43,17 +43,19 @@ both:
     select_action(observation_array)  -> 0 = keep, 1 = switch      (env action)
     select_action(TrafficState)       -> 0 = NS green, 1 = EW green (phase)
 
-The network itself is always asked for keep/switch; the phase answer is just
-that decision translated through `phase_action_to_env_action`'s inverse. The
-training loop and the evaluation runner use the observation form, the
-dashboard uses the `TrafficState` form, and there is only one network behind
-both.
+The network itself is always asked for keep/switch. For `TrafficState`, the
+agent applies the minimum-green action mask and accounts for the maximum-green
+override before translating to the target phase. Training feeds observations
+directly; rollout code uses `env_action(TrafficState)` so the timing context is
+available. Both paths share one network.
 """
 
 from __future__ import annotations
 
 import glob
+import hashlib
 import json
+import math
 import os
 import random
 from datetime import datetime
@@ -127,12 +129,158 @@ class DQNUnavailableError(RuntimeError):
     """Raised when PyTorch itself is missing."""
 
 
+class DQNModelCompatibilityError(DQNModelNotFoundError):
+    """Raised when a checkpoint's observation contract cannot match runtime."""
+
+
 # ===========================================================================
 # Model discovery - used by the dashboard to decide whether DQN is offered
 # ===========================================================================
 def model_directory(scenario: str) -> str:
     """models/dqn_<scenario>"""
     return os.path.join(MODELS_DIR, "dqn_{}".format(scenario))
+
+
+def _active_models_path() -> str:
+    return os.path.join(MODELS_DIR, "active_models.json")
+
+
+def _active_model_registry() -> Dict[str, Any]:
+    path = _active_models_path()
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        return payload.get("active_models", {}) if isinstance(payload, dict) else {}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
+def _resolve_registered_path(record: Dict[str, Any]) -> Optional[str]:
+    value = record.get("path")
+    if not value:
+        return None
+    path = str(value)
+    if not os.path.isabs(path):
+        path = os.path.join(PROJECT_ROOT, path)
+    return os.path.abspath(path)
+
+
+def _active_model_record_for_path(path: str) -> Optional[Dict[str, Any]]:
+    target = os.path.normcase(os.path.realpath(os.path.abspath(path)))
+    for record in _active_model_registry().values():
+        candidate = _resolve_registered_path(record)
+        if candidate and os.path.normcase(os.path.realpath(candidate)) == target:
+            return record
+    return None
+
+
+def _verify_registered_checkpoint(path: str) -> None:
+    record = _active_model_record_for_path(path)
+    if not record or not record.get("sha256"):
+        return
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    if digest.hexdigest().lower() != str(record["sha256"]).lower():
+        raise DQNModelCompatibilityError(
+            "Active DQN checkpoint hash differs from models/active_models.json: {}"
+            .format(path))
+
+
+def read_model_metadata(path: str) -> Dict[str, Any]:
+    """Read folder metadata and any pinned active-model contract."""
+    metadata = read_metadata(os.path.dirname(os.path.abspath(path)))
+    record = _active_model_record_for_path(path)
+    if record:
+        metadata.update(record.get("metadata", {}))
+        for key in ("scenario", "label", "stage", "sha256", "observation_contract"):
+            if key in record:
+                metadata[key] = record[key]
+        metadata["active_model"] = True
+    return metadata
+
+
+def _make_observation_contract(scenario: str, observation_size: int,
+                               observation: Dict[str, Any],
+                               environment: Dict[str, Any],
+                               step_length: float,
+                               phase_elapsed_scale: float) -> Dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "scenario": str(scenario),
+        "observation_size": int(observation_size),
+        "max_queue_per_approach": float(observation["max_queue_per_approach"]),
+        "max_waiting_per_approach": float(observation["max_waiting_per_approach"]),
+        "phase_elapsed_scale": float(phase_elapsed_scale),
+        "decision_interval": float(environment["decision_interval"]),
+        "min_green": float(environment["min_green"]),
+        "max_green": float(environment["max_green"]),
+        "yellow_time": float(environment["yellow_time"]),
+        "all_red_time": float(environment["all_red_time"]),
+        "step_length": float(step_length),
+    }
+
+
+def observation_contract_for_scenario(
+        scenario: str, phase_elapsed_scale: Optional[float] = None,
+        observation_size: int = 10) -> Dict[str, Any]:
+    """Return the observation and timing contract effective for a scenario."""
+    from rl.config import load_rl_config
+    from utils.config_loader import load_config
+
+    scenario_config = load_config(scenario)
+    rl_config = load_rl_config(scenario_config)
+    environment = rl_config["environment"]
+    observation = rl_config["observation"]
+    if phase_elapsed_scale is None:
+        phase_elapsed_scale = min(float(environment["max_green"]),
+                                  4.0 * float(environment["min_green"]))
+    return _make_observation_contract(
+        scenario, observation_size, observation, environment,
+        scenario_config["simulation"]["step_length"], phase_elapsed_scale)
+
+
+def validate_observation_contract(scenario: str, contract: Dict[str, Any],
+                                  path: str) -> None:
+    """Reject known preprocessing or timing mismatches before inference."""
+    if not isinstance(contract, dict):
+        raise DQNModelCompatibilityError(
+            "Checkpoint has no observation contract; cannot verify its input "
+            "scales. Retrain it or add audited metadata: {}".format(path))
+    phase_scale = contract.get("phase_elapsed_scale")
+    if phase_scale is None:
+        raise DQNModelCompatibilityError(
+            "Checkpoint contract does not record phase_elapsed_scale: {}"
+            .format(path))
+    expected = observation_contract_for_scenario(
+        scenario, phase_elapsed_scale=float(phase_scale),
+        observation_size=int(contract.get("observation_size", 10)))
+    keys = ("scenario", "observation_size", "max_queue_per_approach",
+            "max_waiting_per_approach", "decision_interval", "min_green",
+            "max_green", "yellow_time", "all_red_time", "step_length")
+    mismatches = []
+    for key in keys:
+        actual = contract.get(key)
+        wanted = expected[key]
+        if isinstance(wanted, (int, float)) and not isinstance(wanted, bool):
+            try:
+                matches = math.isclose(float(actual), float(wanted),
+                                       rel_tol=0.0, abs_tol=1e-6)
+            except (TypeError, ValueError):
+                matches = False
+        else:
+            matches = actual == wanted
+        if not matches:
+            mismatches.append("{}: checkpoint={!r}, runtime={!r}".format(
+                key, actual, wanted))
+    if float(phase_scale) <= 0 or float(phase_scale) > expected["max_green"]:
+        mismatches.append("phase_elapsed_scale={!r} outside (0, max_green]"
+                          .format(phase_scale))
+    if mismatches:
+        raise DQNModelCompatibilityError(
+            "DQN checkpoint is incompatible with the current '{}' runtime:\n- {}"
+            .format(scenario, "\n- ".join(mismatches)))
 
 
 def find_models(scenario: str) -> List[Dict[str, Any]]:
@@ -143,8 +291,22 @@ def find_models(scenario: str) -> List[Dict[str, Any]]:
     the file, never guessed.
     """
     directory = model_directory(scenario)
+    models = []
+    seen = set()
+    active_record = _active_model_registry().get(scenario)
+    if active_record:
+        active_path = _resolve_registered_path(active_record)
+        if active_path and os.path.isfile(active_path):
+            models.append({
+                "name": active_record.get(
+                    "name", "active_" + os.path.basename(active_path)),
+                "path": active_path,
+                "metadata": read_model_metadata(active_path),
+                "active": True,
+            })
+            seen.add(os.path.normcase(os.path.realpath(active_path)))
     if not os.path.isdir(directory):
-        return []
+        return models
 
     paths = sorted(glob.glob(os.path.join(directory, "*.pt")))
     metadata = read_metadata(directory)
@@ -155,8 +317,13 @@ def find_models(scenario: str) -> List[Dict[str, Any]]:
             return (PREFERRED_CHECKPOINTS.index(name), name)
         return (len(PREFERRED_CHECKPOINTS), name)
 
-    return [{"name": os.path.basename(p), "path": p, "metadata": metadata}
-            for p in sorted(paths, key=rank)]
+    for path in sorted(paths, key=rank):
+        resolved = os.path.normcase(os.path.realpath(path))
+        if resolved in seen:
+            continue
+        models.append({"name": os.path.basename(path), "path": path,
+                       "metadata": dict(metadata), "active": False})
+    return models
 
 
 def read_metadata(directory: str) -> Dict[str, Any]:
@@ -187,9 +354,13 @@ def dqn_model_available(scenario: str = None) -> bool:
         return False
     if scenario is not None:
         return default_model_path(scenario) is not None
-    if not os.path.isdir(MODELS_DIR):
-        return False
-    return bool(glob.glob(os.path.join(MODELS_DIR, "dqn_*", "*.pt")))
+    scenarios = set(_active_model_registry())
+    if os.path.isdir(MODELS_DIR):
+        scenarios.update(
+            name[len("dqn_"):]
+            for name in os.listdir(MODELS_DIR)
+            if name.startswith("dqn_") and os.path.isdir(os.path.join(MODELS_DIR, name)))
+    return any(default_model_path(name) is not None for name in scenarios)
 
 
 # ===========================================================================
@@ -282,6 +453,8 @@ class DQNAgent(TrafficAgent):
         self.trainable = bool(trainable)
         self.model_path = ""
         self.metadata: Dict[str, Any] = {}
+        self.observation_contract: Optional[Dict[str, Any]] = None
+        self.phase_elapsed_scale: Optional[float] = None
 
         # --- find the weights, unless a fresh network was asked for ----
         if model_path is None and not trainable and observation_size is None:
@@ -302,6 +475,7 @@ class DQNAgent(TrafficAgent):
         # --- sizes -----------------------------------------------------
         checkpoint = None
         if model_path is not None:
+            _verify_registered_checkpoint(model_path)
             checkpoint = self._read_checkpoint(model_path)
             observation_size = int(checkpoint["observation_size"])
             num_actions = int(checkpoint["num_actions"])
@@ -333,7 +507,8 @@ class DQNAgent(TrafficAgent):
         # --- training machinery ----------------------------------------
         self.optimizer = torch.optim.Adam(self.policy_net.parameters(),
                                           lr=self.config.learning_rate)
-        self.memory = ReplayBuffer(self.config.replay_capacity, seed=seed)
+        self.memory = ReplayBuffer(self.config.replay_capacity, seed=seed,
+                                   num_actions=self.num_actions)
         self.epsilon = float(self.config.epsilon_start)
         self.learn_steps = 0          # gradient steps taken
         self.target_updates = 0       # times the target network was refreshed
@@ -361,7 +536,8 @@ class DQNAgent(TrafficAgent):
         return values.cpu().numpy()
 
     # ------------------------------------------------------------------
-    def act(self, observation, training: bool = False) -> int:
+    def act(self, observation, training: bool = False,
+            valid_actions: Optional[Sequence[int]] = None) -> int:
         """The environment action for an observation: 0 = keep, 1 = switch.
 
         training=True  ->  epsilon-greedy: a random action with probability
@@ -369,9 +545,17 @@ class DQNAgent(TrafficAgent):
         training=False ->  greedy, no exploration at all. This is what
                            evaluation and the dashboard use.
         """
+        if valid_actions is None:
+            valid_actions = range(self.num_actions)
+        valid = [int(action) for action in valid_actions]
+        if not valid:
+            raise ValueError("act() needs at least one valid action")
+        if any(action < 0 or action >= self.num_actions for action in valid):
+            raise ValueError("valid_actions contains an action outside the action space")
         if training and self._random.random() < self.epsilon:
-            return int(self._random.randrange(self.num_actions))
-        return int(np.argmax(self.q_values(observation)))
+            return int(self._random.choice(valid))
+        values = self.q_values(observation)
+        return int(max(valid, key=lambda action: values[action]))
 
     # ------------------------------------------------------------------
     def select_action(self, state, training: bool = False) -> int:
@@ -384,8 +568,9 @@ class DQNAgent(TrafficAgent):
           * a `TrafficState` (the agent-layer object the dashboard uses)
                 -> the PHASE to make green: 0 NS green, 1 EW green
 
-        The network is asked for keep/switch either way; the second form just
-        translates that into the phase that keep/switch would produce.
+        The network is asked for keep/switch either way. With a TrafficState,
+        timing constraints are applied before returning the phase that will
+        actually be active after the environment resolves the request.
         """
         if isinstance(state, TrafficState):
             observation = state.observation()
@@ -396,8 +581,12 @@ class DQNAgent(TrafficAgent):
                     "TrafficState.from_env_info(info, observation=obs) - the "
                     "DQN reads the per-approach observation, not the NS/EW "
                     "summary.")
-            env_action = self.act(observation, training=training)
-            return self.phase_for(env_action, state.current_phase)
+            requested_action = self.act(
+                observation, training=training,
+                valid_actions=self._valid_actions_for_state(state))
+            effective_action = self._effective_action_for_state(
+                state, requested_action)
+            return self.phase_for(effective_action, state.current_phase)
         return self.act(state, training=training)
 
     # ------------------------------------------------------------------
@@ -410,11 +599,35 @@ class DQNAgent(TrafficAgent):
 
     # ------------------------------------------------------------------
     def env_action(self, state: TrafficState) -> int:
-        """Override: ask the network directly, with no phase round trip."""
+        """Return the network's KEEP/SWITCH request for a TrafficState."""
         observation = state.observation()
         if observation is None:
             return super().env_action(state)
-        return self.act(observation, training=False)
+        return self.act(observation, training=False,
+                        valid_actions=self._valid_actions_for_state(state))
+
+    @staticmethod
+    def _valid_actions_for_state(state: TrafficState) -> List[int]:
+        """Actions the timing rules allow the policy to request at this state."""
+        max_green = state.extra.get("max_green")
+        if (max_green is not None and
+                state.time_since_phase_change >= float(max_green)):
+            return [ENV_ACTION_SWITCH]
+        min_green = state.extra.get("min_green")
+        if (min_green is not None and
+                state.time_since_phase_change < float(min_green)):
+            return [ENV_ACTION_KEEP]
+        return [ENV_ACTION_KEEP, ENV_ACTION_SWITCH]
+
+    @staticmethod
+    def _effective_action_for_state(state: TrafficState,
+                                    requested_action: int) -> int:
+        """Apply the max-green override when translating a request to a phase."""
+        max_green = state.extra.get("max_green")
+        if (max_green is not None and
+                state.time_since_phase_change >= float(max_green)):
+            return ENV_ACTION_SWITCH
+        return int(requested_action)
 
     # ------------------------------------------------------------------
     def explain(self, state) -> Dict[str, Any]:
@@ -426,6 +639,8 @@ class DQNAgent(TrafficAgent):
         if isinstance(state, TrafficState):
             observation = state.observation()
             current_phase = int(state.current_phase)
+            valid_actions = self._valid_actions_for_state(state)
+            max_green = state.extra.get("max_green")
             state_rows = {
                 "NS queue": state.ns_queue,
                 "EW queue": state.ew_queue,
@@ -437,6 +652,8 @@ class DQNAgent(TrafficAgent):
         else:
             observation = np.asarray(state, dtype=np.float32)
             current_phase = PHASE_EW if float(observation[8]) >= 0.5 else PHASE_NS
+            valid_actions = [ENV_ACTION_KEEP, ENV_ACTION_SWITCH]
+            max_green = None
             state_rows = {"observation": np.round(observation, 3).tolist()}
 
         if observation is None:
@@ -444,8 +661,38 @@ class DQNAgent(TrafficAgent):
                 "explain() needs a TrafficState that carries its observation.")
 
         values = self.q_values(observation)
-        env_action = int(np.argmax(values))
-        phase = self.phase_for(env_action, current_phase)
+        env_action = int(max(valid_actions, key=lambda action: values[action]))
+        effective_action = env_action
+        forced_by_max_green = (
+            isinstance(state, TrafficState) and max_green is not None and
+            state.time_since_phase_change >= float(max_green)
+        )
+        if forced_by_max_green:
+            effective_action = ENV_ACTION_SWITCH
+        phase = self.phase_for(effective_action, current_phase)
+        if forced_by_max_green:
+            network_preference = (
+                "also prefers SWITCH" if env_action == ENV_ACTION_SWITCH
+                else "prefers KEEP")
+            reason = (
+                "The max-green limit requires a phase change now. The network "
+                "{} (Q(keep) = {:+.3f}, Q(switch) = {:+.3f}); the environment "
+                "will switch safely.".format(
+                    network_preference, values[ENV_ACTION_KEEP],
+                    values[ENV_ACTION_SWITCH]))
+        elif (isinstance(state, TrafficState) and
+              valid_actions == [ENV_ACTION_KEEP]):
+            reason = (
+                "The minimum-green rule requires holding this phase for now. "
+                "Q(keep) = {:+.3f}, Q(switch) = {:+.3f}.".format(
+                    values[ENV_ACTION_KEEP], values[ENV_ACTION_SWITCH]))
+        else:
+            reason = (
+                "Q(keep) = {:+.3f} and Q(switch) = {:+.3f}, so the network "
+                "expects less future congestion if it {}."
+                .format(values[ENV_ACTION_KEEP], values[ENV_ACTION_SWITCH],
+                        "holds this green" if env_action == ENV_ACTION_KEEP
+                        else "changes the signal"))
         return {
             "agent": self.name,
             "action": phase,
@@ -454,16 +701,15 @@ class DQNAgent(TrafficAgent):
             "uses_traffic_state": True,
             "env_action": env_action,
             "env_action_name": "KEEP" if env_action == ENV_ACTION_KEEP else "SWITCH",
+            "effective_env_action": effective_action,
+            "effective_env_action_name": ("KEEP" if effective_action == ENV_ACTION_KEEP
+                                          else "SWITCH"),
             "q_values": {"keep": float(values[ENV_ACTION_KEEP]),
                          "switch": float(values[ENV_ACTION_SWITCH])},
             "q_gap": float(abs(values[0] - values[1])),
             "epsilon": float(self.epsilon),
             "model_path": self.model_path,
-            "reason": ("Q(keep) = {:+.3f} and Q(switch) = {:+.3f}, so the "
-                       "network expects less future congestion if it {}."
-                       .format(values[ENV_ACTION_KEEP], values[ENV_ACTION_SWITCH],
-                               "holds this green" if env_action == ENV_ACTION_KEEP
-                               else "changes the signal")),
+            "reason": reason,
             "state": state_rows,
         }
 
@@ -481,9 +727,10 @@ class DQNAgent(TrafficAgent):
     # Learning
     # ==================================================================
     def remember(self, state, action: int, reward: float, next_state,
-                 done: bool) -> None:
+                 done: bool, next_valid_actions=None) -> None:
         """Store one transition in the replay buffer."""
-        self.memory.push(state, action, reward, next_state, done)
+        self.memory.push(state, action, reward, next_state, done,
+                         next_valid_actions=next_valid_actions)
 
     # ------------------------------------------------------------------
     def learn(self) -> Optional[float]:
@@ -495,10 +742,11 @@ class DQNAgent(TrafficAgent):
         The update is the standard DQN temporal-difference rule:
 
             current = Q_policy(state, action_taken)
-            target  = reward + gamma * max_a' Q_target(next_state, a')
+            target  = reward + gamma * max_valid_a' Q_target(next_state, a')
             target  = reward                        if the episode ended
 
-        The maximum is taken with the TARGET network, not the policy network.
+        The maximum is over actions legal in the next signal state and is
+        taken with the TARGET network, not the policy network.
         That is the whole point of having two: the policy network is being
         changed by this very gradient step, and using it on both sides of the
         comparison makes the target move as fast as the estimate, which is
@@ -515,6 +763,7 @@ class DQNAgent(TrafficAgent):
         rewards = torch.from_numpy(batch.rewards).to(self.device)
         next_states = torch.from_numpy(batch.next_states).to(self.device)
         dones = torch.from_numpy(batch.dones).to(self.device)
+        next_action_masks = torch.from_numpy(batch.next_action_masks).to(self.device)
 
         self.policy_net.train()
 
@@ -523,7 +772,10 @@ class DQNAgent(TrafficAgent):
 
         # Best Q-value the TARGET network sees in the next state
         with torch.no_grad():
-            next_q = self.target_net(next_states).max(dim=1).values
+            next_q_values = self.target_net(next_states)
+            next_q_values = next_q_values.masked_fill(
+                ~next_action_masks, -torch.inf)
+            next_q = next_q_values.max(dim=1).values
             # A terminal transition has no future, so the future term is zeroed.
             target_q = rewards + self.config.gamma * next_q * (1.0 - dones)
 
@@ -598,8 +850,21 @@ class DQNAgent(TrafficAgent):
         directory = os.path.dirname(os.path.abspath(path))
         os.makedirs(directory, exist_ok=True)
         payload = self.state_dict()
-        if extra:
-            payload["extra"] = dict(extra)
+        checkpoint_extra = dict(extra or {})
+        contract = self.observation_contract
+        if contract is None and self.scenario:
+            contract = observation_contract_for_scenario(
+                self.scenario, phase_elapsed_scale=self.phase_elapsed_scale,
+                observation_size=self.observation_size)
+        if contract is not None:
+            checkpoint_extra["observation_contract"] = dict(contract)
+            self.observation_contract = dict(contract)
+            self.phase_elapsed_scale = float(contract["phase_elapsed_scale"])
+        if self.phase_elapsed_scale is not None:
+            checkpoint_extra["phase_elapsed_scale"] = float(
+                self.phase_elapsed_scale)
+        if checkpoint_extra:
+            payload["extra"] = checkpoint_extra
         torch.save(payload, path)
         self.model_path = path
         return path
@@ -644,7 +909,40 @@ class DQNAgent(TrafficAgent):
             "torch_version": checkpoint.get("torch_version", ""),
             "config": checkpoint.get("config", {}),
         }
-        self.metadata.update(read_metadata(os.path.dirname(os.path.abspath(path))))
+        self.metadata.update(read_model_metadata(path))
+        checkpoint_extra = checkpoint.get("extra") or {}
+        contract = (checkpoint_extra.get("observation_contract") or
+                    self.metadata.get("observation_contract"))
+        if contract is not None:
+            self.observation_contract = dict(contract)
+            self.metadata["observation_contract"] = self.observation_contract
+            self.phase_elapsed_scale = float(contract["phase_elapsed_scale"])
+            self.metadata["phase_elapsed_scale"] = self.phase_elapsed_scale
+            if self.scenario:
+                validate_observation_contract(self.scenario, contract, path)
+        elif self.scenario:
+            raise DQNModelCompatibilityError(
+                "Checkpoint for '{}' has no recorded observation contract; "
+                "its preprocessing cannot be verified: {}".format(
+                    self.scenario, path))
+        else:
+            # Keep direct, scenario-free checkpoint inspection possible, but
+            # never use the unknown scale as a dashboard rollout default.
+            self.metadata["observation_contract_status"] = "missing"
+            self.phase_elapsed_scale = None
+        if checkpoint_extra.get("phase_elapsed_scale") is not None:
+            extra_scale = float(checkpoint_extra["phase_elapsed_scale"])
+            if (self.phase_elapsed_scale is not None and
+                    not math.isclose(extra_scale, self.phase_elapsed_scale,
+                                     rel_tol=0.0, abs_tol=1e-6)):
+                raise DQNModelCompatibilityError(
+                    "Checkpoint phase_elapsed_scale disagrees with its "
+                    "observation contract: {}".format(path))
+            self.phase_elapsed_scale = extra_scale
+        for key in ("validation_seeds", "validation_mean_waiting_time",
+                    "selection", "episode"):
+            if key in checkpoint_extra:
+                self.metadata[key] = checkpoint_extra[key]
 
     # ------------------------------------------------------------------
     @classmethod
@@ -738,7 +1036,7 @@ def build_agent_for_env(env, config: DQNConfig = None, scenario: str = None,
     if len(shape) != 1:
         raise ValueError(
             "Expected a flat observation space, got shape {}.".format(shape))
-    return DQNAgent(
+    agent = DQNAgent(
         observation_size=int(shape[0]),
         num_actions=int(env.action_space.n),
         config=config,
@@ -747,3 +1045,12 @@ def build_agent_for_env(env, config: DQNConfig = None, scenario: str = None,
         seed=seed,
         device=device,
     )
+    agent.phase_elapsed_scale = float(env.state_extractor.phase_elapsed_scale)
+    contract_scenario = scenario or getattr(env, "scenario", None)
+    if contract_scenario:
+        agent.observation_contract = _make_observation_contract(
+            contract_scenario, int(shape[0]), env.rl_config["observation"],
+            env.rl_config["environment"], env.step_length,
+            agent.phase_elapsed_scale)
+        agent.metadata["observation_contract"] = agent.observation_contract
+    return agent

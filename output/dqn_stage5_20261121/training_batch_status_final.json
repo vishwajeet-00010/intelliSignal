@@ -1,0 +1,125 @@
+{
+  "jobs": [
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6207,
+      "status": "completed",
+      "return_code": 0
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6207,
+      "status": "running"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6208,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6208,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6209,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6209,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6210,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6210,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6211,
+      "status": "queued"
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6211,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6207,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6207,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6208,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6208,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6209,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6209,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6210,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6210,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6211,
+      "status": "queued"
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6211,
+      "status": "queued"
+    }
+  ]
+}

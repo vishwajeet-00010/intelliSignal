@@ -1,0 +1,76 @@
+{
+  "scenario": "moderate",
+  "model": "D:\\intelliSignal\\output\\dqn_stage4_20261120\\moderate\\seed55\\models\\best.pt",
+  "seeds": [
+    5201,
+    5202,
+    5203,
+    5204,
+    5205,
+    5206,
+    5207,
+    5208,
+    5209,
+    5210
+  ],
+  "samples_per_approach": {
+    "queues": {
+      "north": 18000,
+      "east": 18000,
+      "south": 18000,
+      "west": 18000
+    },
+    "waiting": {
+      "north": 18000,
+      "east": 18000,
+      "south": 18000,
+      "west": 18000
+    }
+  },
+  "percentiles": {
+    "queues": {
+      "north": {
+        "p95": 2.0,
+        "p99": 2.0,
+        "max": 3.0
+      },
+      "east": {
+        "p95": 1.0,
+        "p99": 2.0,
+        "max": 3.0
+      },
+      "south": {
+        "p95": 2.0,
+        "p99": 2.0,
+        "max": 3.0
+      },
+      "west": {
+        "p95": 1.0,
+        "p99": 2.0,
+        "max": 3.0
+      }
+    },
+    "waiting": {
+      "north": {
+        "p95": 9.0,
+        "p99": 14.0,
+        "max": 21.0
+      },
+      "east": {
+        "p95": 7.0,
+        "p99": 11.0,
+        "max": 27.0
+      },
+      "south": {
+        "p95": 9.0,
+        "p99": 14.0,
+        "max": 26.0
+      },
+      "west": {
+        "p95": 7.0,
+        "p99": 11.0,
+        "max": 32.0
+      }
+    }
+  }
+}

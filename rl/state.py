@@ -21,9 +21,8 @@ deliberately readable: every entry can be pointed at and explained.
       9    phase_elapsed    how long the current green has been running
 
 Every entry is normalised into [0, 1] so the observation space is well
-conditioned for a neural network later. Queue and waiting values are divided
-by a constant from config/rl/environment.yaml and clipped at 1.0, so the
-observation can never leave the declared space.
+conditioned for a neural network later. Queue and waiting values use measured
+scenario-specific scales, and the observation is clipped to [0, 1].
 
 "Halting" is SUMO's own definition: a vehicle moving slower than 0.1 m/s.
 "Current waiting time" is SUMO's per-vehicle waiting time, which resets when
@@ -33,7 +32,7 @@ a bounded range, which makes it a much better input for a learning agent.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -72,10 +71,17 @@ class StateExtractor:
 
     def __init__(self, max_queue_per_approach: float,
                  max_waiting_per_approach: float,
-                 max_green: float):
+                 max_green: float, min_green: float = 10.0,
+                 phase_elapsed_scale: Optional[float] = None):
         self.max_queue = float(max_queue_per_approach)
         self.max_waiting = float(max_waiting_per_approach)
         self.max_green = float(max_green)
+        self.min_green = float(min_green)
+        self.phase_elapsed_scale = float(
+            phase_elapsed_scale if phase_elapsed_scale is not None else
+            min(self.max_green, 4.0 * self.min_green))
+        if self.phase_elapsed_scale <= 0:
+            raise ValueError("phase_elapsed_scale must be positive")
 
     # ------------------------------------------------------------------
     def raw(self, conn) -> Dict[str, Any]:
@@ -106,7 +112,7 @@ class StateExtractor:
         for approach in APPROACH_ORDER:
             values.append(raw["waiting"][approach] / self.max_waiting)
         values.append(float(phase_index))                 # already 0.0 or 1.0
-        values.append(green_elapsed / self.max_green)
+        values.append(green_elapsed / self.phase_elapsed_scale)
 
         observation = np.asarray(values, dtype=np.float32)
         # Clip so the observation is always inside the declared space, even

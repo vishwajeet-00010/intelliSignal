@@ -180,6 +180,10 @@ class TrafficState:
         extra: Dict[str, Any] = {}
         if observation is not None:
             extra["observation"] = observation
+        if "min_green" in info:
+            extra["min_green"] = float(info["min_green"])
+        if "max_green" in info:
+            extra["max_green"] = float(info["max_green"])
         return cls(
             ns_queue=float(queues.get("north", 0.0) + queues.get("south", 0.0)),
             ew_queue=float(queues.get("east", 0.0) + queues.get("west", 0.0)),

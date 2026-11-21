@@ -68,7 +68,8 @@ from agents.dqn_agent import (DQNAgent, DQNModelNotFoundError,  # noqa: E402
                               set_seeds)
 from evaluation.evaluate_dqn import (EVALUATION_RESULTS_DIR,     # noqa: E402
                                      METRIC_LABELS, METRICS, aggregate,
-                                     format_mean_std, resolve_model,
+                                     format_mean_std, reject_validation_overlap,
+                                     resolve_model,
                                      write_raw)
 from simulation.agent_simulation import (DQN, FIXED_TIME,        # noqa: E402
                                          LOWER_IS_BETTER, improvement,
@@ -111,7 +112,8 @@ def compare(scenario: str = "moderate", model: Optional[str] = None,
             seeds: List[int] = None, duration: Optional[float] = None,
             results_dir: Optional[str] = None,
             include_untrained: bool = False,
-            save: bool = True, quiet: bool = False) -> Dict[str, Any]:
+            save: bool = True, quiet: bool = False,
+            allow_validation_overlap: bool = False) -> Dict[str, Any]:
     """Run both controllers on every seed and return the whole comparison."""
     seeds = [int(s) for s in (seeds or [42, 43, 44])]
     results_dir = results_dir or EVALUATION_RESULTS_DIR
@@ -119,6 +121,7 @@ def compare(scenario: str = "moderate", model: Optional[str] = None,
 
     agent = DQNAgent.load(model_path, scenario=scenario)
     agent.set_epsilon(0.0)
+    reject_validation_overlap(agent, seeds, allow_validation_overlap)
 
     control = None
     if include_untrained:
@@ -369,7 +372,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Scenario to compare on (moderate or heavy).")
     parser.add_argument("--model", "-m", default=None,
                         help="Checkpoint to use "
-                             "(default: models/dqn_<scenario>/best.pt).")
+                             "(default: registered active incumbent).")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 43, 44],
                         help="Seeds to run both controllers on.")
     parser.add_argument("--duration", type=float, default=None,
@@ -381,6 +384,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--include-untrained", action="store_true",
                         dest="include_untrained",
                         help="Also run an untrained network as a control.")
+    parser.add_argument("--allow-validation-overlap", action="store_true",
+                        help="Allow checkpoint-selection seeds for a diagnostic only.")
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument("--quiet", action="store_true")
     return parser
@@ -392,7 +397,8 @@ def main(argv=None) -> int:
         compare(scenario=args.scenario, model=args.model, seeds=args.seeds,
                 duration=args.duration, results_dir=args.results_dir,
                 include_untrained=args.include_untrained,
-                save=not args.no_save, quiet=args.quiet)
+                save=not args.no_save, quiet=args.quiet,
+                allow_validation_overlap=args.allow_validation_overlap)
     except DQNModelNotFoundError as error:
         print("\n{}\n".format(error), file=sys.stderr)
         return 2

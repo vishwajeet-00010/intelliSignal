@@ -1,0 +1,367 @@
+{
+  "experiment": "dqn_stage5_20261121",
+  "status": "stage5_incomplete_reconciled",
+  "protocol": "protocol.md",
+  "audit": "audit.md",
+  "seed_plan": {
+    "training": [
+      6207,
+      6208,
+      6209,
+      6210,
+      6211
+    ],
+    "validation": [
+      6301,
+      6302,
+      6303,
+      6304,
+      6305
+    ],
+    "calibration": [
+      6401,
+      6402,
+      6403,
+      6404,
+      6405,
+      6406,
+      6407,
+      6408,
+      6409,
+      6410
+    ],
+    "confirmatory": [
+      6501,
+      6502,
+      6503,
+      6504,
+      6505,
+      6506,
+      6507,
+      6508,
+      6509,
+      6510,
+      6511,
+      6512,
+      6513,
+      6514,
+      6515,
+      6516,
+      6517,
+      6518,
+      6519,
+      6520
+    ]
+  },
+  "arms": {
+    "control": {
+      "name": "legacy_phase_age_scale",
+      "phase_elapsed_scale_seconds": 20,
+      "changed_factor": "none; frozen Stage 4 configuration"
+    },
+    "treatment": {
+      "name": "full_legal_phase_age_scale",
+      "phase_elapsed_scale_seconds": 60,
+      "changed_factor": "phase_elapsed observation divisor only"
+    }
+  },
+  "training": {
+    "episodes_per_run": 100,
+    "scenarios": [
+      "moderate",
+      "heavy"
+    ],
+    "training_seeds_per_arm_per_scenario": 5,
+    "checkpoint_every": 10,
+    "validation_degradation_tolerance": 0.1,
+    "validation_degradation_patience": 3,
+    "status": "incomplete_no_live_runner",
+    "primary_training_seeds": [
+      6207,
+      6208,
+      6209,
+      6210,
+      6211
+    ],
+    "excluded_pilot_seed": 6201,
+    "interruption": "Prior audit of seed6201 treatment was incorrect: its artifacts show a complete 100-episode run and it is excluded as a pilot only because the primary seed set was already amended. Replacement seed6202 moderate/control stopped at episode 78/100 without replay/RNG resume state; it and its unstarted treatment pair are excluded. Primary seeds amended to 6207-6211.",
+    "completed_cells": 1,
+    "failed_cells": 0,
+    "reported_counts_before_reconciliation": {
+      "completed_cells": 3,
+      "failed_cells": 17,
+      "status": "complete_with_failures"
+    },
+    "partial_cells": 1,
+    "not_started_cells": 18
+  },
+  "validation_gates": {
+    "min_independent_runs_pass": 4,
+    "runs_per_configuration": 5,
+    "max_waiting_regression_percent": 3,
+    "max_average_queue_regression_percent": 2,
+    "max_throughput_regression_percent": 1,
+    "blocked_switches": 0,
+    "teleports": 0
+  },
+  "promotion_gates": {
+    "min_wait_improvement_percent": 2,
+    "min_paired_wait_wins_of_20": 11,
+    "max_average_queue_regression_percent": 2,
+    "max_max_queue_regression_percent": 5,
+    "max_throughput_regression_percent": 1,
+    "blocked_switches": 0,
+    "teleports": 0,
+    "automatic_model_replacement": false
+  },
+  "training_runs": {
+    "moderate_control_seed6201": {
+      "status": "completed",
+      "summary": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6201\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6201\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6201\\training\\dqn_moderate_seed6201_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6201\\models\\validation_history.json",
+      "best_validation_episode": 100,
+      "best_validation_waiting": 3.3200000000000003,
+      "episodes_completed": 100,
+      "stopped_early": false,
+      "stop_reason": null,
+      "phase_elapsed_scale": null,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 6201,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "moderate_treatment_seed6201": {
+      "status": "completed",
+      "summary": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6201\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6201\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6201\\training\\dqn_moderate_seed6201_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6201\\models\\validation_history.json",
+      "best_validation_episode": 60,
+      "best_validation_waiting": 3.3200000000000003,
+      "episodes_completed": 100,
+      "stopped_early": false,
+      "stop_reason": null,
+      "phase_elapsed_scale": 60.0,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 6201,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "moderate_control_seed6202": {
+      "status": "completed",
+      "summary": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6202\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6202\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6202\\training\\dqn_moderate_seed6202_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6202\\models\\validation_history.json",
+      "best_validation_episode": 30,
+      "best_validation_waiting": 3.4019999999999997,
+      "episodes_completed": 100,
+      "stopped_early": false,
+      "stop_reason": null,
+      "phase_elapsed_scale": null,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 6202,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "moderate_treatment_seed6202": {
+      "status": "completed",
+      "summary": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6202\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6202\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6202\\training\\dqn_moderate_seed6202_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\treatment\\seed6202\\models\\validation_history.json",
+      "best_validation_episode": 40,
+      "best_validation_waiting": 3.3200000000000003,
+      "episodes_completed": 100,
+      "stopped_early": false,
+      "stop_reason": null,
+      "phase_elapsed_scale": 60.0,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 6202,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    },
+    "moderate_control_seed6207": {
+      "status": "completed",
+      "summary": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6207\\training_summary.json",
+      "checkpoint": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6207\\models\\best.pt",
+      "history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6207\\training\\dqn_moderate_seed6207_training.csv",
+      "validation_history": "D:\\intelliSignal\\output\\dqn_stage5_20261121\\moderate\\control\\seed6207\\models\\validation_history.json",
+      "best_validation_episode": 10,
+      "best_validation_waiting": 3.4019999999999997,
+      "episodes_completed": 100,
+      "stopped_early": false,
+      "stop_reason": null,
+      "phase_elapsed_scale": null,
+      "config": {
+        "hidden_layers": [
+          64,
+          64
+        ],
+        "episodes": 100,
+        "episode_duration": null,
+        "max_steps_per_episode": null,
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "gamma": 0.98,
+        "loss": "huber",
+        "gradient_clip": 10.0,
+        "replay_capacity": 50000,
+        "learning_starts": 500,
+        "train_frequency": 1,
+        "target_update_frequency": 500,
+        "epsilon_start": 1.0,
+        "epsilon_end": 0.05,
+        "epsilon_decay": "linear",
+        "epsilon_decay_steps": null,
+        "exploration_fraction": 0.5,
+        "epsilon_decay_rate": 0.9995,
+        "seed": 6207,
+        "checkpoint_every": 10,
+        "best_window": 5,
+        "vary_episode_seed": true
+      }
+    }
+  },
+  "validation": {},
+  "calibration": {},
+  "confirmatory": {},
+  "tests": {
+    "command": ".venv-stage3\\Scripts\\python.exe -m pytest -q --basetemp tmp/pytest-stage5-final-20261121",
+    "result": "227 passed, 1 skipped",
+    "duration_seconds": 109.4,
+    "status": "passed",
+    "smoke_test": "one moderate episode plus held-out validation on scale 60; passed"
+  },
+  "integrity": {
+    "before": "integrity_before.json",
+    "after": null,
+    "passed": null
+  },
+  "environment": null,
+  "report": null,
+  "decision": null,
+  "training_runs_started": [
+    "moderate_control_seed6201",
+    "moderate_treatment_seed6201",
+    "moderate_control_seed6202",
+    "moderate_treatment_seed6202",
+    "moderate_control_seed6207"
+  ],
+  "run_reconciliation": "output\\dqn_stage5_20261121\\run_reconciliation.md",
+  "reconciliation": {
+    "basis": "training_batch_status_final.json plus per-run summary, history, checkpoint, and validation artifacts",
+    "runner_pid": null,
+    "runner_alive": false,
+    "primary_cells": {
+      "complete": 1,
+      "partial": 1,
+      "not_started": 18
+    },
+    "historical_status_conflicts": [
+      "training_batch_status.json marks moderate/control seed6202 failed while its 100-episode summary and checkpoints exist",
+      "training_batch_status_replacement.json marks moderate/treatment seed6202 failed while its 100-episode summary and checkpoints exist",
+      "replacement stdout/stderr record invalid seed choices 6202-6206; the frozen primary CLI accepts 6207-6211"
+    ],
+    "archived_batch_status_files_preserved": true,
+    "replacement_seed_argument_errors_preserved": true
+  }
+}

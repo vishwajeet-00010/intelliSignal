@@ -1,0 +1,64 @@
+{
+  "format_version": 1,
+  "selection_policy": "Use only the explicitly registered incumbent as the dashboard default. Candidate checkpoints are never promoted by directory ordering.",
+  "active_models": {
+    "moderate": {
+      "name": "stage4_incumbent_best.pt",
+      "label": "Validated Stage 4 incumbent",
+      "stage": "dqn_retraining_20261120",
+      "scenario": "moderate",
+      "path": "output/dqn_retraining_20261120/models/dqn_moderate/best.pt",
+      "sha256": "A1B611EC89C9E145B742CA9FA3B7FC404A2515348CADB80A768C32E46207B2AD",
+      "observation_contract": {
+        "schema_version": 1,
+        "scenario": "moderate",
+        "observation_size": 10,
+        "max_queue_per_approach": 3.0,
+        "max_waiting_per_approach": 14.0,
+        "phase_elapsed_scale": 20.0,
+        "decision_interval": 5.0,
+        "min_green": 5.0,
+        "max_green": 60.0,
+        "yellow_time": 4.0,
+        "all_red_time": 0.0,
+        "step_length": 1.0
+      },
+      "metadata": {
+        "gamma": 0.98,
+        "episodes": 100,
+        "seed": 42,
+        "validation_seeds": [2001, 2002, 2003],
+        "incumbent_note": "This is the Stage 4 comparison incumbent. No Stage 4 candidate passed its promotion gate. The scale 20 value is inferred from the frozen runtime defaults used to train this checkpoint."
+      }
+    },
+    "heavy": {
+      "name": "stage4_incumbent_best.pt",
+      "label": "Validated Stage 4 incumbent",
+      "stage": "dqn_retraining_20261120",
+      "scenario": "heavy",
+      "path": "output/dqn_retraining_20261120/models/dqn_heavy/best.pt",
+      "sha256": "B6BB539DAABB512CF45F7B4D2E29E596D6A671F5C5C8481A87894CB421392E6A",
+      "observation_contract": {
+        "schema_version": 1,
+        "scenario": "heavy",
+        "observation_size": 10,
+        "max_queue_per_approach": 16.0,
+        "max_waiting_per_approach": 142.0,
+        "phase_elapsed_scale": 20.0,
+        "decision_interval": 5.0,
+        "min_green": 5.0,
+        "max_green": 60.0,
+        "yellow_time": 4.0,
+        "all_red_time": 0.0,
+        "step_length": 1.0
+      },
+      "metadata": {
+        "gamma": 0.98,
+        "episodes": 100,
+        "seed": 42,
+        "validation_seeds": [2001, 2002, 2003],
+        "incumbent_note": "This is the Stage 4 comparison incumbent. No Stage 4 candidate passed its promotion gate. The scale 20 value is inferred from the frozen runtime defaults used to train this checkpoint."
+      }
+    }
+  }
+}

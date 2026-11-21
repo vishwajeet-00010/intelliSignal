@@ -1,0 +1,144 @@
+{
+  "jobs": [
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6201,
+      "status": "completed",
+      "return_code": 0
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6201,
+      "status": "completed",
+      "return_code": 0
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6202,
+      "status": "failed",
+      "return_code": 1
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6202,
+      "status": "completed",
+      "return_code": 0
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6203,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6203,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6204,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6204,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "moderate",
+      "arm": "control",
+      "seed": 6205,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "moderate",
+      "arm": "treatment",
+      "seed": 6205,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6201,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6201,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6202,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6202,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6203,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6203,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6204,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6204,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "control",
+      "seed": 6205,
+      "status": "failed",
+      "return_code": 2
+    },
+    {
+      "scenario": "heavy",
+      "arm": "treatment",
+      "seed": 6205,
+      "status": "failed",
+      "return_code": 2
+    }
+  ]
+}

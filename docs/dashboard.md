@@ -230,10 +230,14 @@ It is **not** a boolean somebody flipped. Every time the sidebar is drawn,
 `SimulationController.control_modes(scenario)` asks two questions:
 
 1. Is PyTorch installed?
-2. Does a trained checkpoint exist in `models/dqn_<scenario>/`?
+2. Is a checkpoint registered for the scenario, or otherwise available on disk?
 
-Only if both are true is the mode selectable. Otherwise it is listed, disabled
-and explained:
+The default checkpoint comes from `models/active_models.json`, which pins the
+validated Stage 4 incumbent and its hash. Other on-disk checkpoints may be
+selected manually, but the loader checks their recorded preprocessing contract
+before running them. The mode is selectable when PyTorch and a checkpoint file
+are available; a selected legacy checkpoint without a verifiable contract is
+rejected with an explanation when loaded.
 
 ```
 DQN unavailable — train a model first.
@@ -275,8 +279,9 @@ for DQN numbers would be lying, and a test asserts it does not.
 
 ### New sidebar controls, shown only in DQN mode
 
-* **Trained Model** — which checkpoint to run (`best.pt`, `final.pt`, or any
-  `checkpoint_ep*.pt`), listed from what is actually on disk.
+* **Trained Model** — defaults to the registered validated incumbent, followed
+  by other checkpoints found on disk. Each selected model is checked against
+  the scenario's observation scales and signal timings before the run starts.
 * **Random Seed** — the SUMO seed. The same seed gives the same traffic, which
   is how a DQN run and a fixed-time run can be compared fairly.
 

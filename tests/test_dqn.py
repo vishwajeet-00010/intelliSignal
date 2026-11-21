@@ -98,7 +98,7 @@ def test_the_shipped_configuration_file_is_valid():
     settings = load_dqn_settings()
     assert "network" in settings and "training" in settings
     config = load_dqn_config()
-    assert config.gamma == 0.9, "the project's planned discount factor"
+    assert config.gamma == 0.98, "the configured long-horizon discount factor"
     assert config.hidden_layers == [64, 64]
     assert config.epsilon_start == 1.0 and config.epsilon_end == 0.05
 
@@ -106,7 +106,18 @@ def test_the_shipped_configuration_file_is_valid():
 def test_command_line_overrides_win_and_none_is_ignored():
     config = load_dqn_config(episodes=7, gamma=None)
     assert config.episodes == 7
-    assert config.gamma == 0.9, "a None override must not erase a real value"
+    assert config.gamma == 0.98, "a None override must not erase a real value"
+
+
+def test_action_mask_limits_greedy_and_exploratory_actions():
+    agent = fresh_agent()
+    agent.q_values = lambda observation: np.asarray([0.0, 100.0])
+    assert agent.act(random_observation(), valid_actions=[0]) == 0
+    agent.set_epsilon(1.0)
+    assert {agent.act(random_observation(), training=True, valid_actions=[0])
+            for _ in range(20)} == {0}
+    with pytest.raises(ValueError, match="at least one"):
+        agent.act(random_observation(), valid_actions=[])
 
 
 def test_configuration_rejects_settings_that_cannot_work():
@@ -638,9 +649,9 @@ def test_seeding_makes_two_fresh_agents_identical():
 # ==========================================================================
 def test_episode_plan_matches_the_stage2_timing_contract():
     plan = episode_plan("moderate")
-    assert plan["decision_interval"] == 10.0
+    assert plan["decision_interval"] == 5.0
     assert plan["episode_duration"] == 1800.0
-    assert plan["decisions"] == 180
+    assert plan["decisions"] == 360
     assert plan["measured_steps"] == 1800
 
 
@@ -691,10 +702,85 @@ def test_a_dqn_episode_is_measured_by_the_stage1_collector():
                    "max_queue_length", "throughput", "teleports",
                    "vehicles_still_in_network"):
         assert metric in summary
-    assert summary["decisions"] == 12, "120 s at a 10 s decision interval"
-    assert len(summary["decision_log"]) == 12
+    assert summary["decisions"] == 24, "120 s at a 5 s decision interval"
+    assert len(summary["decision_log"]) == 24
     assert {"q_keep", "q_switch"} <= set(summary["decision_log"][0])
+    assert summary["blocked_switches"] == 0
     assert timeseries[0]["signal_state"], "the real SUMO signal was recorded"
+
+
+def test_training_replay_uses_executed_action_and_masks_unavailable_switch(monkeypatch):
+    from training import train_dqn
+
+    class FakeController:
+        green_elapsed = 0.0
+        min_green = 5.0
+
+    class FakeEnvironment:
+        scenario = "moderate"
+        step_length = 1.0
+        connection = object()
+        controller = FakeController()
+        step_callback = None
+
+        def step(self, action):
+            assert action == 0
+            return np.zeros(OBS, dtype=np.float32), 1.0, True, False, {
+                "effective_action": 0, "switch_blocked": False,
+                "forced_switch": False, "switch_count": 0,
+            }
+
+        def reset(self, seed):
+            return np.zeros(OBS, dtype=np.float32), {}
+
+    class FakeCollector:
+        def __init__(self, **kwargs):
+            pass
+
+        def summary(self, scenario):
+            return {"average_queue_length": 0.0, "average_waiting_time": 0.0,
+                    "throughput": 0, "max_queue_length": 0, "vehicles": 0,
+                    "vehicles_still_in_network": 0, "teleports": 0}
+
+    class FakeAgent:
+        epsilon = 1.0
+        learn_steps = 0
+        target_updates = 0
+
+        def __init__(self):
+            self.memory = []
+            self.valid_actions = None
+
+        def set_epsilon(self, value):
+            self.epsilon = value
+
+        def act(self, observation, training=False, valid_actions=None):
+            self.valid_actions = valid_actions
+            return 0
+
+        def remember(self, observation, action, reward, next_observation, done):
+            self.memory.append(action)
+
+        def learn(self):
+            return None
+
+    monkeypatch.setattr(train_dqn, "MetricsCollector", FakeCollector)
+    agent = FakeAgent()
+    config = tiny_config(train_frequency=1)
+    schedule = type("Schedule", (), {"value": lambda self, step: 1.0})()
+    train_dqn._run_episode(FakeEnvironment(), agent, schedule, config,
+                           episode=1, episode_seed=42, global_step=0, max_steps=1)
+    assert agent.valid_actions == [0]
+    assert agent.memory == [0]
+
+
+def test_validation_degradation_tolerance_is_strict_and_bounded():
+    from training.train_dqn import validation_is_degraded
+
+    assert not validation_is_degraded(110.0, 100.0, 0.10)
+    assert validation_is_degraded(110.01, 100.0, 0.10)
+    with pytest.raises(ValueError, match="non-negative"):
+        validation_is_degraded(111.0, 100.0, -0.01)
 
 
 def test_the_dqn_cannot_create_an_unsafe_signal_transition():
@@ -753,8 +839,8 @@ def tiny_training(tmp_path_factory):
 
 def test_training_run_completes_and_reports_what_happened(tiny_training):
     assert tiny_training["episodes"] == 2
-    assert tiny_training["steps_per_episode"] == 12
-    assert tiny_training["total_steps"] == 24
+    assert tiny_training["steps_per_episode"] == 24
+    assert tiny_training["total_steps"] == 48
     assert tiny_training["gradient_steps"] > 0
     assert tiny_training["target_updates"] > 0
     assert tiny_training["architecture"] == "10 -> 64 -> 64 -> 2"
@@ -779,7 +865,7 @@ def test_training_writes_checkpoints_and_metadata(tiny_training):
                 "config"):
         assert key in metadata, "metadata is missing {}".format(key)
     assert metadata["scenario"] == "moderate"
-    assert metadata["gamma"] == 0.9
+    assert metadata["gamma"] == 0.98
 
 
 def test_training_history_csv_has_the_required_columns(tiny_training):
@@ -1185,7 +1271,7 @@ def test_model_status_reports_the_real_checkpoint(monkeypatch, tmp_path,
     status = controller.model_status("moderate")
     assert status["available"] is True
     assert status["summary"]["architecture"] == "10 -> 64 -> 64 -> 2"
-    assert status["summary"]["gamma"] == 0.9
+    assert status["summary"]["gamma"] == 0.98
     assert status["metadata"]["training_date"] == "2026-01-01"
     assert status["checkpoints"][0]["name"] == "best.pt"
 
@@ -1219,7 +1305,7 @@ def test_dashboard_dqn_run_really_runs_the_network(monkeypatch, tmp_path,
 
     decisions = controller.load_decisions("moderate")
     assert decisions is not None and "q_keep" in decisions.columns
-    assert len(decisions) == 12
+    assert len(decisions) == 24
 
 
 def test_a_dqn_run_never_overwrites_a_fixed_time_run(monkeypatch, tmp_path,

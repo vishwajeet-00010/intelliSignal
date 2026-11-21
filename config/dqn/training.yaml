@@ -31,7 +31,7 @@ training:
 
   # --- how much experience to collect -------------------------------------
   # One episode is one full SUMO run of the scenario. With the Stage 2
-  # defaults (1800 s episode, 10 s decision interval) that is 180 decisions,
+  # defaults (1800 s episode, 5 s decision interval) that is 360 decisions,
   # so 100 episodes is 18,000 training steps.
   episodes: 100
 
@@ -47,7 +47,7 @@ training:
   # --- the learning update -------------------------------------------------
   batch_size: 64              # transitions per gradient step
   learning_rate: 0.001        # Adam step size
-  gamma: 0.9                  # discount factor - the project's planned value
+  gamma: 0.98                 # longer horizon for clearing oversaturated queues
   loss: huber                 # "huber" (smooth_l1) or "mse"
   gradient_clip: 10.0         # max gradient norm; 0 or null disables clipping
 
@@ -81,9 +81,9 @@ training:
   seed: 42                    # Python / NumPy / PyTorch / SUMO seed
   checkpoint_every: 10        # episodes between checkpoint saves
 
-  # best.pt is saved when the mean return of the last `best_window` episodes
-  # improves, not when a single episode happens to be good. Traffic RL returns
-  # are noisy and one lucky episode is not a better policy.
+  # Kept for configuration compatibility with historical Stage 3 runs.
+  # Current training selects best.pt by the lowest mean waiting on the
+  # validation seeds supplied to train(); best_window no longer selects it.
   best_window: 5
 
   # Reuse the same SUMO seed for every episode (true) or advance it per

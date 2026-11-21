@@ -2,11 +2,16 @@
 
 **AI-Based Adaptive Traffic Signal Management Using SUMO and Deep Reinforcement Learning**
 
-> **Current status: Stages 1–3 implemented; Windows verification completed on 16 Nov 2026.**
-> The SUMO simulation, Gymnasium environment, trained PyTorch DQN, evaluation
-> pipeline, and six-page Streamlit dashboard are working. The user reported
-> **221 passed, 1 skipped in 166.72 s** and confirmed the dashboard walkthrough.
-> Windows comparisons reproduced the reference results for both scenarios.
+> **Current status (21 Nov 2026): Stage 4 is validated; a clean Stage 5 attempt is running. Stage 5 is not complete.**
+> The Stage 4 incumbent reduced confirmatory mean waiting versus the starting
+> DQN by **90.1% (moderate)** and **15.2% (heavy)** across 20 matched seeds.
+> Neither Stage 4 candidate cleared its validation gate. The dashboard now uses
+> the validated incumbent registered in `models/active_models.json`.
+> The original Stage 5 primary run has **1 complete, 1 partial, and 18 not started** cells.
+> Its archived status files disagree with artifacts; see
+> `output/dqn_stage5_20261121/run_reconciliation.md`. A separate fresh run is
+> underway in `output/dqn_stage5_20261121_attempt3/`; its live status is in
+> `training_batch_status_final.json`. Do not promote a candidate or start Stage 6.
 
 The existing Windows environment is `.venv-stage3` (Python 3.12.13, installed
 SUMO/TraCI/sumolib packages 1.28.0, PyTorch 2.14.1). Comparison CSVs are in
@@ -14,7 +19,12 @@ SUMO/TraCI/sumolib packages 1.28.0, PyTorch 2.14.1). Comparison CSVs are in
 fixed-time, trained DQN, and untrained controls evaluated at seeds 42, 43, and 44
 for 1800 seconds. Waiting time decreased by **42.3% (moderate)** and **8.9%
 (heavy)**; throughput decreased by **0.3%** and **0.6%**, respectively.
-See [`HANDOFF.md`](HANDOFF.md) for verification details and remaining work.
+Use [`requirements-win-py312.lock`](requirements-win-py312.lock) to recreate
+that exact Windows Python environment. `requirements.txt` remains the portable
+minimum-version list.
+The 16 Nov comparisons below are historical Stage 3 verification. For the
+latest measured DQN results and current project status, see
+[`HANDOFF.md`](HANDOFF.md) and the Stage 4 experiment directory.
 
 ---
 
@@ -93,7 +103,7 @@ streamlit run dashboard.py
 | **Greedy evaluation over multiple seeds** | Implemented (`evaluation/evaluate_dqn.py`) |
 | **Fixed-Time vs DQN comparison + improvement percentages + charts** | Implemented (`evaluation/compare_controllers.py`) |
 | **DQN mode in the dashboard, enabled only when a model exists** | Implemented |
-| Automated tests | **221 passed, 1 skipped on Windows** (user-reported, 16 Nov 2026); historical Linux run: 222 passed |
+| Automated tests | **224 passed, 1 skipped** (verified 20 Nov 2026); historical 16 Nov user-reported run: 221 passed, 1 skipped |
 
 ### What is NOT implemented
 
@@ -271,6 +281,7 @@ A longer explanation is in [`docs/dqn_training.md`](docs/dqn_training.md) and
 intelliSignal/
 ├── README.md
 ├── requirements.txt
+├── requirements-win-py312.lock  exact verified Windows/Python 3.12 environment
 ├── .gitignore
 │
 ├── config/                      scenario definitions (the only place numbers live)
@@ -340,9 +351,10 @@ intelliSignal/
 │   ├── compare_controllers.py   Fixed-Time vs DQN on identical traffic
 │   └── plot_comparison.py       the comparison charts
 │
-├── models/                      Stage 3: trained checkpoints (+ metadata.json)
-│   ├── dqn_moderate/            best.pt, final.pt, checkpoint_ep*.pt
-│   └── dqn_heavy/
+├── models/                      active-model registry and historical checkpoints
+│   ├── active_models.json       SHA-pinned Stage 4 dashboard incumbents
+│   ├── dqn_moderate/            original Stage 3 checkpoints
+│   └── dqn_heavy/               original Stage 3 checkpoints
 │
 ├── results/
 │   ├── csv/                     the recorded Stage 1 baseline (NEVER overwritten)
@@ -390,6 +402,9 @@ those files are generated from the YAML configuration every time a scenario runs
    ```bash
    pip install -r requirements.txt
    ```
+
+   For the verified Windows/Python 3.12.13 environment, install the exact
+   snapshot with `pip install -r requirements-win-py312.lock` instead.
 
 3. **Check that SUMO is reachable:**
 
@@ -531,7 +546,6 @@ Evaluate the trained policy greedily (epsilon = 0, no learning):
 
 ```bash
 python evaluation/evaluate_dqn.py --scenario moderate --seeds 42 43 44
-python evaluation/evaluate_dqn.py --scenario moderate --model models/dqn_moderate/final.pt --seed 42
 ```
 
 Compare it against the fixed-time baseline on identical traffic:
@@ -556,7 +570,7 @@ Use the agent from Python:
 ```python
 from agents import DQNAgent
 
-agent = DQNAgent.for_scenario("moderate")        # loads models/dqn_moderate/best.pt
+agent = DQNAgent.for_scenario("moderate")        # loads the registered incumbent
 action = agent.act(observation, training=False)  # 0 = keep, 1 = switch
 print(agent.q_values(observation))               # [Q(keep), Q(switch)]
 ```
@@ -748,8 +762,12 @@ Full discussion, including every limitation, is in
 
 ## 12. Tests
 
+Latest verified Windows run (20 Nov 2026): **224 passed, 1 skipped**, using
+`.venv-stage3` and `tmp/pytest-stage4-full-20261120` as the isolated pytest
+temporary directory.
+
 ```bash
-python -m pytest -q                               # everything: 222 tests
+python -m pytest -q                               # entire current suite
 python -m pytest tests/test_simulation.py -q      # Stage 1: 24 tests
 python -m pytest tests/test_rl_environment.py -q  # Stage 2: 47 tests
 python -m pytest tests/test_dashboard.py -q       # dashboard: 55 tests
@@ -757,7 +775,7 @@ python -m pytest tests/test_dqn.py -q             # Stage 3: 96 tests
 ```
 
 ```
-221 passed, 1 skipped in 166.72s (0:02:46)
+221 passed, 1 skipped in 166.72s (0:02:46) — historical run, 16 Nov 2026
 ```
 
 The result above was reported by the user on Windows on 16 Nov 2026 using

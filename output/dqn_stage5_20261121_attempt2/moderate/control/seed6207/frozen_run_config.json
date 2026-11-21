@@ -1,0 +1,35 @@
+{
+  "scenario": "moderate",
+  "arm": "control",
+  "seed": 6207,
+  "phase_elapsed_scale": 20.0,
+  "changed_factor": "phase_elapsed observation divisor only",
+  "dqn_config": {
+    "hidden_layers": [
+      64,
+      64
+    ],
+    "episodes": 100,
+    "episode_duration": null,
+    "max_steps_per_episode": null,
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "gamma": 0.98,
+    "loss": "huber",
+    "gradient_clip": 10.0,
+    "replay_capacity": 50000,
+    "learning_starts": 500,
+    "train_frequency": 1,
+    "target_update_frequency": 500,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay": "linear",
+    "epsilon_decay_steps": null,
+    "exploration_fraction": 0.5,
+    "epsilon_decay_rate": 0.9995,
+    "seed": 6207,
+    "checkpoint_every": 10,
+    "best_window": 5,
+    "vary_episode_seed": true
+  }
+}

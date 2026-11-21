@@ -45,3 +45,10 @@ vehicle:
   length: 5.0             # m
   min_gap: 2.5            # m
   sigma: 0.5              # driver imperfection (0 = perfect driver)
+
+# RL observation scales measured from 10 greedy incumbent rollouts,
+# validation seeds 2001-2010, after the 5 s cadence/action-mask changes.
+rl:
+  observation:
+    max_queue_per_approach: 3
+    max_waiting_per_approach: 14

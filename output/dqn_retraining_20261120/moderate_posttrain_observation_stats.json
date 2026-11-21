@@ -1,0 +1,76 @@
+{
+  "scenario": "moderate",
+  "model": "output\\dqn_retraining_20261120\\models\\dqn_moderate\\best.pt",
+  "seeds": [
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010
+  ],
+  "samples_per_approach": {
+    "queues": {
+      "north": 18000,
+      "east": 18000,
+      "south": 18000,
+      "west": 18000
+    },
+    "waiting": {
+      "north": 18000,
+      "east": 18000,
+      "south": 18000,
+      "west": 18000
+    }
+  },
+  "percentiles": {
+    "queues": {
+      "north": {
+        "p95": 2.0,
+        "p99": 3.0,
+        "max": 3.0
+      },
+      "east": {
+        "p95": 1.0,
+        "p99": 2.0,
+        "max": 2.0
+      },
+      "south": {
+        "p95": 2.0,
+        "p99": 3.0,
+        "max": 3.0
+      },
+      "west": {
+        "p95": 1.0,
+        "p99": 2.0,
+        "max": 2.0
+      }
+    },
+    "waiting": {
+      "north": {
+        "p95": 8.0,
+        "p99": 15.0,
+        "max": 28.0
+      },
+      "east": {
+        "p95": 6.0,
+        "p99": 10.0,
+        "max": 20.0
+      },
+      "south": {
+        "p95": 8.0,
+        "p99": 15.0,
+        "max": 25.0
+      },
+      "west": {
+        "p95": 6.0,
+        "p99": 10.0,
+        "max": 21.0
+      }
+    }
+  }
+}

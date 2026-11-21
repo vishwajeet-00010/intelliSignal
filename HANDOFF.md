@@ -1,12 +1,14 @@
 # IntelliSignal — Handoff
 
-Handoff updated: 16 Nov 2026. Historical evidence: the four status notes written at the end of Stage 1 (19 Sep), Stage 2 (20 Sep), the dashboard (21 Sep) and Stage 3 (11 Oct 2026). Current Windows evidence: the user-reported test output, comparison CSVs under `verification/windows_20261116/`, and the user's dashboard walkthrough confirmation.
+Handoff updated: 21 Nov 2026. The stage reports below are historical snapshots from Stages 1–3; later retraining and validation evidence is under `output/dqn_retraining_20261120/`, `output/dqn_stage4_20261120/`, and `output/dqn_stage5_20261121/`. A new Stage 5 run is under `output/dqn_stage5_20261121_attempt3/` and remains incomplete.
 
-**Project location:** `C:\Users\Vishwajeet\OneDrive\Desktop\project\intelliSignal` (Windows).
+**Current workspace:** `D:\intelliSignal` (Windows). The location above in older handoffs is historical.
 
-> **Read this first.** Stages 1–3 are implemented and have now been verified on Windows. The existing `.venv-stage3` interpreter runs Python 3.12.13; installed package metadata shows SUMO/TraCI/sumolib 1.28.0 and PyTorch 2.14.1. The user reported **221 passed, 1 skipped in 166.72 s**, reproduced both scenario comparisons, and confirmed the dashboard checks all work. Earlier stage reports describe Linux runs with SUMO 1.27.1; preserve them as historical records.
+> **Read this first.** Stages 1–3 are implemented and Stage 4 robust validation is complete. The Stage 4 suite reported **224 passed, 1 skipped** using Python 3.12.13, SUMO/TraCI 1.28.0, and PyTorch 2.14.1. On 20 matched confirmatory seeds, the retrained incumbent reduced mean waiting versus the starting DQN by **90.1% in moderate traffic** (29.54→2.92 s) and **15.2% in heavy traffic** (19.41→16.47 s). Neither pair of Stage 4 candidate runs passed validation. The dashboard now uses the validated incumbent through `models/active_models.json`; no Stage 4 candidate was promoted. Stage 5 was reconciled as incomplete: 1 primary cell is complete, 1 partial, and 18 have no artifacts. See `output/dqn_stage5_20261121/run_reconciliation.md`; its raw status snapshots and logs remain preserved.
 
-### Windows verification — 16 Nov 2026
+**Immediate next step:** monitor the separately named Stage 5 attempt 3, then verify all 20 new cells, validation, eligible confirmatory comparisons, tests, protected-file integrity, and every page of the report. The original partial run stays excluded. No Stage 6 work should start until the Stage 5 checklist is complete and the user confirms it.
+
+### Historical Windows verification — 16 Nov 2026
 
 - **Tests:** user-reported result above. The skipped test was not identified in the supplied summary. `tests/test_dqn.py` has a process-cleanup test that skips without `pgrep`; this is a likely explanation, not a confirmed skip reason.
 - **Comparisons:** existing `best.pt` models, seeds 42/43/44, 1800 seconds, including the untrained control. CSVs: `verification/windows_20261116/moderate/` and `verification/windows_20261116/heavy/`. Both seed-42 fixed-time baselines and the aggregate comparison results match the reference figures below.
@@ -30,7 +32,7 @@ on the same simulated four-way intersection, under two demand scenarios (moderat
 
 | Area | Technology |
 |---|---|
-| Traffic simulator | SUMO 1.27.1, driven through TraCI (`eclipse-sumo` pip package) |
+| Traffic simulator | SUMO 1.28.0 on Windows; historical Linux runs used 1.27.1, driven through TraCI |
 | RL environment | Gymnasium (custom `gym.Env`, registered as `IntelliSignal-v0`) |
 | SUMO-RL | `sumo_rl` used only in an adapter + one integration test (not as the base of the env) |
 | Deep learning | PyTorch (`torch>=2.0`) — hand-written DQN, **no Stable-Baselines3** |
@@ -41,7 +43,7 @@ on the same simulated four-way intersection, under two demand scenarios (moderat
 
 ## 3. Folder structure
 
-Reconstructed from the status notes; **verify against the real tree** (`tree /F` on Windows) — some minor files may be missing here.
+High-level map of the current workspace. Experiment result files are intentionally omitted from this tree.
 
 ```
 intelliSignal/
@@ -58,12 +60,15 @@ intelliSignal/
 ├── rl/           environment.py, state.py, action.py, reward.py, config.py,
 │                 sumo_rl_adapter.py, run_environment.py
 ├── agents/       base_agent.py, fixed_time_agent.py, dqn_agent.py, dqn_network.py,
-│                 replay_buffer.py, dqn_config.py, registry.py
+│                 replay_buffer.py, dqn_config.py
 ├── training/     train_dqn.py, plot_training.py
 ├── evaluation/   evaluate_dqn.py, compare_controllers.py, plot_comparison.py
 ├── dashboard.py + dashboard/   theme, state, controls, components, charts
-├── models/       dqn_<scenario>/*.pt (seed 42), dqn_<scenario>_seed<N>/ for other seeds
+├── models/       active_models.json points to the validated incumbent under output/
 ├── results/      csv/ (PROTECTED Stage 1 baseline), data/ (dashboard run output), graphs
+├── experiments/  historical controlled experiment records
+├── output/       retraining plus Stage 4/5 isolated evidence
+├── verification/ prior Windows/Linux validation outputs
 ├── tests/        test_simulation.py, test_rl_environment.py, test_dashboard.py, test_dqn.py
 ├── docs/         architecture.md, rl_environment.md, dashboard.md, dqn_training.md
 ├── presentation/ slides, capture_screenshots.py, dashboard_screenshots/ (01–11)
@@ -72,7 +77,7 @@ intelliSignal/
 └── STAGE1_REPORT.md, STAGE2_REPORT.md, DASHBOARD_REPORT.md, STAGE3_REPORT.md
 ```
 
-## 4. Working features (all verified in real SUMO runs, in the Linux container)
+## 4. Implemented features and current settings
 
 **Stage 1 — simulation and baseline**
 - Four-way intersection: 4 × 200 m approaches, 2 lanes per direction, 16 signal-controlled links at junction `C`.
@@ -90,18 +95,19 @@ intelliSignal/
 | Throughput | 693 | 1351 |
 | Still in network | 9 | 94 |
 
-**Stage 2 — RL environment** (`IntelliSignal-v0`, passes `check_env` with no warnings)
+**Stage 2 — RL environment** (`IntelliSignal-v0`)
 - Observation `Box(0,1,(10,),float32)` = [N,E,S,W queue][N,E,S,W waiting][phase][phase elapsed].
 - Action `Discrete(2)`: 0 = keep, 1 = switch, with safety rules.
 - Reward `-0.01 * (total_waiting + total_queue)`, averaged over the decision interval.
-- `decision_interval=10 s`, `min_green=10 s`, `max_green=60 s`, `yellow=4 s`.
+- Current settings: `decision_interval=5 s`, `min_green=5 s`, `max_green=60 s`, `yellow=4 s`.
+- Current queue/waiting scales are scenario-specific: moderate `3/14`, heavy `16/142`. The default phase-age scale is 20 s and clips before `max_green=60 s`; see the caveat below.
 
 **Dashboard** (6 pages incl. DQN Model and Comparison)
 - UI only talks to `SimulationController`; real signal colours decoded from recorded SUMO states with a time slider.
 - Control modes: fixed-time and DQN (DQN enabled only when a model file and torch exist for the scenario).
 - Driven end-to-end in real Chromium, including a real DQN run via the Run button.
 
-**Stage 3 — DQN**
+**Historical Stage 3 — original DQN baseline**
 - Network `10 → 64 → 64 → 2` (4,994 params, matching the implementation and model metadata; the historical Stage 3 report says 5,058); gamma 0.9, lr 0.001, batch 64, Huber loss, replay 50k, learning_starts 500, target update every 500 gradient steps, epsilon 1.0 → 0.05 linearly over 50 % of the run.
 - Training, evaluation, fixed-time-vs-DQN comparison, and comparison plots.
 - Results (3 eval seeds; DQN vs fixed-time):
@@ -113,26 +119,32 @@ intelliSignal/
 | Max queue | 9.7 → 7.0 (+27.6 %) | 71.3 → 69.7 (+2.3 %) |
 | Throughput | 693 → 691 (−0.3 %) | 1351 → 1344 (−0.6 %) |
 
-- Untrained control (random weights): moderate 10.91 s, heavy 88.21 s — worse than fixed-time, so the gain comes from learning, not from the 10 s decision interval.
+- These figures use the historical 10-second environment and original Stage 3 models. They are not the current 5-second run results.
 - Fixed-time comparison at seed 42 reproduces the Stage 1 baseline exactly (asserted by a test).
 
-**Tests:** latest Windows run, reported by the user: **221 passed, 1 skipped in 166.72 s**. Historical Linux run: **222 passed** (24 Stage 1 + 47 Stage 2 + 55 dashboard + 96 Stage 3). See the Windows verification note above for the unconfirmed skip reason.
+**Historical Stage 3 tests:** the Windows run reported by the user on 16 Nov was **221 passed, 1 skipped in 166.72 s**; the historical Linux run was **222 passed**. The latest full suite is **224 passed, 1 skipped** on 20 Nov 2026; its command and isolated temp path are recorded in `output/dqn_stage4_20261120/experiment_manifest.json`.
 
-## 5. Unfinished / planned features (NOT built)
+## 5. Current limitations and next steps
 
 - **Windows runtime verification is complete** for tests, comparisons, and the user-confirmed dashboard walkthrough. Fresh screenshot capture remains outstanding.
-- **Heavy-scenario convergence:** at 100 episodes the heavy agent is still improving; moderate plateaued around episode 40. A longer run is untested.
+- **Training stability:** the 20 Nov incumbent retraining improved over the starting DQN, but both pairs of Stage 4 candidate runs failed the validation gate. Keep the incumbent and run a controlled multi-seed stability study before selecting a replacement.
+- **Stage 5 is reconciled but incomplete:** the preserved final snapshot says moderate/control seed 6207 completed, moderate/treatment seed 6207 running, and 18 queued. Artifact inspection finds 1 complete, 1 partial (19 history rows, no summary), and 18 with no artifacts. The runner PID is absent and no Python/SUMO process was found. The older replacement log's 6202–6206 errors came from seed arguments rejected by the frozen CLI; a 100-episode moderate/treatment seed-6202 artifact exists despite an archived failure status. See `output/dqn_stage5_20261121/run_reconciliation.md`; do not overwrite these records.
 - **Benchmarks against PPO/A2C or a tuned actuated controller** — listed as future scope only.
 - **Clean screenshots:** Stage 1 screenshots were captured headlessly and the wide views crop the top of the northern approach. Re-run `python presentation/capture_screenshots.py` on Windows.
 - Anything beyond a single intersection (multi-intersection, real-world data, pedestrians, emergency vehicles) is not planned in the notes; treat as out of scope unless Adesh says otherwise.
 
-## 6. Known bugs, caveats and gotchas
+## 6. Known issues, caveats and gotchas
 
-No open functional bugs are recorded. The issues below are the real ones:
+The current working tree has not yet been fully re-verified after its latest edits. The main correctness and reproducibility issues to keep in view are:
 
 - **Use the verified `.venv-stage3` environment:** Python 3.12.13 with installed PyTorch 2.14.1. The earlier Python 3.14 compatibility warning is historical; this verification did not test Python 3.14.
 - **`sumo_rl` raises ImportError unless `SUMO_HOME` is set.** `rl/sumo_rl_adapter.ensure_sumo_home()` derives it from the eclipse-sumo package, but setting it properly on Windows is cleaner. Stage 1 doesn't need it.
-- **Dependency versions are not pinned** in `requirements.txt`. The historical Linux and current Windows environments differ; use the verified environment for reproduction. CPU execution is sufficient for this small network.
+- **Reproduce the verified Windows environment with the full lock.** `requirements.txt` is intentionally portable and keeps minimum versions; `requirements-win-py312.lock` pins the complete Python 3.12.13 environment. SUMO itself is packaged at 1.28.0 in this lock.
+- **The dashboard default is now the validated incumbent.** `models/active_models.json` points to each Stage 4 incumbent checkpoint and pins its SHA-256 and observation contract. The original Stage 3 model files remain on disk but lack a verified contract; loading them for a named scenario is rejected.
+- **Phase-age scales are model-specific.** Standalone environments keep the legacy 20-second default for compatibility. New DQN training defaults to `max_green` (60 seconds), and saves that scale with the checkpoint. The dashboard incumbent was trained with scale 20 and continues to receive scale 20 so its input stays consistent. Stage 5 has not validated whether scale 60 improves performance; do not change the incumbent's input scale without a retrained, gated checkpoint.
+- **Keep DQN targets inside the legal action set.** Training now stores the next state's min/max-green action mask in replay and applies it when computing the target-network maximum. Legacy direct replay inserts default to all actions valid.
+- **Observation scales are part of the model contract.** New checkpoints record queue, waiting, phase-age, and timing values in both the checkpoint and metadata. Loads compare that contract with the current scenario. The active Stage 4 checkpoints use the sidecar registry because their frozen experiment files were not edited.
+- **Validation selection can overfit the validation seeds.** `train()` still reuses its selection seeds to choose `best.pt`; checkpoint metadata records those seeds, and `evaluate_dqn.py` refuses to call them an independent evaluation unless the diagnostic override is explicit. Confirmatory reports must continue to use a new, sealed seed set, as Stage 4 did.
 - **Do not run training and evaluation for the same scenario in parallel** — both rebuild `sumo/routes/<scenario>_rl.rou.xml`. Different scenarios are safe in parallel.
 - **"Still in network" is misleading under heavy demand.** The DQN admits more vehicles (1462 vs 1445) because clearer approaches let SUMO insert held-back vehicles. Always read it next to the insertion count.
 - **Waiting-time definitions differ:** the project averages over all vehicles that entered (heavy: 51.90 s); SUMO's own end-of-run statistic averages completed trips only (heavy: 35.55 s). Both correct; the project's is the honest one for a congested run.
@@ -143,9 +155,9 @@ No open functional bugs are recorded. The issues below are the real ones:
 ## 7. Important design decisions (do not undo without reason)
 
 1. **Own Gymnasium env, not a sumo-rl subclass.** sumo-rl's action space is "name the next phase"; the spec needs keep/switch plus a custom 10-dim observation and reward. A real `sumo_rl.SumoEnvironment` is built in `rl/sumo_rl_adapter.py` and exercised by a test as the integration proof.
-2. **Decision interval is 10 s, not 5.** Yellow is 4 s; `rl/config.py` enforces `decision_interval > yellow + all_red`.
+2. **Current decision interval is 5 s.** Yellow is 4 s, so a switch leaves 1 s of new green during that interval; the configuration enforces `decision_interval > yellow + all_red`.
 3. **State uses current waiting time, not accumulated** (accumulated would leak episode time). Reporting metric still uses accumulated.
-4. **Normalisation divisors are measured, not guessed:** 50 (queue) and 1500 (waiting), shared across scenarios so one agent can be evaluated on both.
+4. **Current queue/wait normalisation is measured per scenario:** moderate 3/14, heavy 16/142. Models are scenario-specific; older Stage 3 models used shared 50/1500 values.
 5. **Fairness comes from `max_green` (structural), not a reward term.** `fairness_weight` exists, is tested, defaults to 0.0.
 6. **Generated vs committed files:** `sumo/routes|additional|config/` are generated from YAML on every run. The RL env writes under `<scenario>_rl`, the adapter under `<scenario>_sumorl`, so Stage 1 files are never overwritten (regression tests enforce this).
 7. **`config/rl/environment.yaml` lives in a subdirectory** so `available_scenarios()` (which lists `config/*.yaml`) doesn't treat it as a third scenario.
@@ -154,9 +166,9 @@ No open functional bugs are recorded. The issues below are the real ones:
 10. **`setRedYellowGreenState` moves the TL to SUMO's `online` program** and persists across steps (asserted by test).
 11. **No Stable-Baselines3.** The DQN update is written out in full so it can be explained line by line. Only `torch>=2.0` was added.
 12. **`select_action` is polymorphic:** a 10-value observation returns the env action (keep/switch); a `TrafficState` returns the phase (0 = NS, 1 = EW). The observation travels in `TrafficState.extra["observation"]`. `phase_action_to_env_action()` bridges the two conventions.
-13. **DQN availability is read from the filesystem** (`control_modes()` checks `models/dqn_<scenario>/*.pt` + torch), never a boolean flag.
+13. **DQN availability is read from the filesystem** (the active-model registry and checkpoint files + torch), never a boolean flag.
 14. **No DQN fallback to fixed-time results.** `load_results(scenario, "dqn_adaptive")` returns None if absent. Separate files: `<scenario>_dqn_results.csv`, `..._decisions.csv`.
-15. **`best.pt` follows a 5-episode moving average**, not one lucky episode. Seed 42 owns `models/dqn_<scenario>/`; other seeds go to `_seed<N>` directories.
+15. **Current `best.pt` selection uses validation waiting time.** The legacy `best_window` setting remains in the config for compatibility but no longer selects the checkpoint. Seed 42 owns `models/dqn_<scenario>/`; other seeds go to `_seed<N>` directories unless isolated paths are supplied.
 16. **Keep using `--include-untrained`** (random-weight control); it is what makes the improvement claim defensible.
 17. **`results/csv/` is protected.** Dashboard runs write to `results/data/`; the dashboard falls back to the Stage 1 baseline and labels it. A test asserts the baseline is never overwritten.
 18. **Fairness guarantee:** `simulation/agent_simulation.py` runs both controllers on byte-identical SUMO inputs, measured by the Stage 1 `MetricsCollector`.
@@ -183,7 +195,8 @@ Use the existing verified Windows environment from the project root:
 
 ```powershell
 .\.venv-stage3\Scripts\python.exe -m pytest -q
-# Latest user-reported result: 221 passed, 1 skipped in 166.72 s
+# Historical Stage 3 run: 221 passed, 1 skipped in 166.72 s
+# Latest full suite: 224 passed, 1 skipped (see Stage 4 manifest)
 .\.venv-stage3\Scripts\python.exe -m streamlit run dashboard.py
 
 # Completed verification commands (rerunning replaces these CSVs and shared plots):
@@ -226,9 +239,9 @@ Reference training run used for the reported results: 100 episodes per scenario,
 
 Windows tests, baseline/comparison reproduction, model loading, and the manual dashboard walkthrough are complete; no retraining is needed to demonstrate the current project.
 
-1. **Presentation prep:** capture clean screenshots and update slides/speaking notes with Stage 3 and Windows verification results. Report waiting/queue improvements alongside the small throughput decreases. The existing deck covers Stage 1 only.
-2. **Improve the heavy-scenario result (optional experiment):** train more episodes into separate model/results directories, inspect convergence, and compare against the preserved current model using the same seeds and `--include-untrained`.
-3. **Optional extensions:** benchmark against a tuned actuated controller and PPO/A2C; test generalisation (train on one scenario, evaluate on the other).
+1. **Finish or formally close Stage 5.** Decide how to account for partial moderate/treatment seed 6207, then run the remaining primary cells in a separately named attempt. Complete the frozen validation/calibration/confirmatory gates where eligible, verify integrity, and produce the report. Do not call the study complete while cells remain missing.
+2. **Presentation prep:** update slides and speaking notes from the final Stage 4/5 evidence, including negative results and remaining limitations.
+3. **Future extensions:** evaluate demand shifts, sensor noise, time-varying demand, and multi-intersection coordination; compare PPO/A2C only after current baselines are complete.
 
 ## 11. Working conventions inherited from earlier stages
 

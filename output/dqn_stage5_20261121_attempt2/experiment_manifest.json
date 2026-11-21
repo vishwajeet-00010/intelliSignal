@@ -1,0 +1,120 @@
+{
+  "experiment": "dqn_stage5_20261121_attempt2",
+  "parent_attempt": "output/dqn_stage5_20261121/",
+  "status": "interrupted_sandbox_traci_socket_permission_denied",
+  "protocol": "protocol.md",
+  "audit": "audit.md",
+  "seed_plan": {
+    "training": [
+      6207,
+      6208,
+      6209,
+      6210,
+      6211
+    ],
+    "validation": [
+      6301,
+      6302,
+      6303,
+      6304,
+      6305
+    ],
+    "calibration": [
+      6401,
+      6402,
+      6403,
+      6404,
+      6405,
+      6406,
+      6407,
+      6408,
+      6409,
+      6410
+    ],
+    "confirmatory": [
+      6501,
+      6502,
+      6503,
+      6504,
+      6505,
+      6506,
+      6507,
+      6508,
+      6509,
+      6510,
+      6511,
+      6512,
+      6513,
+      6514,
+      6515,
+      6516,
+      6517,
+      6518,
+      6519,
+      6520
+    ]
+  },
+  "arms": {
+    "control": {
+      "name": "legacy_phase_age_scale",
+      "phase_elapsed_scale_seconds": 20,
+      "changed_factor": "none; frozen Stage 4 configuration"
+    },
+    "treatment": {
+      "name": "full_legal_phase_age_scale",
+      "phase_elapsed_scale_seconds": 60,
+      "changed_factor": "phase_elapsed observation divisor only"
+    }
+  },
+  "training": {
+    "episodes_per_run": 100,
+    "scenarios": [
+      "moderate",
+      "heavy"
+    ],
+    "training_seeds_per_arm_per_scenario": 5,
+    "checkpoint_every": 10,
+    "validation_degradation_tolerance": 0.1,
+    "validation_degradation_patience": 3,
+    "primary_training_seeds": [
+      6207,
+      6208,
+      6209,
+      6210,
+      6211
+    ],
+    "status": "interrupted",
+    "completed_cells": 0,
+    "failed_cells": 0,
+    "partial_cells": 1,
+    "not_started_cells": 19
+  },
+  "validation_gates": {
+    "min_independent_runs_pass": 4,
+    "runs_per_configuration": 5,
+    "max_waiting_regression_percent": 3,
+    "max_average_queue_regression_percent": 2,
+    "max_throughput_regression_percent": 1,
+    "blocked_switches": 0,
+    "teleports": 0
+  },
+  "promotion_gates": {
+    "min_wait_improvement_percent": 2,
+    "min_paired_wait_wins_of_20": 11,
+    "max_average_queue_regression_percent": 2,
+    "max_max_queue_regression_percent": 5,
+    "max_throughput_regression_percent": 1,
+    "blocked_switches": 0,
+    "teleports": 0,
+    "automatic_model_replacement": false
+  },
+  "training_runs": {},
+  "training_runs_started": [],
+  "integrity": {
+    "before": "integrity_before.json",
+    "after": null,
+    "passed": null
+  },
+  "user_signoff": "pending",
+  "stage6_allowed": false
+}

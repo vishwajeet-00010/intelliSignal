@@ -13,6 +13,7 @@ One entry per decision the agent made, called a transition:
     reward      the congestion reward that followed
     next_state  the observation after the decision interval
     done        True when the episode ended on this transition
+    next_action_mask  actions allowed by the next state's signal timing
 
 Why it exists
 -------------
@@ -36,38 +37,60 @@ from __future__ import annotations
 
 import random
 from collections import deque, namedtuple
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
 
 #: One stored decision. Plain and inspectable, which keeps the tests readable.
 Transition = namedtuple("Transition",
-                        ("state", "action", "reward", "next_state", "done"))
+                        ("state", "action", "reward", "next_state", "done",
+                         "next_action_mask"))
 
-#: What `sample()` returns: five NumPy arrays, all with the batch as dimension 0.
+#: What `sample()` returns: arrays with the batch as dimension 0.
 Batch = namedtuple("Batch",
-                   ("states", "actions", "rewards", "next_states", "dones"))
+                   ("states", "actions", "rewards", "next_states", "dones",
+                    "next_action_masks"))
 
 
 class ReplayBuffer:
     """A fixed-capacity memory of transitions with uniform random sampling."""
 
-    def __init__(self, capacity: int = 50000, seed: Optional[int] = None):
+    def __init__(self, capacity: int = 50000, seed: Optional[int] = None,
+                 num_actions: int = 2):
         if int(capacity) <= 0:
             raise ValueError("capacity must be positive, got {}.".format(capacity))
+        if int(num_actions) <= 0:
+            raise ValueError("num_actions must be positive, got {}.".format(num_actions))
         self.capacity = int(capacity)
+        self.num_actions = int(num_actions)
         self._storage = deque(maxlen=self.capacity)
         self._random = random.Random(seed)
 
     # ------------------------------------------------------------------
-    def push(self, state, action: int, reward: float, next_state, done: bool) -> None:
-        """Store one transition. Oldest is dropped once the buffer is full."""
+    def push(self, state, action: int, reward: float, next_state, done: bool,
+             next_valid_actions: Optional[Sequence[int]] = None) -> None:
+        """Store one transition. Oldest is dropped once the buffer is full.
+
+        When omitted, `next_valid_actions` defaults to the full action space
+        for compatibility with callers that do not model timing constraints.
+        """
+        if next_valid_actions is None:
+            next_action_mask = np.ones(self.num_actions, dtype=np.bool_)
+        else:
+            next_action_mask = np.zeros(self.num_actions, dtype=np.bool_)
+            valid = [int(value) for value in next_valid_actions]
+            if not valid:
+                raise ValueError("next_valid_actions must contain an action")
+            if any(value < 0 or value >= self.num_actions for value in valid):
+                raise ValueError("next_valid_actions contains an action outside the action space")
+            next_action_mask[valid] = True
         self._storage.append(Transition(
             np.asarray(state, dtype=np.float32),
             int(action),
             float(reward),
             np.asarray(next_state, dtype=np.float32),
             bool(done),
+            next_action_mask,
         ))
 
     #: `remember` reads better from the agent, `push` from the tests.
@@ -75,13 +98,14 @@ class ReplayBuffer:
 
     # ------------------------------------------------------------------
     def sample(self, batch_size: int) -> Batch:
-        """A uniformly random mini-batch, as five arrays.
+        """A uniformly random mini-batch, including next-action masks.
 
             states      (batch_size, observation_size)  float32
             actions     (batch_size,)                   int64
             rewards     (batch_size,)                   float32
             next_states (batch_size, observation_size)  float32
             dones       (batch_size,)                   float32  (0.0 / 1.0)
+            next_action_masks (batch_size, num_actions) bool
 
         Sampling is WITHOUT replacement inside one batch, so the same
         transition cannot be counted twice in a single gradient step.
@@ -103,6 +127,8 @@ class ReplayBuffer:
             rewards=np.asarray([t.reward for t in transitions], dtype=np.float32),
             next_states=np.stack([t.next_state for t in transitions]).astype(np.float32),
             dones=np.asarray([t.done for t in transitions], dtype=np.float32),
+            next_action_masks=np.stack(
+                [t.next_action_mask for t in transitions]).astype(np.bool_),
         )
 
     # ------------------------------------------------------------------

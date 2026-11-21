@@ -58,7 +58,9 @@ baseline run are measured identically:
 from __future__ import annotations
 
 import argparse
+import math
 import os
+import random
 import sys
 import time
 from typing import Any, Dict, List, Optional
@@ -71,6 +73,8 @@ from agents.dqn_agent import (EpsilonSchedule, build_agent_for_env,  # noqa: E40
                               model_directory, set_seeds, write_metadata)
 from agents.dqn_config import DQNConfig, load_dqn_config          # noqa: E402
 from rl.environment import IntelliSignalEnv                       # noqa: E402
+from rl.action import ACTION_KEEP, ACTION_SWITCH                   # noqa: E402
+from simulation.agent_simulation import run_agent_episode            # noqa: E402
 from simulation.agent_simulation import (QUIET_SUMO_ARGS,          # noqa: E402
                                          _LateCollector)
 from utils.metrics import MetricsCollector                         # noqa: E402
@@ -110,9 +114,18 @@ def history_path(scenario: str, seed: int, directory: str = None) -> str:
 def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
           model_dir: Optional[str] = None, results_dir: Optional[str] = None,
           quiet: bool = False, progress_every: int = 1,
-          save_plots: bool = True) -> Dict[str, Any]:
+          save_plots: bool = True, validation_seeds=(2001, 2002, 2003),
+          degradation_tolerance: Optional[float] = None,
+          degradation_patience: int = 3,
+          phase_elapsed_scale: Optional[float] = None) -> Dict[str, Any]:
     """Run the training loop and return a summary of what happened."""
     config = config or load_dqn_config()
+    if degradation_tolerance is not None and degradation_tolerance < 0:
+        raise ValueError("degradation_tolerance must be non-negative")
+    if degradation_patience < 1:
+        raise ValueError("degradation_patience must be at least 1")
+    if not validation_seeds:
+        raise ValueError("validation_seeds must not be empty")
     seed = int(config.seed)
     set_seeds(seed)
 
@@ -126,7 +139,14 @@ def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
         episode_duration=config.episode_duration,
         seed=seed,
         extra_sumo_args=QUIET_SUMO_ARGS,
+        phase_elapsed_scale=phase_elapsed_scale,
     )
+    if phase_elapsed_scale is None:
+        # New DQN training observes the full legal green duration. The
+        # environment's standalone default remains 20 s for legacy callers;
+        # trained policies carry their own scale into later rollouts.
+        phase_elapsed_scale = float(env.controller.max_green)
+        env.state_extractor.phase_elapsed_scale = phase_elapsed_scale
 
     try:
         # The network is sized from the environment's own spaces - the input
@@ -148,8 +168,11 @@ def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
                           schedule, model_dir)
 
         history: List[Dict[str, Any]] = []
-        best_average = None
+        best_validation_wait = None
         best_episode = 0
+        validation_history = []
+        degraded_validation_count = 0
+        stop_reason = None
         global_step = 0
         started = time.time()
 
@@ -159,33 +182,65 @@ def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
                 env, agent, schedule, config, episode, episode_seed,
                 global_step, steps_per_episode)
             row["wall_clock_seconds"] = round(time.time() - started, 1)
+            checked = ("total_reward", "average_queue_length",
+                       "average_waiting_time", "throughput", "max_queue_length",
+                       "vehicles_still_in_network", "loss")
+            bad_values = [key for key in checked if row.get(key) is not None and
+                          not math.isfinite(float(row[key]))]
+            if bad_values:
+                _write_history(history, history_path(scenario, seed, results_dir))
+                raise RuntimeError(
+                    "Training stopped: non-finite {} at episode {}."
+                    .format(", ".join(bad_values), episode))
             history.append(row)
             agent.episode = episode
 
-            # best.pt follows the mean return of the last `best_window`
-            # episodes, not a single episode - one lucky episode is not a
-            # better policy.
-            window = history[-int(config.best_window):]
-            window_mean = sum(r["total_reward"] for r in window) / len(window)
-            if len(history) >= int(config.best_window) and (
-                    best_average is None or window_mean > best_average):
-                best_average = window_mean
-                best_episode = episode
-                agent.save(os.path.join(model_dir, "best.pt"),
-                           extra={"selection": "best mean return over last "
-                                                "{} episodes".format(config.best_window),
-                                  "window_mean_return": round(window_mean, 4),
-                                  "episode": episode})
-
             if config.checkpoint_every and episode % int(config.checkpoint_every) == 0:
-                agent.save(os.path.join(
-                    model_dir, "checkpoint_ep{:03d}.pt".format(episode)))
+                checkpoint = os.path.join(
+                    model_dir, "checkpoint_ep{:03d}.pt".format(episode))
+                agent.save(checkpoint)
+                validation = _evaluate_validation(
+                    agent, scenario, duration=config.episode_duration,
+                    seeds=validation_seeds,
+                    phase_elapsed_scale=phase_elapsed_scale)
+                validation["episode"] = episode
+                validation_history.append(validation)
+                if (degradation_tolerance is not None and
+                        best_validation_wait is not None and
+                        validation_is_degraded(
+                            validation["mean_waiting_time"],
+                            best_validation_wait, degradation_tolerance)):
+                    degraded_validation_count += 1
+                else:
+                    degraded_validation_count = 0
+                if (best_validation_wait is None or
+                        validation["mean_waiting_time"] < best_validation_wait):
+                    best_validation_wait = validation["mean_waiting_time"]
+                    best_episode = episode
+                    degraded_validation_count = 0
+                    agent.save(os.path.join(model_dir, "best.pt"), extra={
+                        "selection": "lowest mean waiting on held-out validation seeds",
+                        "validation_mean_waiting_time": best_validation_wait,
+                        "validation_seeds": validation["seeds"],
+                        "phase_elapsed_scale": phase_elapsed_scale,
+                        "episode": episode})
+                _write_json(validation_history,
+                            os.path.join(model_dir, "validation_history.json"))
+                if (degradation_tolerance is not None and
+                        degraded_validation_count >= int(degradation_patience)):
+                    stop_reason = (
+                        "validation waiting exceeded best by {:.1%} for {} "
+                        "consecutive evaluations".format(
+                            degradation_tolerance, degradation_patience))
 
             if not quiet and (episode % max(int(progress_every), 1) == 0
                               or episode == 1):
                 _print_episode(row, config.episodes)
 
             _write_history(history, history_path(scenario, seed, results_dir))
+
+            if stop_reason:
+                break
 
         # --- final artefacts ------------------------------------------
         final_path = agent.save(os.path.join(model_dir, "final.pt"),
@@ -211,8 +266,16 @@ def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
                                     if returns else None),
             "mean_reward_last_5": (sum(returns[-5:]) / min(5, len(returns))
                                    if returns else None),
-            "best_window_mean": best_average,
+            "best_validation_mean_waiting_time": best_validation_wait,
+            "best_validation_episode": best_episode,
+            # Compatibility alias used by existing experiment scripts.
             "best_window_episode": best_episode,
+            "stopped_early": stop_reason is not None,
+            "stop_reason": stop_reason,
+            "validation_seeds": [int(value) for value in validation_seeds],
+            "degradation_tolerance": degradation_tolerance,
+            "degradation_patience": int(degradation_patience),
+            "phase_elapsed_scale": phase_elapsed_scale,
             "final_loss": losses[-1] if losses else None,
             "final_epsilon": history[-1]["epsilon"] if history else None,
             "model_dir": model_dir,
@@ -245,6 +308,9 @@ def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
             "replay_capacity": config.replay_capacity,
             "target_update_frequency": config.target_update_frequency,
             "loss": config.loss,
+            "phase_elapsed_scale": phase_elapsed_scale,
+            "observation_contract": agent.observation_contract,
+            "validation_seeds": [int(value) for value in validation_seeds],
             "training_date": time.strftime("%Y-%m-%d %H:%M:%S"),
             "final_reward": summary["final_reward"],
             "best_reward": summary["best_reward"],
@@ -293,7 +359,14 @@ def _run_episode(env, agent, schedule, config, episode: int, episode_seed: int,
         epsilon = schedule.value(global_step)
         agent.set_epsilon(epsilon)
 
-        action = agent.act(observation, training=True)
+        if env.controller.green_elapsed >= env.controller.max_green:
+            valid_actions = [ACTION_SWITCH]
+        elif env.controller.green_elapsed >= env.controller.min_green:
+            valid_actions = [ACTION_KEEP, ACTION_SWITCH]
+        else:
+            valid_actions = [ACTION_KEEP]
+        action = agent.act(observation, training=True,
+                           valid_actions=valid_actions)
         next_observation, reward, terminated, truncated, info = env.step(action)
 
         # `terminated` is a real end of the traffic (no vehicle left and none
@@ -301,7 +374,16 @@ def _run_episode(env, agent, schedule, config, episode: int, episode_seed: int,
         # the 1800 s time limit, so that transition keeps its future term -
         # treating a time limit as terminal would teach the agent that the
         # world ends at 1800 s.
-        agent.remember(observation, action, reward, next_observation, terminated)
+        executed = int(info.get("effective_action", action))
+        next_green_elapsed = float(info.get("green_elapsed", 0.0))
+        if next_green_elapsed < float(info.get("min_green", 0.0)):
+            next_valid_actions = [ACTION_KEEP]
+        elif next_green_elapsed >= float(info.get("max_green", float("inf"))):
+            next_valid_actions = [ACTION_SWITCH]
+        else:
+            next_valid_actions = [ACTION_KEEP, ACTION_SWITCH]
+        agent.remember(observation, executed, reward, next_observation, terminated,
+                       next_valid_actions=next_valid_actions)
 
         observation = next_observation
         total_reward += float(reward)
@@ -358,6 +440,59 @@ def _write_history(history: List[Dict[str, Any]], path: str) -> str:
         if column not in frame.columns:
             frame[column] = None
     frame[HISTORY_COLUMNS].to_csv(path, index=False)
+    return path
+
+
+def _evaluate_validation(agent, scenario: str, duration=None,
+                         seeds=(2001, 2002, 2003),
+                         phase_elapsed_scale=None) -> Dict[str, Any]:
+    """Greedy held-out evaluation that leaves training RNG streams untouched."""
+    import numpy as np
+    import torch
+
+    python_state = random.getstate()
+    numpy_state = np.random.get_state()
+    torch_state = torch.get_rng_state()
+    cuda_state = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
+    epsilon = agent.epsilon
+    try:
+        agent.set_epsilon(0.0)
+        rows = []
+        for seed in seeds:
+            set_seeds(int(seed))
+            summary, _ = run_agent_episode(
+                scenario, agent, seed=int(seed), duration=duration,
+                controller="dqn", phase_elapsed_scale=phase_elapsed_scale)
+            rows.append(summary)
+        return {
+            "seeds": [int(seed) for seed in seeds],
+            "mean_waiting_time": float(sum(
+                row["average_waiting_time"] for row in rows) / len(rows)),
+            "mean_throughput": float(sum(row["throughput"] for row in rows) / len(rows)),
+            "rows": rows,
+        }
+    finally:
+        agent.set_epsilon(epsilon)
+        random.setstate(python_state)
+        np.random.set_state(numpy_state)
+        torch.set_rng_state(torch_state)
+        if cuda_state is not None:
+            torch.cuda.set_rng_state_all(cuda_state)
+
+
+def validation_is_degraded(current_wait: float, best_wait: float,
+                           tolerance: float) -> bool:
+    """Whether validation exceeds the best checkpoint by the allowed margin."""
+    if tolerance < 0:
+        raise ValueError("degradation tolerance must be non-negative")
+    return float(current_wait) > float(best_wait) * (1.0 + float(tolerance))
+
+
+def _write_json(value, path: str) -> str:
+    import json
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(value, handle, indent=2)
     return path
 
 
@@ -460,6 +595,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--target-update-frequency", type=int, default=None,
                         dest="target_update_frequency",
                         help="Gradient steps between target-network updates.")
+    parser.add_argument("--phase-elapsed-scale", type=float, default=None,
+                        dest="phase_elapsed_scale",
+                        help="Phase-age divisor; defaults to max_green (60 s) for new training.")
     parser.add_argument("--epsilon-end", type=float, default=None,
                         dest="epsilon_end", help="Final exploration rate.")
     parser.add_argument("--hidden", type=int, nargs="+", default=None,
@@ -497,7 +635,8 @@ def main(argv=None) -> int:
     )
     train(scenario=args.scenario, config=config, model_dir=args.model_dir,
           results_dir=args.results_dir, quiet=args.quiet,
-          progress_every=args.progress_every, save_plots=not args.no_plots)
+          progress_every=args.progress_every, save_plots=not args.no_plots,
+          phase_elapsed_scale=args.phase_elapsed_scale)
     return 0
 
 

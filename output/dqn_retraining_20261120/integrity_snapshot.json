@@ -1,0 +1,33 @@
+{
+  "experiment": "dqn_retraining_20261120",
+  "source_files": {
+    "agents/base_agent.py": "259273a776e90a243fd7054d831c9cafab127d4b49ad6c9c4fd6218cc6d84d08",
+    "agents/dqn_agent.py": "bde45aafc5377f2ae2d706676deb3ba4efdaa8ed9844248c60b80ce993c0fa1c",
+    "agents/dqn_config.py": "90c30eee01acbcc91b557e74ada08aeb0a2032b587f385bb51cb59dd7f66f44a",
+    "config/dqn/training.yaml": "fca37cdb46a3d4aa331f4260e29a4b4bfcedbfdb7344199c8b13fc0a07d2e838",
+    "config/heavy.yaml": "9b247521ad016911d603930d51e104131063cea041eef4caa0405355c8a494a3",
+    "config/moderate.yaml": "54ac5f0f27ac2754c04ccfa0de0815f129a9654ffa558fba17cfb6e3db48aa12",
+    "config/rl/environment.yaml": "a02bffc13275cf908a20c87863819903a6d4c75db27aeca3155cdd4c7ef15738",
+    "evaluation/evaluate_dqn.py": "cab07da6195b381cfe825b5c6402428637538fc2d326e15e1a92ac33485a655a",
+    "evaluation/collect_observation_stats.py": "372af0215f5e3b48b37c02e7302320420f3f7210fa308c45d7fcb5463b83ed74",
+    "rl/config.py": "cb41135f7eea40dff2a705f9a92a73347ae36d81eef8aaed88600d67d98cbbfd",
+    "rl/environment.py": "53c6a11b0fc59589c3064c0d123cc9b486833f18d394e6b0b9aff01a5b49cc8a",
+    "rl/state.py": "22ce36aaff5eee92b7a397817411bb13c2fbcf98096d06383a8654e330bd1e5c",
+    "simulation/agent_simulation.py": "b953bfb5ff6fbfa0b26274b1a384f8899bab14594b5d3cb73ffc9bd38eb9d392",
+    "tests/test_dqn.py": "44b7d05d306fab771b6417680f578c980bf3dfb4bc3d8f06f0b94d2e2e230d39",
+    "training/train_dqn.py": "473bd0a946db542f8b70e33b58624428c1a094d356adfd9ca16f8654492c883b",
+    "output/dqn_retraining_20261120/fixed_time_baseline.py": "3e820a3131f954deb569612e8d2d2a6a131b9ae6da9e6af21c7eb909b1399d82",
+    "output/dqn_retraining_20261120/build_report.py": "03a2d2548dcdcb57691bfab0723912d4d597a2efd0f9cb54094d940b3c4f9c0e",
+    "output/dqn_retraining_20261120/snapshot_integrity.py": "0d0b01c5f1c0a50cbe388642181a96c24a64c9188c6402056783c2297de06999"
+  },
+  "incumbent_checkpoint_sha256": {
+    "models/dqn_moderate/best.pt": "07d5631f4e3f4de7468fde9ce90e1bb322fce2e76356ebaed26d36d45bf1ca49",
+    "models/dqn_heavy/best.pt": "c9f525c13e22f3821e314d9eebc80ae8d262ebe69ef2efd70e217b0455fa485d"
+  },
+  "candidate_checkpoint_sha256": {
+    "output/dqn_retraining_20261120/models/dqn_moderate/best.pt": "a1b611ec89c9e145b742ca9fa3b7fc404a2515348cadb80a768c32e46207b2ad",
+    "output/dqn_retraining_20261120/models/dqn_heavy/best.pt": "b6bb539daabb512cf45f7b4d2e29e596d6a671f5c5c8481a87894cb421392e6a"
+  },
+  "protected_experiments_modified": false,
+  "incumbent_models_modified": false
+}

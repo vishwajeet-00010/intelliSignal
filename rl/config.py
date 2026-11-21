@@ -30,8 +30,8 @@ RL_CONFIG_FILE = os.path.join(PROJECT_ROOT, "config", "rl", "environment.yaml")
 # file is merged onto, so a partial file is always valid.
 DEFAULTS: Dict[str, Any] = {
     "environment": {
-        "decision_interval": 10,
-        "min_green": 10,
+        "decision_interval": 5,
+        "min_green": 5,
         "max_green": 60,
         "episode_duration": None,
         "yellow_time": None,

@@ -1,0 +1,104 @@
+
+=== Stage 5 cell: moderate control seed 6207 ===
+==========================================================================
+  IntelliSignal - Stage 3  |  DQN training
+==========================================================================
+  Scenario            : moderate
+  Episode             : 1800 simulated seconds = 360 decisions
+  Observation         : 10 values (from env.observation_space)
+  Actions             : 2 (0 = keep green, 1 = switch)
+  Network             : 10 -> 64 -> 64 -> 2  (4994 parameters)
+  Exploration         : linear 1.0 -> 0.05 over 18000 steps
+  Models              : output\dqn_stage5_20261121_attempt2\moderate\control\seed6207\models
+--------------------------------------------------------------------------
+  hidden layers            : [64, 64]
+  episodes                 : 100
+  gamma (discount)         : 0.98
+  learning rate            : 0.001
+  batch size               : 64
+  loss                     : huber
+  replay capacity          : 50000
+  learning starts after    : 500 transitions
+  train frequency          : every 1 step(s)
+  target update frequency  : every 500 gradient step(s)
+  epsilon                  : 1.0 -> 0.05 (linear)
+  seed                     : 6207
+--------------------------------------------------------------------------
+  ep      return    avg loss   eps     queue   wait(s)  thru  switch
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds
+Could not connect to TraCI server at localhost:54424 [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+ Retrying in 1 seconds

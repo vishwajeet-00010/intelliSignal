@@ -1,0 +1,92 @@
+{
+  "decision": "NO_CANDIDATE_PROMOTED",
+  "scenarios": {
+    "moderate": {
+      "scenario": "moderate",
+      "promotion": "NOT_ELIGIBLE",
+      "reason": "No training candidate passed the predeclared validation gate; candidate was not run on confirmatory seeds.",
+      "all_controller_means": {
+        "fixed_time_original": {
+          "average_waiting_time": 9.863,
+          "average_queue_length": 3.653,
+          "max_queue_length": 10.05,
+          "throughput": 692.9,
+          "vehicles_still_in_network": 9.1
+        },
+        "fixed_time_tuned": {
+          "average_waiting_time": 3.56,
+          "average_queue_length": 1.304,
+          "max_queue_length": 5.3,
+          "throughput": 689.55,
+          "vehicles_still_in_network": 12.45
+        },
+        "actuated_tuned": {
+          "average_waiting_time": 3.3310000000000004,
+          "average_queue_length": 1.22,
+          "max_queue_length": 5.75,
+          "throughput": 689.8,
+          "vehicles_still_in_network": 12.2
+        },
+        "incumbent_dqn": {
+          "average_waiting_time": 2.9185,
+          "average_queue_length": 1.0690000000000002,
+          "max_queue_length": 6.6,
+          "throughput": 690.8,
+          "vehicles_still_in_network": 11.2
+        },
+        "starting_dqn": {
+          "average_waiting_time": 29.540499999999998,
+          "average_queue_length": 11.2875,
+          "max_queue_length": 31.1,
+          "throughput": 680.4,
+          "vehicles_still_in_network": 21.6
+        }
+      },
+      "recommend_best_overall_controller": "incumbent_dqn"
+    },
+    "heavy": {
+      "scenario": "heavy",
+      "promotion": "NOT_ELIGIBLE",
+      "reason": "No training candidate passed the predeclared validation gate; candidate was not run on confirmatory seeds.",
+      "all_controller_means": {
+        "fixed_time_original": {
+          "average_waiting_time": 53.0295,
+          "average_queue_length": 41.2645,
+          "max_queue_length": 71.0,
+          "throughput": 1349.8,
+          "vehicles_still_in_network": 95.5
+        },
+        "fixed_time_tuned": {
+          "average_waiting_time": 36.798500000000004,
+          "average_queue_length": 29.241000000000003,
+          "max_queue_length": 50.95,
+          "throughput": 1359.2,
+          "vehicles_still_in_network": 109.55
+        },
+        "actuated_tuned": {
+          "average_waiting_time": 16.700499999999998,
+          "average_queue_length": 13.498500000000002,
+          "max_queue_length": 31.55,
+          "throughput": 1439.05,
+          "vehicles_still_in_network": 64.95
+        },
+        "incumbent_dqn": {
+          "average_waiting_time": 16.469,
+          "average_queue_length": 13.477,
+          "max_queue_length": 32.45,
+          "throughput": 1420.55,
+          "vehicles_still_in_network": 82.3
+        },
+        "starting_dqn": {
+          "average_waiting_time": 19.411,
+          "average_queue_length": 16.0025,
+          "max_queue_length": 35.9,
+          "throughput": 1406.2,
+          "vehicles_still_in_network": 96.8
+        }
+      },
+      "recommend_best_overall_controller": "incumbent_dqn"
+    }
+  },
+  "promotion_note": "No automatic checkpoint replacement was performed."
+}

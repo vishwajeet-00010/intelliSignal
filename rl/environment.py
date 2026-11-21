@@ -126,7 +126,8 @@ class IntelliSignalEnv(gym.Env):
                  render_mode: Optional[str] = None,
                  seed: Optional[int] = None,
                  sumo_warnings: bool = False,
-                 extra_sumo_args: Optional[list] = None):
+                 extra_sumo_args: Optional[list] = None,
+                 phase_elapsed_scale: Optional[float] = None):
         super().__init__()
 
         if render_mode is not None and render_mode not in self.metadata["render_modes"]:
@@ -177,6 +178,8 @@ class IntelliSignalEnv(gym.Env):
             max_queue_per_approach=obs_cfg["max_queue_per_approach"],
             max_waiting_per_approach=obs_cfg["max_waiting_per_approach"],
             max_green=env_cfg["max_green"],
+            min_green=env_cfg["min_green"],
+            phase_elapsed_scale=phase_elapsed_scale,
         )
         self.reward_fn = RewardFunction(**reward_cfg)
 
@@ -363,6 +366,8 @@ class IntelliSignalEnv(gym.Env):
             "phase": int(self.controller.phase),
             "phase_name": PHASE_NAMES[self.controller.phase],
             "green_elapsed": float(self.controller.green_elapsed),
+            "min_green": float(self.controller.min_green),
+            "max_green": float(self.controller.max_green),
             "queue_per_approach": dict(raw["queues"]),
             "waiting_per_approach": dict(raw["waiting"]),
             "total_queue": float(sum(raw["queues"].values())),

@@ -249,7 +249,8 @@ def run_agent_episode(scenario: str, agent, seed: int = 42,
                       controller: str = DQN,
                       quiet: bool = True,
                       use_gui: bool = False,
-                      record_decisions: bool = False
+                      record_decisions: bool = False,
+                      phase_elapsed_scale: Optional[float] = None
                       ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     """Run one episode with a `TrafficAgent` choosing keep/switch.
 
@@ -261,6 +262,8 @@ def run_agent_episode(scenario: str, agent, seed: int = 42,
     dashboard uses to show what the network actually did.
     """
     plan = episode_plan(scenario, duration)
+    if phase_elapsed_scale is None:
+        phase_elapsed_scale = getattr(agent, "phase_elapsed_scale", None)
 
     hook = _LateCollector()
     env = IntelliSignalEnv(
@@ -269,12 +272,15 @@ def run_agent_episode(scenario: str, agent, seed: int = 42,
         seed=int(seed),
         render_mode="human" if use_gui else None,
         extra_sumo_args=QUIET_SUMO_ARGS if quiet else None,
+        phase_elapsed_scale=phase_elapsed_scale,
     )
     env.step_callback = hook
 
     decisions: List[Dict[str, Any]] = []
     total_reward = 0.0
     steps = 0
+    blocked_switches = 0
+    green_durations = []
 
     try:
         observation, info = env.reset(seed=int(seed))
@@ -293,6 +299,7 @@ def run_agent_episode(scenario: str, agent, seed: int = 42,
                     "env_action": action,
                     "total_queue": info.get("total_queue"),
                     "total_waiting_time": info.get("total_waiting_time"),
+                    "green_elapsed": info.get("green_elapsed"),
                 }
                 values = getattr(agent, "q_values", None)
                 if callable(values):
@@ -305,6 +312,9 @@ def run_agent_episode(scenario: str, agent, seed: int = 42,
                 decisions.append(row)
 
             observation, reward, terminated, truncated, info = env.step(action)
+            blocked_switches += int(bool(info.get("switch_blocked", False)))
+            if info.get("effective_action") == 1:
+                green_durations.append(float(state.time_since_phase_change))
             total_reward += float(reward)
             steps += 1
             if terminated or truncated:
@@ -317,6 +327,11 @@ def run_agent_episode(scenario: str, agent, seed: int = 42,
         "episode_return": round(total_reward, 4),
         "decisions": steps,
         "switch_count": int(info.get("switch_count", 0)),
+        "blocked_switches": blocked_switches,
+        "completed_green_duration_counts": {
+            str(float(duration)): int(green_durations.count(duration))
+            for duration in sorted(set(green_durations))
+        },
         "terminated_early": bool(steps < plan["decisions"]),
     })
     if record_decisions:
