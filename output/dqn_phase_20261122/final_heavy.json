@@ -1,0 +1,141 @@
+[
+  {
+    "controller": "dqn_phase (duration DQN, R143)",
+    "mean_waiting_time": 5.151,
+    "sd_waiting_time": 0.33306005464480415,
+    "mean_throughput": 1468.5,
+    "family": "phase_duration",
+    "per_seed_waiting": [
+      5.15,
+      5.6,
+      5.21,
+      4.94,
+      5.43,
+      5.06,
+      4.93,
+      4.69,
+      5.6,
+      6.02,
+      5.01,
+      5.06,
+      4.85,
+      4.5,
+      5.06,
+      5.05,
+      5.29,
+      5.32,
+      4.96,
+      5.29
+    ],
+    "green_histogram": {
+      "1": 0.0003,
+      "2": 0.0006,
+      "4": 0.0054,
+      "5": 0.3738,
+      "6": 0.0062,
+      "7": 0.6137
+    },
+    "mean_green_ns": 6.953054298642534,
+    "mean_green_ew": 5.493742889647327,
+    "largest_green_share": 0.6137266023823029,
+    "model": "output/dqn_phase_20261122/runs/R143/models/best.pt",
+    "durations": [
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      12.0,
+      15.0,
+      20.0
+    ]
+  },
+  {
+    "controller": "pattern ns[7,7] ew[5,6]",
+    "mean_waiting_time": 5.68,
+    "sd_waiting_time": 0.246,
+    "mean_throughput": 1463.8,
+    "family": "fixed_time"
+  },
+  {
+    "controller": "fixed 7/6    (best fixed plan)",
+    "mean_waiting_time": 5.754,
+    "sd_waiting_time": 0.418,
+    "mean_throughput": 1466.5,
+    "family": "fixed_time"
+  },
+  {
+    "controller": "fixed_ns7_ew6",
+    "mean_waiting_time": 5.754,
+    "sd_waiting_time": 0.418,
+    "mean_throughput": 1466.5,
+    "family": "fixed_time_tuned_alias",
+    "seeds": [
+      6101,
+      6102,
+      6103,
+      6104,
+      6105,
+      6106,
+      6107,
+      6108,
+      6109,
+      6110,
+      6111,
+      6112,
+      6113,
+      6114,
+      6115,
+      6116,
+      6117,
+      6118,
+      6119,
+      6120
+    ]
+  },
+  {
+    "controller": "fixed 7/7    (best symmetric)",
+    "mean_waiting_time": 12.638,
+    "sd_waiting_time": 0.814,
+    "mean_throughput": 1441.3,
+    "family": "fixed_time"
+  },
+  {
+    "controller": "DQN Stage 4 (KEEP/SWITCH, deployed)",
+    "mean_waiting_time": 16.469,
+    "sd_waiting_time": 2.658898080032403,
+    "mean_throughput": 1420.55,
+    "family": "keep_switch_dqn",
+    "per_seed_waiting": [
+      14.11,
+      19.06,
+      16.49,
+      18.69,
+      16.91,
+      14.69,
+      17.33,
+      12.65,
+      14.48,
+      15.01,
+      18.25,
+      14.06,
+      20.51,
+      19.32,
+      17.1,
+      14.13,
+      13.6,
+      17.33,
+      22.7,
+      12.96
+    ]
+  },
+  {
+    "controller": "fixed 30/30  (Stage 1 baseline)",
+    "mean_waiting_time": 53.029,
+    "sd_waiting_time": 1.854,
+    "mean_throughput": 1349.8,
+    "family": "fixed_time"
+  }
+]

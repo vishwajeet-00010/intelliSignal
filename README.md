@@ -2,16 +2,34 @@
 
 **AI-Based Adaptive Traffic Signal Management Using SUMO and Deep Reinforcement Learning**
 
-> **Current status (21 Nov 2026): Stage 4 is validated; a clean Stage 5 attempt is running. Stage 5 is not complete.**
-> The Stage 4 incumbent reduced confirmatory mean waiting versus the starting
-> DQN by **90.1% (moderate)** and **15.2% (heavy)** across 20 matched seeds.
-> Neither Stage 4 candidate cleared its validation gate. The dashboard now uses
-> the validated incumbent registered in `models/active_models.json`.
-> The original Stage 5 primary run has **1 complete, 1 partial, and 18 not started** cells.
-> Its archived status files disagree with artifacts; see
-> `output/dqn_stage5_20261121/run_reconciliation.md`. A separate fresh run is
-> underway in `output/dqn_stage5_20261121_attempt3/`; its live status is in
-> `training_batch_status_final.json`. Do not promote a candidate or start Stage 6.
+> **Current status (22 Nov 2026): the DQN beats the best fixed-time plan on
+> both scenarios.** Measured over confirmatory seeds 6101–6120, 1800 s per
+> run, with the project's own `MetricsCollector`:
+>
+> | scenario | best fixed plan | duration DQN | change |
+> |---|---|---|---|
+> | heavy | 5.754 s (ns 7 / ew 6) | **5.151 s** | **−10.5 %** |
+> | moderate | 2.761 s (ns 6 / ew 4) | **2.237 s** | **−19.0 %** |
+>
+> Throughput is higher in both cases (1468.5 against 1466.5; 691.8 against
+> 690.8), so the lower waiting is not bought by stranding vehicles. Heavy
+> wins on 17 of 20 paired seeds, moderate on 20 of 20.
+>
+> This needed a second action space — **one decision per green, choosing that
+> green's duration** — plus a semi-Markov correction to the learning. See
+> [`docs/phase_duration_control.md`](docs/phase_duration_control.md) and
+> [`output/dqn_phase_20261122/FINDINGS.md`](output/dqn_phase_20261122/FINDINGS.md).
+>
+> **Two earlier claims in this README are corrected by that work.** The
+> fixed-time baselines it had been compared against were not the best fixed
+> plans: demand is asymmetric, and so is the optimum. Against the properly
+> tuned plan, the deployed Stage 4 models *lose* — heavy 16.469 s against
+> 5.754 s, moderate 2.918 s against 2.761 s. Section 11b below is historical
+> Stage 3 verification against a 30/30 plan and should be read as such.
+>
+> The Stage 4 incumbents remain registered in `models/active_models.json` and
+> still drive the dashboard. The new models are registered separately under
+> `phase_duration_models`; dashboard integration is not done.
 
 The existing Windows environment is `.venv-stage3` (Python 3.12.13, installed
 SUMO/TraCI/sumolib packages 1.28.0, PyTorch 2.14.1). Comparison CSVs are in
@@ -270,7 +288,17 @@ controller turns that into a legal signal change with the Stage 1 yellow
 clearance, honours `min_green`, and forces a switch at `max_green` — so a
 learned policy cannot produce an unsafe or unfair signal.
 
-A longer explanation is in [`docs/dqn_training.md`](docs/dqn_training.md) and
+**There is a second action space**, added on 22 Nov 2026, which is the one
+that finally beats fixed-time: instead of deciding keep-or-switch every few
+seconds, the agent makes **one decision per green and chooses how long that
+green lasts**, from a menu bounded by `min_green` and `max_green`. Safety is
+then structural rather than enforced — an unsafe green is not expressible,
+every action ends with the yellow clearance, and every action hands the road
+to the other direction next. The two action spaces live side by side; nothing
+about the Stage 2 environment or the deployed Stage 4 models changed.
+
+A longer explanation is in [`docs/phase_duration_control.md`](docs/phase_duration_control.md),
+[`docs/dqn_training.md`](docs/dqn_training.md) and
 [`docs/architecture.md`](docs/architecture.md).
 
 ---
@@ -661,7 +689,17 @@ Graphs (all generated from the CSV files above):
 ---
 
 
-## 11b. Stage 3 results — Fixed-Time vs DQN
+## 11b. Stage 3 results — Fixed-Time vs DQN (historical)
+
+> **Superseded.** The "Fixed-Time" column here is the 30/30 plan from
+> `config/*.yaml`, which is not the best fixed plan for either scenario — the
+> demand is asymmetric and so is the optimum. Measured over seeds 6101–6120
+> the best plans are ns 7 / ew 6 at **5.754 s** (heavy) and ns 6 / ew 4 at
+> **2.761 s** (moderate), and against those the Stage 3/4 DQN loses. For the
+> current comparison against properly tuned baselines see
+> [`output/dqn_phase_20261122/FINDINGS.md`](output/dqn_phase_20261122/FINDINGS.md).
+> This section is kept because it is what was measured on 16 Nov 2026 and the
+> numbers are reproducible; it is not the project's current result.
 
 Every number below comes from a SUMO run performed by
 `evaluation/compare_controllers.py`. For each seed, **one** set of SUMO input
@@ -762,9 +800,13 @@ Full discussion, including every limitation, is in
 
 ## 12. Tests
 
-Latest verified Windows run (20 Nov 2026): **224 passed, 1 skipped**, using
-`.venv-stage3` and `tmp/pytest-stage4-full-20261120` as the isolated pytest
-temporary directory.
+Latest verified Windows run (22 Nov 2026): **317 passed, 1 skipped**, using
+`.venv-stage3`.
+
+The 20 Nov figure of "224 passed, 1 skipped" recorded in earlier reports was
+not reproducible: `test_training_replay_uses_executed_action_and_masks_unavailable_switch`
+failed on `main` and also at `8b8fa34`, before any of this work. It is fixed
+(commit `43cd8dd`).
 
 ```bash
 python -m pytest -q                               # entire current suite
@@ -772,6 +814,9 @@ python -m pytest tests/test_simulation.py -q      # Stage 1: 24 tests
 python -m pytest tests/test_rl_environment.py -q  # Stage 2: 47 tests
 python -m pytest tests/test_dashboard.py -q       # dashboard: 55 tests
 python -m pytest tests/test_dqn.py -q             # Stage 3: 96 tests
+python -m pytest tests/test_phase_dqn.py -q       # duration action space: 33
+python -m pytest tests/test_phase_environment.py -q  # its environment: 13
+python -m pytest tests/test_phase_registry.py -q  # promotion + loading: 11
 ```
 
 ```

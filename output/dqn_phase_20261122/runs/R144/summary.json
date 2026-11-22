@@ -1,0 +1,44 @@
+{
+  "scenario": "heavy",
+  "seed": 144,
+  "episodes": 420,
+  "durations": [
+    4.0,
+    5.0,
+    6.0,
+    7.0,
+    8.0,
+    9.0,
+    10.0,
+    12.0,
+    15.0,
+    20.0
+  ],
+  "best_validation_waiting": 5.215999999999999,
+  "best_validation_episode": 370,
+  "best_model": "output/dqn_phase_20261122/runs/R144\\models\\best.pt",
+  "final_model": "output/dqn_phase_20261122/runs/R144\\models\\final.pt",
+  "gamma_per_second": 0.99,
+  "n_step": 2,
+  "double_dqn": true,
+  "reward": {
+    "scale": 0.01,
+    "waiting": 1.0,
+    "queue": 1.0
+  },
+  "learning_rate": 0.0005,
+  "batch_size": 128,
+  "hidden_layers": [
+    128,
+    128
+  ],
+  "observation_contract": {
+    "observation_size": 10.0,
+    "max_queue_per_direction": 20.0,
+    "max_waiting_per_direction": 200.0,
+    "max_vehicles_per_direction": 30.0,
+    "max_queue_per_approach": 12.0,
+    "max_green_seconds": 20.0
+  },
+  "wall_clock_seconds": 3995.4
+}

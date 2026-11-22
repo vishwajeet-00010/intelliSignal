@@ -27,7 +27,11 @@
         "gamma": 0.98,
         "episodes": 100,
         "seed": 42,
-        "validation_seeds": [2001, 2002, 2003],
+        "validation_seeds": [
+          2001,
+          2002,
+          2003
+        ],
         "incumbent_note": "This is the Stage 4 comparison incumbent. No Stage 4 candidate passed its promotion gate. The scale 20 value is inferred from the frozen runtime defaults used to train this checkpoint."
       }
     },
@@ -56,9 +60,99 @@
         "gamma": 0.98,
         "episodes": 100,
         "seed": 42,
-        "validation_seeds": [2001, 2002, 2003],
+        "validation_seeds": [
+          2001,
+          2002,
+          2003
+        ],
         "incumbent_note": "This is the Stage 4 comparison incumbent. No Stage 4 candidate passed its promotion gate. The scale 20 value is inferred from the frozen runtime defaults used to train this checkpoint."
       }
+    }
+  },
+  "phase_duration_models": {
+    "heavy": {
+      "label": "Phase-duration DQN (heavy)",
+      "stage": "dqn_phase_20261122",
+      "scenario": "heavy",
+      "controller_family": "phase_duration",
+      "path": "output/dqn_phase_20261122/runs/R143/models/best.pt",
+      "sha256": "68B9518C0F0BB56731BF6C5087BABB889301C1A5928D53E2B803B2CBD8BB669C",
+      "durations": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        12.0,
+        15.0,
+        20.0
+      ],
+      "gamma_per_second": 0.99,
+      "double_dqn": true,
+      "architecture": "10 -> 128 -> 128 -> 10",
+      "observation_contract": {
+        "observation_size": 10.0,
+        "max_queue_per_direction": 20.0,
+        "max_waiting_per_direction": 200.0,
+        "max_vehicles_per_direction": 30.0,
+        "max_queue_per_approach": 12.0,
+        "max_green_seconds": 20.0
+      },
+      "measurement": {
+        "seeds": null,
+        "mean_waiting_time": 5.151,
+        "sd_waiting_time": 0.33306005464480415,
+        "mean_throughput": 1468.5,
+        "baseline_controller": "fixed_ns7_ew6",
+        "baseline_mean_waiting_time": 5.754,
+        "baseline_mean_throughput": 1466.5
+      },
+      "promoted_on": "2026-11-22",
+      "note": "Selected on seeds 4001-4020 (disjoint from training, validation and the reported seeds); reported on 6101-6120: 5.151 s against the best fixed plan's 5.754 s, throughput 1468.5 against 1466.5."
+    },
+    "moderate": {
+      "label": "Phase-duration DQN (moderate)",
+      "stage": "dqn_phase_20261122",
+      "scenario": "moderate",
+      "controller_family": "phase_duration",
+      "path": "output/dqn_phase_20261122/runs/M1/models/best.pt",
+      "sha256": "232D7B5FF72556ACBF0E7833676D69826E13BE6B528852B7C4665A0221619345",
+      "durations": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        12.0,
+        15.0,
+        20.0
+      ],
+      "gamma_per_second": 0.99,
+      "double_dqn": true,
+      "architecture": "10 -> 128 -> 128 -> 10",
+      "observation_contract": {
+        "observation_size": 10.0,
+        "max_queue_per_direction": 7.0,
+        "max_waiting_per_direction": 29.0,
+        "max_vehicles_per_direction": 9.0,
+        "max_queue_per_approach": 4.0,
+        "max_green_seconds": 20.0
+      },
+      "measurement": {
+        "seeds": null,
+        "mean_waiting_time": 2.2375,
+        "sd_waiting_time": 0.1417347875434962,
+        "mean_throughput": 691.8,
+        "baseline_controller": "fixed_ns6_ew4",
+        "baseline_mean_waiting_time": 2.761,
+        "baseline_mean_throughput": 690.8
+      },
+      "promoted_on": "2026-11-22",
+      "note": "Selected on seeds 4001-4020; reported on 6101-6120: 2.237 s against the best fixed plan's 2.761 s, throughput 691.8 against 690.8."
     }
   }
 }

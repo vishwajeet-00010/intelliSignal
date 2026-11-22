@@ -1,0 +1,926 @@
+[
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.92,
+    "sd_waiting_time": 0.14818906842274165,
+    "mean_throughput": 690.2,
+    "mean_queue_length": 1.058,
+    "mean_green": 4.821073672187321,
+    "per_seed_waiting": [
+      2.85,
+      3.1,
+      3.0,
+      2.98,
+      2.67
+    ],
+    "episode": 10
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.73,
+    "sd_waiting_time": 0.11882760622010367,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.9800000000000001,
+    "mean_green": 5.557924969611608,
+    "per_seed_waiting": [
+      2.7,
+      2.53,
+      2.72,
+      2.87,
+      2.83
+    ],
+    "episode": 20
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.658,
+    "sd_waiting_time": 0.11232096865679182,
+    "mean_throughput": 692.0,
+    "mean_queue_length": 0.954,
+    "mean_green": 6.181153862275315,
+    "per_seed_waiting": [
+      2.73,
+      2.46,
+      2.61,
+      2.77,
+      2.72
+    ],
+    "episode": 30
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.65,
+    "sd_waiting_time": 0.1405702671264447,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.952,
+    "mean_green": 6.00343383757475,
+    "per_seed_waiting": [
+      2.7,
+      2.82,
+      2.42,
+      2.74,
+      2.57
+    ],
+    "episode": 40
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.496,
+    "sd_waiting_time": 0.052383203414835204,
+    "mean_throughput": 691.6,
+    "mean_queue_length": 0.9,
+    "mean_green": 5.772401193067622,
+    "per_seed_waiting": [
+      2.58,
+      2.44,
+      2.44,
+      2.51,
+      2.51
+    ],
+    "episode": 50
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.584,
+    "sd_waiting_time": 0.18423897524682448,
+    "mean_throughput": 691.6,
+    "mean_queue_length": 0.93,
+    "mean_green": 6.167185021421831,
+    "per_seed_waiting": [
+      2.63,
+      2.75,
+      2.34,
+      2.4,
+      2.8
+    ],
+    "episode": 60
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.634,
+    "sd_waiting_time": 0.12893409169028955,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.944,
+    "mean_green": 5.941551854505921,
+    "per_seed_waiting": [
+      2.61,
+      2.6,
+      2.46,
+      2.86,
+      2.64
+    ],
+    "episode": 70
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.532,
+    "sd_waiting_time": 0.14783774890061063,
+    "mean_throughput": 690.8,
+    "mean_queue_length": 0.906,
+    "mean_green": 6.136621534499272,
+    "per_seed_waiting": [
+      2.55,
+      2.32,
+      2.43,
+      2.75,
+      2.61
+    ],
+    "episode": 80
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.282,
+    "sd_waiting_time": 0.07304792947099874,
+    "mean_throughput": 691.4,
+    "mean_queue_length": 0.8119999999999999,
+    "mean_green": 6.0706652015675715,
+    "per_seed_waiting": [
+      2.17,
+      2.25,
+      2.32,
+      2.39,
+      2.28
+    ],
+    "episode": 90
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.46,
+    "sd_waiting_time": 0.0965401470891774,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.884,
+    "mean_green": 6.181794099705163,
+    "per_seed_waiting": [
+      2.45,
+      2.44,
+      2.35,
+      2.42,
+      2.64
+    ],
+    "episode": 100
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.306,
+    "sd_waiting_time": 0.09769339793455853,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.826,
+    "mean_green": 5.638656444634203,
+    "per_seed_waiting": [
+      2.18,
+      2.32,
+      2.21,
+      2.43,
+      2.39
+    ],
+    "episode": 110
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.272,
+    "sd_waiting_time": 0.1695169608033367,
+    "mean_throughput": 691.6,
+    "mean_queue_length": 0.8099999999999999,
+    "mean_green": 6.110808960472786,
+    "per_seed_waiting": [
+      2.22,
+      2.06,
+      2.34,
+      2.18,
+      2.56
+    ],
+    "episode": 120
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.478,
+    "sd_waiting_time": 0.1873392644375438,
+    "mean_throughput": 692.0,
+    "mean_queue_length": 0.8779999999999999,
+    "mean_green": 6.326012551381065,
+    "per_seed_waiting": [
+      2.55,
+      2.59,
+      2.12,
+      2.48,
+      2.65
+    ],
+    "episode": 130
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.278,
+    "sd_waiting_time": 0.09217374897442325,
+    "mean_throughput": 691.8,
+    "mean_queue_length": 0.8140000000000001,
+    "mean_green": 5.9018700517043055,
+    "per_seed_waiting": [
+      2.12,
+      2.32,
+      2.24,
+      2.39,
+      2.32
+    ],
+    "episode": 140
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.2960000000000003,
+    "sd_waiting_time": 0.20185143051264218,
+    "mean_throughput": 691.4,
+    "mean_queue_length": 0.8299999999999998,
+    "mean_green": 5.9167266119715975,
+    "per_seed_waiting": [
+      2.28,
+      1.97,
+      2.6,
+      2.27,
+      2.36
+    ],
+    "episode": 150
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.346,
+    "sd_waiting_time": 0.15186836405255708,
+    "mean_throughput": 691.8,
+    "mean_queue_length": 0.836,
+    "mean_green": 6.124266861134551,
+    "per_seed_waiting": [
+      2.13,
+      2.21,
+      2.39,
+      2.48,
+      2.52
+    ],
+    "episode": 160
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.364,
+    "sd_waiting_time": 0.13455110553243327,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.858,
+    "mean_green": 5.654556835676463,
+    "per_seed_waiting": [
+      2.2,
+      2.21,
+      2.41,
+      2.48,
+      2.52
+    ],
+    "episode": 170
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.246,
+    "sd_waiting_time": 0.06216108107168024,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.806,
+    "mean_green": 6.03541301845041,
+    "per_seed_waiting": [
+      2.28,
+      2.13,
+      2.31,
+      2.24,
+      2.27
+    ],
+    "episode": 180
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.368,
+    "sd_waiting_time": 0.1254432142445338,
+    "mean_throughput": 692.0,
+    "mean_queue_length": 0.852,
+    "mean_green": 5.215271134928218,
+    "per_seed_waiting": [
+      2.17,
+      2.3,
+      2.5,
+      2.37,
+      2.5
+    ],
+    "episode": 190
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.288,
+    "sd_waiting_time": 0.05381449618829483,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.818,
+    "mean_green": 5.490989362586221,
+    "per_seed_waiting": [
+      2.29,
+      2.33,
+      2.21,
+      2.36,
+      2.25
+    ],
+    "episode": 200
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.154,
+    "sd_waiting_time": 0.14402777509911066,
+    "mean_throughput": 690.4,
+    "mean_queue_length": 0.768,
+    "mean_green": 5.794312194381826,
+    "per_seed_waiting": [
+      2.12,
+      1.89,
+      2.3,
+      2.23,
+      2.23
+    ],
+    "episode": 210
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.35,
+    "sd_waiting_time": 0.10751744044572499,
+    "mean_throughput": 690.6,
+    "mean_queue_length": 0.842,
+    "mean_green": 5.742373796164957,
+    "per_seed_waiting": [
+      2.29,
+      2.26,
+      2.47,
+      2.49,
+      2.24
+    ],
+    "episode": 220
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.362,
+    "sd_waiting_time": 0.14176036117335475,
+    "mean_throughput": 692.4,
+    "mean_queue_length": 0.842,
+    "mean_green": 6.0583913446634785,
+    "per_seed_waiting": [
+      2.24,
+      2.31,
+      2.22,
+      2.44,
+      2.6
+    ],
+    "episode": 230
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.104,
+    "sd_waiting_time": 0.10836973747315257,
+    "mean_throughput": 690.6,
+    "mean_queue_length": 0.756,
+    "mean_green": 5.808672779579348,
+    "per_seed_waiting": [
+      2.01,
+      2.27,
+      2.19,
+      1.99,
+      2.06
+    ],
+    "episode": 240
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.196,
+    "sd_waiting_time": 0.24613817257792428,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.774,
+    "mean_green": 6.171256420086337,
+    "per_seed_waiting": [
+      1.99,
+      2.09,
+      2.1,
+      2.12,
+      2.68
+    ],
+    "episode": 250
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.232,
+    "sd_waiting_time": 0.15223665787188054,
+    "mean_throughput": 692.2,
+    "mean_queue_length": 0.7939999999999999,
+    "mean_green": 5.851765054323073,
+    "per_seed_waiting": [
+      2.11,
+      2.14,
+      2.45,
+      2.08,
+      2.38
+    ],
+    "episode": 260
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.166,
+    "sd_waiting_time": 0.19085072700935668,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.774,
+    "mean_green": 6.142403286725794,
+    "per_seed_waiting": [
+      2.07,
+      1.96,
+      2.22,
+      2.07,
+      2.51
+    ],
+    "episode": 270
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.2800000000000002,
+    "sd_waiting_time": 0.2368966019173766,
+    "mean_throughput": 691.6,
+    "mean_queue_length": 0.8140000000000001,
+    "mean_green": 5.933461160314399,
+    "per_seed_waiting": [
+      2.3,
+      2.1,
+      2.59,
+      1.94,
+      2.47
+    ],
+    "episode": 280
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.18,
+    "sd_waiting_time": 0.10825894882179486,
+    "mean_throughput": 691.4,
+    "mean_queue_length": 0.784,
+    "mean_green": 5.937688332856872,
+    "per_seed_waiting": [
+      2.13,
+      2.07,
+      2.2,
+      2.12,
+      2.38
+    ],
+    "episode": 290
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.138,
+    "sd_waiting_time": 0.206920274502041,
+    "mean_throughput": 691.6,
+    "mean_queue_length": 0.766,
+    "mean_green": 5.701640913658548,
+    "per_seed_waiting": [
+      2.11,
+      1.96,
+      2.06,
+      2.02,
+      2.54
+    ],
+    "episode": 300
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.0759999999999996,
+    "sd_waiting_time": 0.1785049018934774,
+    "mean_throughput": 690.8,
+    "mean_queue_length": 0.742,
+    "mean_green": 6.094959988811851,
+    "per_seed_waiting": [
+      1.84,
+      2.11,
+      2.2,
+      1.91,
+      2.32
+    ],
+    "episode": 310
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.154,
+    "sd_waiting_time": 0.10011992808627057,
+    "mean_throughput": 690.6,
+    "mean_queue_length": 0.776,
+    "mean_green": 5.953620132968432,
+    "per_seed_waiting": [
+      2.32,
+      2.02,
+      2.09,
+      2.17,
+      2.17
+    ],
+    "episode": 320
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.1719999999999997,
+    "sd_waiting_time": 0.12221292893961759,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.776,
+    "mean_green": 5.981824981841122,
+    "per_seed_waiting": [
+      2.2,
+      2.39,
+      2.1,
+      2.14,
+      2.03
+    ],
+    "episode": 330
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.0119999999999996,
+    "sd_waiting_time": 0.14797297050475122,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.72,
+    "mean_green": 5.851589477284417,
+    "per_seed_waiting": [
+      1.9,
+      2.06,
+      2.26,
+      1.83,
+      2.01
+    ],
+    "episode": 340
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.096,
+    "sd_waiting_time": 0.06374950980203689,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.75,
+    "mean_green": 5.3900971704170715,
+    "per_seed_waiting": [
+      2.11,
+      2.17,
+      1.98,
+      2.09,
+      2.13
+    ],
+    "episode": 350
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.286,
+    "sd_waiting_time": 0.20085815890822065,
+    "mean_throughput": 690.8,
+    "mean_queue_length": 0.8220000000000001,
+    "mean_green": 5.653908846055938,
+    "per_seed_waiting": [
+      1.95,
+      2.17,
+      2.38,
+      2.5,
+      2.43
+    ],
+    "episode": 360
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.1100000000000003,
+    "sd_waiting_time": 0.07899367063252606,
+    "mean_throughput": 690.0,
+    "mean_queue_length": 0.76,
+    "mean_green": 5.64839337214997,
+    "per_seed_waiting": [
+      2.18,
+      2.14,
+      1.97,
+      2.08,
+      2.18
+    ],
+    "episode": 370
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.036,
+    "sd_waiting_time": 0.15291827882892228,
+    "mean_throughput": 691.4,
+    "mean_queue_length": 0.7300000000000001,
+    "mean_green": 5.879418577360549,
+    "per_seed_waiting": [
+      2.24,
+      2.16,
+      2.05,
+      1.89,
+      1.84
+    ],
+    "episode": 380
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.2039999999999997,
+    "sd_waiting_time": 0.09769339793455861,
+    "mean_throughput": 690.4,
+    "mean_queue_length": 0.796,
+    "mean_green": 5.581248938271329,
+    "per_seed_waiting": [
+      2.22,
+      2.2,
+      2.33,
+      2.03,
+      2.24
+    ],
+    "episode": 390
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.2359999999999998,
+    "sd_waiting_time": 0.23635566420122034,
+    "mean_throughput": 691.2,
+    "mean_queue_length": 0.8039999999999999,
+    "mean_green": 5.503220686488395,
+    "per_seed_waiting": [
+      1.98,
+      2.15,
+      2.23,
+      2.14,
+      2.68
+    ],
+    "episode": 400
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.1380000000000003,
+    "sd_waiting_time": 0.08158431221748456,
+    "mean_throughput": 691.0,
+    "mean_queue_length": 0.76,
+    "mean_green": 5.912565897550284,
+    "per_seed_waiting": [
+      2.02,
+      2.27,
+      2.16,
+      2.1,
+      2.14
+    ],
+    "episode": 410
+  },
+  {
+    "seeds": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "mean_waiting_time": 2.132,
+    "sd_waiting_time": 0.16714065932620942,
+    "mean_throughput": 690.2,
+    "mean_queue_length": 0.764,
+    "mean_green": 5.6715311954407515,
+    "per_seed_waiting": [
+      2.21,
+      2.21,
+      1.97,
+      1.91,
+      2.36
+    ],
+    "episode": 420
+  }
+]

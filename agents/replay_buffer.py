@@ -42,14 +42,25 @@ from typing import Optional, Sequence, Tuple
 import numpy as np
 
 #: One stored decision. Plain and inspectable, which keeps the tests readable.
+#:
+#: `duration` is how many SECONDS of simulation the decision covered. It is
+#: 1.0 for callers that do not model it, which is every Stage 3 call site, so
+#: nothing those callers do changes. It matters when decisions differ in
+#: length - choosing a green duration, or serving the clearance outside the
+#: decision interval - because then the transition is semi-Markov: a decision
+#: that occupies eleven seconds must not be discounted like one that occupies
+#: one. See `DQNConfig.gamma_per_second`.
+#: It defaults to 1.0 so that code constructing a Transition directly - the
+#: tests do - keeps working unchanged.
 Transition = namedtuple("Transition",
                         ("state", "action", "reward", "next_state", "done",
-                         "next_action_mask"))
+                         "next_action_mask", "duration"),
+                        defaults=(1.0,))
 
 #: What `sample()` returns: arrays with the batch as dimension 0.
 Batch = namedtuple("Batch",
                    ("states", "actions", "rewards", "next_states", "dones",
-                    "next_action_masks"))
+                    "next_action_masks", "durations"))
 
 
 class ReplayBuffer:
@@ -68,12 +79,20 @@ class ReplayBuffer:
 
     # ------------------------------------------------------------------
     def push(self, state, action: int, reward: float, next_state, done: bool,
-             next_valid_actions: Optional[Sequence[int]] = None) -> None:
+             next_valid_actions: Optional[Sequence[int]] = None,
+             duration: float = 1.0) -> None:
         """Store one transition. Oldest is dropped once the buffer is full.
 
         When omitted, `next_valid_actions` defaults to the full action space
-        for compatibility with callers that do not model timing constraints.
+        for compatibility with callers that do not model timing constraints,
+        and `duration` defaults to one second for callers whose decisions all
+        cover the same amount of simulated time.
         """
+        duration = float(duration)
+        if not duration > 0.0:
+            raise ValueError(
+                "duration must be positive, got {!r}. A transition covering "
+                "no simulated time cannot be discounted.".format(duration))
         if next_valid_actions is None:
             next_action_mask = np.ones(self.num_actions, dtype=np.bool_)
         else:
@@ -91,6 +110,7 @@ class ReplayBuffer:
             np.asarray(next_state, dtype=np.float32),
             bool(done),
             next_action_mask,
+            duration,
         ))
 
     #: `remember` reads better from the agent, `push` from the tests.
@@ -106,6 +126,7 @@ class ReplayBuffer:
             next_states (batch_size, observation_size)  float32
             dones       (batch_size,)                   float32  (0.0 / 1.0)
             next_action_masks (batch_size, num_actions) bool
+            durations   (batch_size,)                   float32  (seconds)
 
         Sampling is WITHOUT replacement inside one batch, so the same
         transition cannot be counted twice in a single gradient step.
@@ -129,6 +150,8 @@ class ReplayBuffer:
             dones=np.asarray([t.done for t in transitions], dtype=np.float32),
             next_action_masks=np.stack(
                 [t.next_action_mask for t in transitions]).astype(np.bool_),
+            durations=np.asarray([t.duration for t in transitions],
+                                 dtype=np.float32),
         )
 
     # ------------------------------------------------------------------
