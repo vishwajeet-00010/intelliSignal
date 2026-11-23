@@ -27,8 +27,17 @@
 > 5.754 s, moderate 2.918 s against 2.761 s. Section 11b below is historical
 > Stage 3 verification against a 30/30 plan and should be read as such.
 >
+> **23 Nov 2026 — built for the demonstration.** Three additions:
+> **Custom Traffic** (describe demand lane by lane, see the exact preview,
+> run precisely that), a **Hybrid** controller that gives the DQN a fixed
+> amount of wall-clock time to prove itself and falls back to the best
+> measured fixed plan if it does not, and a simplified dashboard. See
+> [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md) for a ten-minute
+> run-through and [`docs/custom_traffic_and_hybrid.md`](docs/custom_traffic_and_hybrid.md)
+> for how they work.
+>
 > The Stage 4 incumbents remain registered in `models/active_models.json` and
-> still drive the dashboard. The new models are registered separately under
+> still drive the Moderate and Heavy pages. The new models are registered separately under
 > `phase_duration_models`; dashboard integration is not done.
 
 The existing Windows environment is `.venv-stage3` (Python 3.12.13, installed

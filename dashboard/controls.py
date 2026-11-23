@@ -2,18 +2,17 @@
 IntelliSignal - Dashboard
 dashboard/controls.py
 
-The sidebar: navigation, scenario, control mode, duration and the Run button.
+The sidebar: navigation, what to run, and Run.
 
-The control-mode selector is the important part architecturally. It is built
-from `SimulationController.control_modes(scenario)`, so an unavailable mode is
-shown, labelled and explained rather than hidden.
+It is deliberately short. A teacher watching this on a laptop should be able
+to read the whole sidebar without scrolling, so only the four things that
+change what happens live at the top level:
 
-Stage 3 note: the mode list is asked for PER SCENARIO, because whether the
-DQN can run depends on whether a trained checkpoint exists for that scenario.
-Selecting "heavy" with no heavy model therefore disables the DQN mode and
-explains why, without any code in this file knowing what a model is. The
-model and seed pickers appear only when the DQN mode is selected, so the
-fixed-time sidebar is exactly what it was.
+    where you are · which traffic · which controller · Run
+
+Everything occasional - run length, seed, the DQN checkpoint, the Hybrid
+limits, the SUMO window - is behind **Advanced**. None of it is removed; it
+is one click away and it remembers what you set.
 """
 
 from __future__ import annotations
@@ -25,18 +24,27 @@ import streamlit as st
 from dashboard import state
 from dashboard.theme import SCENARIO_LABELS
 
+#: The third option in the scenario list. It has no YAML file - the demand
+#: comes from the Custom Traffic page instead.
+CUSTOM = "custom"
 
+LABELS = dict(SCENARIO_LABELS)
+LABELS[CUSTOM] = "Custom traffic"
+
+
+def _label(scenario: str) -> str:
+    return LABELS.get(scenario, scenario.title())
+
+
+# ---------------------------------------------------------------------------
 def sidebar(controller) -> Dict[str, Any]:
     """Draw the sidebar and return the current selections."""
     with st.sidebar:
         st.markdown('<div class="is-brand">INTELLISIGNAL</div>'
-                    '<div class="is-brand-sub">Adaptive Traffic Signal Management<br>'
-                    'SUMO · TraCI · Deep Reinforcement Learning</div>',
+                    '<div class="is-brand-sub">Adaptive traffic signal '
+                    'management<br>SUMO · TraCI · Deep RL</div>',
                     unsafe_allow_html=True)
 
-        # --- navigation ------------------------------------------------
-        st.markdown('<div class="is-side-label">Navigation</div>',
-                    unsafe_allow_html=True)
         page = st.radio("Navigation", state.PAGES,
                         index=state.PAGES.index(state.get("page")),
                         label_visibility="collapsed", key="nav_radio")
@@ -44,126 +52,147 @@ def sidebar(controller) -> Dict[str, Any]:
 
         st.divider()
 
-        # --- scenario --------------------------------------------------
-        scenarios = controller.available_scenarios()
+        scenarios = list(controller.available_scenarios())
         if not scenarios:
             st.error("No scenarios found in config/.")
-            return {"page": page, "scenario": None, "mode": None,
-                    "mode_object": None, "duration": None, "seed": 42,
-                    "model_name": None, "run_clicked": False, "gui": False}
+            return _empty(page)
+        options = scenarios + [CUSTOM]
 
-        st.markdown('<div class="is-side-label">Scenario</div>',
+        st.markdown('<div class="is-side-label">Traffic</div>',
                     unsafe_allow_html=True)
         current = state.get("scenario")
-        if current not in scenarios:
-            current = scenarios[0]
+        if current not in options:
+            current = options[0]
         scenario = st.selectbox(
-            "Scenario", scenarios, index=scenarios.index(current),
-            format_func=lambda s: SCENARIO_LABELS.get(s, s.title()),
-            label_visibility="collapsed", key="scenario_select")
+            "Traffic", options, index=options.index(current),
+            format_func=_label, label_visibility="collapsed",
+            key="scenario_select")
         state.set_value("scenario", scenario)
 
-        # --- control mode ----------------------------------------------
-        # Asked per scenario: the DQN mode is available only when a trained
-        # checkpoint exists for THIS scenario.
-        st.markdown('<div class="is-side-label">Control Mode</div>',
+        workload = state.get("custom_workload")
+        if scenario == CUSTOM:
+            if workload:
+                st.caption("{} vehicles · {:.0f} s · id {}".format(
+                    len(workload.get("vehicles") or []),
+                    workload.get("duration_s", 0),
+                    str(workload.get("workload_id", ""))[:8]))
+            else:
+                st.caption("No traffic defined yet — open **Custom Traffic**.")
+
+        # --- controller ------------------------------------------------
+        st.markdown('<div class="is-side-label">Controller</div>',
                     unsafe_allow_html=True)
-        modes = controller.control_modes(scenario)
-        labels = {m.key: "{}{}".format(
-            m.label, "" if m.available else "  ·  no trained model")
-            for m in modes}
-        mode_keys = [m.key for m in modes]
+        mode_scenario = (workload.get("base_scenario", "moderate")
+                         if scenario == CUSTOM and workload else scenario)
+        modes = controller.control_modes(
+            mode_scenario if mode_scenario in scenarios else None)
+        keys = [mode.key for mode in modes]
         current_mode = state.get("control_mode")
-        if current_mode not in mode_keys:
-            current_mode = mode_keys[0]
+        if current_mode not in keys:
+            current_mode = keys[0]
         mode_key = st.radio(
-            "Control mode", mode_keys, index=mode_keys.index(current_mode),
-            format_func=lambda k: labels[k],
+            "Controller", keys, index=keys.index(current_mode),
+            format_func=lambda k: next(
+                "{}{}".format(m.label, "" if m.available else "  ·  unavailable")
+                for m in modes if m.key == k),
             label_visibility="collapsed", key="mode_radio")
         state.set_value("control_mode", mode_key)
-
-        selected_mode = next(m for m in modes if m.key == mode_key)
-        if not selected_mode.available:
-            st.warning(selected_mode.unavailable_reason)
-
-        # --- the trained model, only when the DQN mode is selected ------
-        model_name = None
-        if selected_mode.key == "dqn_adaptive" and selected_mode.available:
-            checkpoints = controller.available_models(scenario)
-            names = [m["name"] for m in checkpoints]
-            st.markdown('<div class="is-side-label">Trained Model</div>',
-                        unsafe_allow_html=True)
-            chosen = state.get("model_name")
-            if chosen not in names:
-                chosen = names[0]
-            model_name = st.selectbox(
-                "Model", names, index=names.index(chosen),
-                label_visibility="collapsed", key="model_select",
-                help="Checkpoints found in models/dqn_{}/. best.pt is the one "
-                     "with the best mean return during training; final.pt is "
-                     "the last episode.".format(scenario))
-            state.set_value("model_name", model_name)
-            st.caption("models/dqn_{}/{}".format(scenario, model_name))
-
-        # --- duration ---------------------------------------------------
-        summary = None
-        try:
-            summary = controller.scenario_summary(scenario)
-        except Exception:
-            pass
-        default_duration = int(summary["duration"]) if summary else 1800
-
-        st.markdown('<div class="is-side-label">Simulation Duration</div>',
-                    unsafe_allow_html=True)
-        duration = st.number_input(
-            "Simulation duration (s)", min_value=60, max_value=7200,
-            value=int(state.get("duration") or default_duration), step=60,
-            label_visibility="collapsed", key="duration_input",
-            help="Simulated seconds. The Stage 1 results were measured at "
-                 "1800 s; a shorter run is useful for a quick demonstration.")
-        state.set_value("duration", int(duration))
-
-        # --- seed, only for a DQN run -----------------------------------
-        # The fixed-time command line takes its seed from the scenario YAML
-        # (42), so offering a seed box for it would be offering a control
-        # that does nothing. A DQN run sets the SUMO seed directly.
-        seed = int(state.get("seed") or 42)
-        if selected_mode.key == "dqn_adaptive" and selected_mode.available:
-            st.markdown('<div class="is-side-label">Random Seed</div>',
-                        unsafe_allow_html=True)
-            seed = st.number_input(
-                "Seed", min_value=0, max_value=100000, value=seed, step=1,
-                label_visibility="collapsed", key="seed_input",
-                help="SUMO's random seed. The same seed gives the same "
-                     "traffic, which is how a DQN run and a fixed-time run "
-                     "can be compared fairly.")
-            state.set_value("seed", int(seed))
+        selected = next(mode for mode in modes if mode.key == mode_key)
+        if not selected.available:
+            st.warning(selected.unavailable_reason)
 
         # --- run --------------------------------------------------------
         st.write("")
+        ready = selected.available and (scenario != CUSTOM or bool(workload))
         run_clicked = st.button(
-            "Run Simulation", type="primary", width="stretch",
-            disabled=not selected_mode.available,
-            key="run_button")
+            "Run", type="primary", width="stretch", key="run_button",
+            disabled=not ready,
+            help=None if ready else
+            "Define traffic on the Custom Traffic page first.")
 
-        gui = st.checkbox(
-            "Open SUMO visualization window", value=False, key="gui_checkbox",
-            help="Runs the simulation in sumo-gui instead of headless. Works "
-                 "when the dashboard runs on your own machine with a display.")
+        # --- everything occasional -------------------------------------
+        with st.expander("Advanced"):
+            summary = None
+            if scenario in scenarios:
+                try:
+                    summary = controller.scenario_summary(scenario)
+                except Exception:
+                    summary = None
+            default_duration = int(summary["duration"]) if summary else 1800
 
-        st.divider()
-        st.caption("Stage 1 baseline results were measured at 1800 s with "
-                   "seed 42 and are stored in results/csv/. Dashboard runs "
-                   "are written to results/data/ and never overwrite them.")
+            duration = st.number_input(
+                "Run length (simulated s)", min_value=60, max_value=7200,
+                value=int(state.get("duration") or default_duration), step=60,
+                key="duration_input",
+                help="Simulated seconds. Custom traffic takes its length "
+                     "from the Custom Traffic page instead.")
+            state.set_value("duration", int(duration))
+
+            seed = st.number_input(
+                "Seed", min_value=0, max_value=100000,
+                value=int(state.get("seed") or 42), step=1, key="seed_input",
+                help="SUMO's random seed. The same seed gives the same "
+                     "traffic, which is what makes two controllers "
+                     "comparable.")
+            state.set_value("seed", int(seed))
+
+            model_name = None
+            if mode_key == "dqn_adaptive" and selected.available \
+                    and scenario in scenarios:
+                checkpoints = controller.available_models(scenario)
+                names = [entry["name"] for entry in checkpoints]
+                if names:
+                    chosen = state.get("model_name")
+                    if chosen not in names:
+                        chosen = names[0]
+                    model_name = st.selectbox(
+                        "Checkpoint", names, index=names.index(chosen),
+                        key="model_select")
+                    state.set_value("model_name", model_name)
+
+            if mode_key == "hybrid":
+                st.markdown("**Hybrid limits**")
+                state.set_value("hybrid_wall_clock_s", int(st.number_input(
+                    "Time limit (wall-clock s)", min_value=30, max_value=3600,
+                    value=int(state.get("hybrid_wall_clock_s") or 300),
+                    step=30, key="hyb_clock",
+                    help="Real seconds from pressing Run, including tuning, "
+                         "training and validation. Not simulated seconds.")))
+                state.set_value("hybrid_max_episodes", int(st.number_input(
+                    "Extra training episodes", min_value=0, max_value=500,
+                    value=int(state.get("hybrid_max_episodes") or 30), step=5,
+                    key="hyb_eps")))
+                state.set_value("hybrid_patience", int(st.number_input(
+                    "Patience (failed checks)", min_value=1, max_value=20,
+                    value=int(state.get("hybrid_patience") or 3), step=1,
+                    key="hyb_pat",
+                    help="Consecutive completed validation checks the "
+                         "candidate may lose before the search gives up.")))
+
+            gui = st.checkbox(
+                "Open the SUMO window", value=False, key="gui_checkbox",
+                help="Runs in sumo-gui instead of headless. Needs a display "
+                     "on the machine running the dashboard.")
+
+        st.caption("Baseline results were measured at 1800 s with seed 42 "
+                   "and live in results/csv/. Dashboard runs are written "
+                   "elsewhere and never overwrite them.")
 
     return {
         "page": page,
         "scenario": scenario,
         "mode": mode_key,
-        "mode_object": selected_mode,
+        "mode_object": selected,
         "duration": int(duration),
         "seed": int(seed),
         "model_name": model_name,
         "run_clicked": bool(run_clicked),
         "gui": bool(gui),
+        "is_custom": scenario == CUSTOM,
     }
+
+
+def _empty(page: str) -> Dict[str, Any]:
+    return {"page": page, "scenario": None, "mode": None, "mode_object": None,
+            "duration": None, "seed": 42, "model_name": None,
+            "run_clicked": False, "gui": False, "is_custom": False}

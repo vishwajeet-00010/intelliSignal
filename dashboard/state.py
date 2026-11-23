@@ -17,8 +17,8 @@ from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
-PAGES: List[str] = ["Dashboard", "Simulation", "Results", "DQN Model",
-                    "Comparison", "About Project"]
+PAGES: List[str] = ["Dashboard", "Custom Traffic", "Simulation",
+                    "Comparison", "Results", "DQN Model", "About"]
 
 DEFAULTS: Dict[str, Any] = {
     "page": "Dashboard",
@@ -31,6 +31,21 @@ DEFAULTS: Dict[str, Any] = {
     "last_error": None,        # str, shown once then cleared
     "run_history": [],         # list of dicts, newest first
     "signal_time": 0,          # position of the signal time slider
+
+    # --- custom traffic ------------------------------------------------
+    # The spec is what was typed; the workload is the resolved preview.
+    # They are kept apart so that navigating away and back does not
+    # re-resolve and quietly change the generated values.
+    "custom_spec": None,          # CustomSpec.to_dict()
+    "custom_workload": None,      # ResolvedWorkload.to_dict()
+    "custom_issues": [],          # [{where, message, severity}]
+    "custom_regen_token": 0,      # bumped only by "Regenerate"
+
+    # --- hybrid ----------------------------------------------------------
+    "hybrid_wall_clock_s": 300,
+    "hybrid_max_episodes": 30,
+    "hybrid_patience": 3,
+    "hybrid_workload_id": None,   # the job the page is watching
 }
 
 

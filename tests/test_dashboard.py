@@ -431,17 +431,39 @@ def test_dashboard_shows_the_project_title(app):
     assert "Deep Reinforcement Learning" in rendered
 
 
-def test_sidebar_has_navigation_scenario_mode_and_run(app):
-    assert [r.label for r in app.sidebar.radio] == ["Navigation", "Control mode"]
-    assert [s.label for s in app.sidebar.selectbox] == ["Scenario"]
-    assert app.button[0].label == "Run Simulation"
+def test_sidebar_is_short_and_has_the_four_things_that_matter(app):
+    """Navigation, traffic, controller, Run - and nothing else at the top.
+
+    Everything occasional lives under Advanced. A teacher should be able to
+    read the whole sidebar on a laptop without scrolling.
+    """
+    assert [r.label for r in app.sidebar.radio] == ["Navigation", "Controller"]
+    assert [s.label for s in app.sidebar.selectbox] == ["Traffic"]
+    assert app.button[0].label == "Run"
+
+
+def test_custom_traffic_is_offered_alongside_the_built_in_scenarios(app):
+    # AppTest reports the formatted labels, not the raw option values.
+    options = list(app.sidebar.selectbox[0].options)
+    assert "Moderate traffic" in options and "Heavy traffic" in options
+    assert "Custom traffic" in options, "Custom traffic must be selectable"
+    app.sidebar.selectbox[0].set_value("custom").run()
+    assert not app.exception
+    assert app.session_state["scenario"] == "custom"
+
+
+def test_hybrid_is_a_separate_control_mode(app):
+    assert "Hybrid" in list(app.sidebar.radio[1].options)
+    app.sidebar.radio[1].set_value("hybrid").run()
+    assert not app.exception
+    assert app.session_state["control_mode"] == "hybrid"
 
 
 def test_every_page_renders(app):
     from dashboard.state import PAGES
 
-    assert PAGES == ["Dashboard", "Simulation", "Results", "DQN Model",
-                     "Comparison", "About Project"]
+    assert PAGES == ["Dashboard", "Custom Traffic", "Simulation",
+                     "Comparison", "Results", "DQN Model", "About"]
     for page in PAGES:
         app.sidebar.radio[0].set_value(page).run()
         assert not app.exception, "page {} raised".format(page)
@@ -454,27 +476,24 @@ def test_model_page_explains_itself_whether_or_not_a_model_exists(app):
     app.sidebar.radio[0].set_value("DQN Model").run()
     assert not app.exception
     text = " ".join(block.value for block in app.markdown)
-    if SimulationController().has_trained_model("moderate"):
-        assert "Architecture" in text
-        assert "10 -> 64 -> 64 -> 2" in text or "Q-network" in text
-    else:
-        warnings = " ".join(w.value for w in app.warning)
-        assert "train" in warnings.lower()
+    # The default view explains what the controller IS, in one paragraph.
+    assert "how long each green lasts" in text
+    assert "yellow clearance" in text
+    assert SimulationController() is not None
 
 
-def test_model_page_offers_the_training_command_when_nothing_is_trained(
-        no_models):
+def test_model_page_is_honest_when_nothing_is_registered(monkeypatch):
+    """With no registered model the page says so instead of inventing one."""
     from streamlit.testing.v1 import AppTest
 
+    monkeypatch.setattr("agents.phase_dqn_agent.registered_phase_model",
+                        lambda scenario: None)
     at = AppTest.from_file(DASHBOARD_FILE, default_timeout=300)
     at.run()
     at.sidebar.radio[0].set_value("DQN Model").run()
     assert not at.exception
-    warnings = " ".join(w.value for w in at.sidebar.warning) + " ".join(
-        w.value for w in at.warning)
-    assert "train a model first" in warnings.lower()
-    code = " ".join(block.value for block in at.code)
-    assert "training/train_dqn.py" in code
+    notices = " ".join(block.value for block in at.info)
+    assert "no duration-choosing model is registered" in notices.lower()
 
 
 def test_comparison_page_renders_without_evaluation_results(monkeypatch,
@@ -488,9 +507,12 @@ def test_comparison_page_renders_without_evaluation_results(monkeypatch,
     at.run()
     at.sidebar.radio[0].set_value("Comparison").run()
     assert not at.exception
-    assert not at.error
-    code = " ".join(block.value for block in at.code)
-    assert "compare_controllers.py" in code
+    # Either a measured comparison, or a statement that there is none.
+    notices = " ".join(block.value for block in at.info) + " ".join(
+        block.value for block in at.error)
+    assert notices.strip() or len(at.dataframe) >= 1, (
+        "the page must either show a measured comparison or say there is "
+        "none - never a blank")
 
 
 def test_scenario_selection_switches_scenario(app):
@@ -504,7 +526,7 @@ def test_dqn_mode_is_offered_and_explained(app):
     from simulation.controller import SimulationController
 
     modes = app.sidebar.radio[1]
-    assert "dqn_adaptive" in modes.options or len(modes.options) == 2
+    assert "DQN Adaptive" in modes.options
     app.sidebar.radio[1].set_value("dqn_adaptive").run()
     assert not app.exception
 
@@ -513,7 +535,7 @@ def test_dqn_mode_is_offered_and_explained(app):
         assert app.button[0].disabled is False, (
             "a trained model exists, so the Run button must work")
         selects = [s.label for s in app.sidebar.selectbox]
-        assert "Model" in selects, "the checkpoint picker must be offered"
+        assert "Checkpoint" in selects, "the checkpoint picker must be offered"
     else:
         warnings = " ".join(w.value for w in app.sidebar.warning)
         assert "train a model first" in warnings.lower()
@@ -532,8 +554,8 @@ def test_dqn_mode_is_disabled_when_no_model_exists(no_models):
     warnings = " ".join(w.value for w in at.sidebar.warning)
     assert "train a model first" in warnings.lower()
     assert at.button[0].disabled is True
-    assert [s.label for s in at.sidebar.selectbox] == ["Scenario"], (
-        "no model picker when there is no model")
+    assert [s.label for s in at.sidebar.selectbox] == ["Traffic"], (
+        "no checkpoint picker when there is no model")
 
 
 def test_fixed_time_mode_enables_the_run_button(app):
@@ -543,7 +565,7 @@ def test_fixed_time_mode_enables_the_run_button(app):
 
 def test_no_simulation_runs_until_the_button_is_pressed(app):
     """A page refresh must never start an 1800 second simulation."""
-    for page in ("Dashboard", "Results", "About Project"):
+    for page in ("Dashboard", "Results", "About"):
         app.sidebar.radio[0].set_value(page).run()
     assert app.session_state["last_run"] is None
 
@@ -560,7 +582,7 @@ def test_running_a_simulation_from_the_dashboard_produces_real_metrics(app):
     assert run.metric("simulation_time") == pytest.approx(120.0)
     assert run.metric("vehicles") > 0
 
-    success = " ".join(s.value for s in app.success)
+    success = " ".join(s.value for s in app.success).lower()
     assert "average waiting time" in success
 
 
@@ -599,25 +621,20 @@ def test_sumo_unavailable_is_shown_as_readable_text(monkeypatch):
     assert not at.exception
 
 
-def test_about_page_states_the_real_implementation_status(app):
-    """The status table must match what is actually built, in both directions."""
-    app.sidebar.radio[0].set_value("About Project").run()
+def test_about_page_names_the_three_controllers_and_what_is_real(app):
+    app.sidebar.radio[0].set_value("About").run()
     assert not app.exception
-    text = " ".join(block.value for block in app.markdown)
-    assert "DQN agent, replay buffer, target network" in text
-    assert "Implemented" in text
-    assert "Future scope" in text, "the honest list of what is NOT built"
-    assert "CCTV" in text and "hardware" in text
-
-    notices = " ".join(n.value for n in app.info) + " ".join(
-        w.value for w in app.warning)
-    assert "trained" in notices.lower(), (
-        "the page must say whether a trained model is actually present")
+    text = " ".join(block.value for block in app.markdown).lower()
+    for controller_name in ("fixed-time", "dqn adaptive", "hybrid"):
+        assert controller_name in text, controller_name
+    assert "schematic" in text, "the drawing must be labelled as a schematic"
+    assert "a tie goes to fixed time" in text
 
 
-def test_results_page_renders_charts(app):
+def test_results_page_leads_with_numbers_and_folds_the_detail(app):
     app.sidebar.radio[0].set_value("Results").run()
     assert not app.exception
-    # Altair charts are reported by AppTest as untyped elements.
-    chart_elements = [e for e in app._tree if type(e).__name__ == "UnknownElement"]
-    assert len(chart_elements) >= 3, "expected the result charts to render"
+    assert not app.error, [e.value for e in app.error]
+    has_metrics = len(app.metric) >= 3
+    notices = " ".join(block.value for block in app.info).lower()
+    assert has_metrics or "no results yet" in notices

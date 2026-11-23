@@ -102,9 +102,16 @@ EVALUATION_RESULTS_DIR = os.path.join(PROJECT_ROOT, "results", "evaluation")
 #: Control-mode keys. The dashboard only ever uses these constants.
 MODE_FIXED_TIME = "fixed_time"
 MODE_DQN = "dqn_adaptive"
+MODE_HYBRID = "hybrid"
+
+#: The pseudo-scenario for user-defined traffic. It has no YAML file: the
+#: demand comes from a resolved workload instead, and everything else is
+#: inherited from the workload's base scenario.
+SCENARIO_CUSTOM = "custom"
 
 #: mode key -> the controller label written into every result file
-RESULT_CONTROLLER = {MODE_FIXED_TIME: "fixed_time", MODE_DQN: "dqn"}
+RESULT_CONTROLLER = {MODE_FIXED_TIME: "fixed_time", MODE_DQN: "dqn",
+                     MODE_HYBRID: "hybrid"}
 
 
 # ===========================================================================
@@ -398,6 +405,11 @@ class SimulationController:
         else:
             reason = ""
 
+        hybrid_reason = "" if torch_ok else (
+            "PyTorch is not installed, so there is no DQN for Hybrid to "
+            "try.\n\nInstall the project requirements:\n"
+            "    pip install -r requirements.txt")
+
         return [
             ControlMode(
                 key=MODE_FIXED_TIME,
@@ -415,6 +427,20 @@ class SimulationController:
                 agent_name="dqn",
                 unavailable_reason=reason,
                 badge="TRAINED MODEL" if available else "NO MODEL",
+            ),
+            ControlMode(
+                key=MODE_HYBRID,
+                label="Hybrid",
+                description=(
+                    "Starts the traffic under a valid fixed-time plan, then "
+                    "spends a fixed amount of wall-clock time tuning that "
+                    "plan and testing a DQN against it. The DQN takes over "
+                    "only if it measurably wins; otherwise the best measured "
+                    "fixed plan keeps the signal."),
+                available=bool(torch_ok),
+                agent_name="hybrid",
+                unavailable_reason=hybrid_reason,
+                badge="TIME-LIMITED" if torch_ok else "NO PYTORCH",
             ),
         ]
 
@@ -783,6 +809,73 @@ class SimulationController:
             finished_at=datetime.now(),
             duration_seconds=elapsed,
         )
+
+    # ------------------------------------------------------------------
+    # Custom workloads
+    # ------------------------------------------------------------------
+    def run_custom(self, workload, mode: str = MODE_FIXED_TIME,
+                   plan=None, agent=None, seed: Optional[int] = None,
+                   use_gui: bool = False) -> SimulationRun:
+        """Run a user-defined workload under one controller.
+
+        The workload carries its own explicit vehicle list, so `scenario` is
+        not consulted for demand at all - only for the signal plan and the
+        vehicle type, both of which the workload copied in when it was
+        resolved. That is what lets two controllers be compared on exactly
+        the same traffic rather than on the same random seed.
+        """
+        from simulation.custom_runs import (run_dqn, run_fixed,
+                                            save_custom_run)
+
+        started = datetime.now()
+        status = self.environment_status()
+        if not status.sumo_available or not status.traci_available:
+            raise SumoUnavailableError("SUMO is not available.")
+
+        decisions = None
+        if mode == MODE_DQN:
+            if agent is None:
+                agent = self.load_phase_agent(workload.base_scenario)
+            summary, timeseries, decisions = run_dqn(workload, agent,
+                                                     seed=seed)
+        else:
+            summary, timeseries = run_fixed(workload, plan=plan, seed=seed,
+                                            use_gui=use_gui)
+
+        paths = save_custom_run(workload, summary, timeseries, decisions)
+        summary["workload_id"] = workload.workload_id
+        return SimulationRun(
+            scenario=SCENARIO_CUSTOM,
+            mode=mode,
+            metrics=summary,
+            source="custom workload {}".format(workload.workload_id[:8]),
+            csv_path=paths["results"],
+            timeseries_path=paths["timeseries"],
+            finished_at=datetime.now(),
+            duration_seconds=(datetime.now() - started).total_seconds(),
+        )
+
+    # ------------------------------------------------------------------
+    def load_phase_agent(self, scenario: str):
+        """The promoted duration-choosing model for a scenario.
+
+        Separate from `load_dqn_agent`, which loads the Stage 3 KEEP/SWITCH
+        agent the Moderate and Heavy pages use. The two are different action
+        spaces and different checkpoints; mixing them up would not be a
+        fallback, it would be a crash.
+        """
+        from agents.phase_dqn_agent import (PhaseModelError,
+                                            load_registered_phase_model)
+        try:
+            return load_registered_phase_model(scenario)
+        except PhaseModelError as exc:
+            raise ModelMissingError(
+                "No duration-choosing model is registered for '{}'.\n\n{}"
+                .format(scenario, exc)) from exc
+
+    def has_phase_model(self, scenario: str) -> bool:
+        from agents.phase_dqn_agent import registered_phase_model
+        return bool(registered_phase_model(scenario))
 
     # ------------------------------------------------------------------
     def _save_decisions(self, decisions, stem: str) -> str:

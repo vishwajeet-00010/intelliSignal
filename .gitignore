@@ -33,3 +33,11 @@ __pycache__/
 *.pyc
 
 *.lock
+
+# Disposable artifacts of a run. Everything here is written by the code and
+# can be regenerated; nothing here is evidence of a reported result.
+tmp/
+results/custom_runs/
+results/custom_workloads/
+results/hybrid/
+output/**/logs/

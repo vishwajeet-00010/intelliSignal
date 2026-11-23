@@ -95,6 +95,7 @@ class PhaseDurationEnv(gym.Env):
                  gamma_per_second: float = 1.0,
                  state_extractor: Optional[PhaseStateExtractor] = None,
                  extra_sumo_args: Optional[list] = None,
+                 workload=None,
                  tag: str = ""):
         super().__init__()
 
@@ -113,14 +114,26 @@ class PhaseDurationEnv(gym.Env):
         #: that measured the fixed-time baseline.
         self.step_callback = None
 
-        self.scenario_config = load_config(scenario)
+        # A custom workload replaces the scenario's demand with an explicit
+        # vehicle list. Everything else - the signal plan, the vehicle type,
+        # the step length - still comes from the base scenario, so a custom
+        # run differs from Moderate and Heavy in exactly one thing.
+        self.workload = workload
+        if workload is not None:
+            self.scenario = workload.base_scenario
+        self.scenario_config = load_config(self.scenario)
         signal = self.scenario_config["signal"]
         simulation = self.scenario_config["simulation"]
 
-        self.step_length = float(simulation["step_length"])
-        self.episode_duration = float(
-            episode_duration if episode_duration is not None
-            else simulation["duration"])
+        self.step_length = float(
+            workload.step_length if workload is not None
+            else simulation["step_length"])
+        if episode_duration is not None:
+            self.episode_duration = float(episode_duration)
+        elif workload is not None:
+            self.episode_duration = float(workload.duration_s)
+        else:
+            self.episode_duration = float(simulation["duration"])
         self.total_steps = int(round(self.episode_duration / self.step_length))
 
         self.controller = PhaseDurationController(
@@ -331,10 +344,25 @@ class PhaseDurationEnv(gym.Env):
         return config
 
     # ------------------------------------------------------------------
+    def _build_inputs(self) -> Dict[str, Any]:
+        """Write this episode's SUMO inputs.
+
+        For a custom workload the demand is the workload's own explicit
+        vehicle list, so both controllers in a comparison read the same file
+        and the arrival times are the ones the preview showed.
+        """
+        if self.workload is not None:
+            from custom_traffic.builder import build_workload
+            return build_workload(self.workload,
+                                  tag=PHASE_SUFFIX + self.tag,
+                                  duration=self.episode_duration)
+        return build_scenario(self.episode_scenario_config())
+
+    # ------------------------------------------------------------------
     def _start_sumo(self) -> None:
         import traci
 
-        self._files = build_scenario(self.episode_scenario_config())
+        self._files = self._build_inputs()
         cmd = [
             sumo_binary(self.render_mode == "human"),
             "-c", self._files["sumocfg"],
@@ -375,6 +403,10 @@ class PhaseDurationEnv(gym.Env):
     def cleanup_generated_inputs(self) -> None:
         """Remove this environment's throwaway SUMO inputs."""
         import glob
+        if self.workload is not None:
+            from custom_traffic.builder import cleanup_workload_inputs
+            cleanup_workload_inputs(self.workload, tag=PHASE_SUFFIX + self.tag)
+            return
         stem = self.scenario + PHASE_SUFFIX + self.tag
         for pattern in ("sumo/routes/{}*", "sumo/config/{}*",
                         "sumo/additional/{}*"):
