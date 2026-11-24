@@ -46,6 +46,12 @@ DEFAULTS: Dict[str, Any] = {
     "hybrid_max_episodes": 30,
     "hybrid_patience": 3,
     "hybrid_workload_id": None,   # the job the page is watching
+
+    # --- operational timing profile --------------------------------------
+    # Which green limits every controller is held to. It changes what is
+    # reachable, so it is recorded with every run and shown on the pages
+    # rather than left implicit.
+    "timing_profile": "responsive",
 }
 
 

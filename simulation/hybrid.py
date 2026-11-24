@@ -322,13 +322,14 @@ def run_fixed_plan(workload: ResolvedWorkload, plan: FixedPlan, seed: int,
 
 
 def run_dqn_policy(workload: ResolvedWorkload, agent, seed: int,
-                   tag: str = "_hybdqn") -> RunMetrics:
+                   tag: str = "_hybdqn", profile=None) -> RunMetrics:
     """One greedy run of a phase-duration policy on this workload."""
     from rl.phase_environment import PhaseDurationEnv
     from rl.phase_state import extractor_from_contract
 
     env = PhaseDurationEnv(
         workload=workload, durations=agent.durations,
+        profile=getattr(profile, "name", profile),
         state_extractor=extractor_from_contract(agent.observation_contract),
         tag="{}_{}".format(tag, seed))
     try:
@@ -402,8 +403,8 @@ def tune_fixed_plan(workload: ResolvedWorkload, start: FixedPlan,
                     seed: int, deadline: Optional[float] = None,
                     should_stop: Optional[Callable[[], bool]] = None,
                     greens: Sequence[int] = TUNE_GREENS,
-                    on_progress: Optional[Callable[[str], None]] = None
-                    ) -> Tuple[FixedPlan, bool]:
+                    on_progress: Optional[Callable[[str], None]] = None,
+                    profile=None) -> Tuple[FixedPlan, bool]:
     """Tune north-south and east-west green independently.
 
     Coordinate descent: hold east-west, sweep north-south, keep the best;
@@ -414,6 +415,17 @@ def tune_fixed_plan(workload: ResolvedWorkload, start: FixedPlan,
 
     Returns the best plan ACTUALLY MEASURED and whether the sweep finished.
     """
+    # Under a timing profile the sweep may only try greens that profile
+    # allows, and the starting plan is pulled onto the menu - otherwise
+    # Hybrid's "fallback" could be a plan the profile forbids.
+    if profile is not None:
+        greens = [int(d) for d in profile.durations]
+        start = FixedPlan(
+            ns_green=profile.nearest_duration(start.ns_green),
+            ew_green=profile.nearest_duration(start.ew_green),
+            yellow=start.yellow, all_red=start.all_red,
+            source="configured, pulled onto the {} menu".format(profile.name))
+
     best = FixedPlan(ns_green=start.ns_green, ew_green=start.ew_green,
                      yellow=start.yellow, all_red=start.all_red,
                      source="tuned here", measured_on=[seed])

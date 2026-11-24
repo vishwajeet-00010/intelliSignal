@@ -66,6 +66,7 @@ st.set_page_config(
 from dashboard import (charts, components, controls, custom_form,  # noqa: E402
                        hybrid_panel, state)
 from dashboard.theme import CSS, fmt, scenario_label          # noqa: E402
+from rl.timing_profile import PROFILES, compatible, get_profile  # noqa: E402
 from simulation.controller import (ControlModeUnavailableError,  # noqa: E402
                                    MODE_DQN, MODE_FIXED_TIME, MODE_HYBRID,
                                    SimulationController, SimulationError)
@@ -118,6 +119,20 @@ def traffic_label(selection) -> str:
     return scenario_label(selection["scenario"])
 
 
+def active_profile(selection):
+    return get_profile(selection.get("profile") or "responsive")
+
+
+def profile_banner(selection) -> None:
+    """Say which timing rules are in force, on every page that shows a run."""
+    profile = active_profile(selection)
+    st.caption(
+        "Timing profile **{}** — green {:g}-{:g} s, red at most {:g}x the "
+        "preceding green. {}".format(
+            profile.name, profile.min_green, profile.max_green,
+            profile.max_red_factor, profile.description))
+
+
 def controller_label(mode: str) -> str:
     return {MODE_FIXED_TIME: "Fixed-Time", MODE_DQN: "DQN Adaptive",
             MODE_HYBRID: "Hybrid"}.get(mode, mode)
@@ -168,11 +183,26 @@ def do_run(controller, selection) -> None:
                 state.record_error(
                     "Define traffic on the Custom Traffic page first.")
                 return
-            agent = (controller.load_phase_agent(workload.base_scenario)
-                     if mode == MODE_DQN else None)
+            profile = active_profile(selection)
+            agent = None
+            if mode == MODE_DQN:
+                agent = controller.load_phase_agent(workload.base_scenario,
+                                                    profile=profile.name)
+                if not compatible(profile, agent.durations):
+                    state.record_error(
+                        "The registered model's greens are {} s, which the "
+                        "{} profile ({:g}-{:g} s) does not allow. It is kept "
+                        "as historical evidence, not activated here. Train a "
+                        "model for this profile, or switch the profile back."
+                        .format("/".join("{:g}".format(d)
+                                         for d in agent.durations),
+                                profile.name, profile.min_green,
+                                profile.max_green))
+                    return
             run = controller.run_custom(workload, mode=mode, agent=agent,
                                         seed=selection["seed"],
-                                        use_gui=selection["gui"])
+                                        use_gui=selection["gui"],
+                                        profile=profile.name)
         else:
             run = controller.run(
                 scenario, mode=mode, duration=selection["duration"],
@@ -210,7 +240,8 @@ def _run_hybrid(controller, selection) -> None:
 
     state.set_value("hybrid_workload_id", workload.workload_id)
     state.set_value("hybrid_workload", workload.to_dict())
-    start_job(workload, hybrid_limits(), configured_plan_for(workload))
+    start_job(workload, hybrid_limits(), configured_plan_for(workload),
+              profile=active_profile(selection).name)
     state.set_value("page", "Comparison")
 
 
@@ -233,6 +264,7 @@ def page_dashboard(controller, selection, env) -> None:
         st.markdown("### {}".format(traffic_label(selection)))
         st.caption("Controller: **{}**".format(
             controller_label(selection["mode"])))
+        profile_banner(selection)
 
         if run is not None and getattr(run, "metrics", None):
             columns = st.columns(3)
@@ -529,14 +561,38 @@ def page_results(controller, selection, env) -> None:
 
     components.controller_badge(run.mode,
                                 str(run.metric("model", "") or ""))
+    profile_banner(selection)
     _headline_metrics(run)
     vehicle_accounting(run)
     st.caption("From {}.".format(run.source))
+    _timing_compliance(run)
 
     with st.expander("Every measured value from this run"):
         st.json(run.metrics, expanded=False)
     with st.expander("Saved runs on disk"):
         _saved_runs_table()
+
+
+def _timing_compliance(run) -> None:
+    """Did the run obey the profile? Measured from the recorded phases."""
+    report = run.metric("timing_compliance")
+    if not report:
+        return
+    ok = report.get("compliant", True)
+    (st.success if ok else st.error)(
+        "Timing {}: greens ran {:g}-{:g} s, {} below the minimum, {} above "
+        "the maximum, {} red-limit breach(es).".format(
+            "compliant" if ok else "NOT compliant",
+            report.get("min_green_seen") or 0,
+            report.get("max_green_seen") or 0,
+            report.get("greens_below_min", 0),
+            report.get("greens_above_max", 0),
+            report.get("red_limit_breaches", 0)))
+    truncated = report.get("truncated_phases", 0)
+    if truncated:
+        st.caption("{} phase(s) were cut short by the end of the run. They "
+                   "are counted as truncated, not as short greens."
+                   .format(truncated))
 
 
 def _saved_runs_table() -> None:

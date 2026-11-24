@@ -438,8 +438,23 @@ def test_sidebar_is_short_and_has_the_four_things_that_matter(app):
     read the whole sidebar on a laptop without scrolling.
     """
     assert [r.label for r in app.sidebar.radio] == ["Navigation", "Controller"]
-    assert [s.label for s in app.sidebar.selectbox] == ["Traffic"]
+    # Traffic and the timing profile both change what is simulated, so
+    # both are at the top level. Everything else is under Advanced.
+    assert [s.label for s in app.sidebar.selectbox] == ["Traffic",
+                                                        "Timing profile"]
     assert app.button[0].label == "Run"
+
+
+def test_the_timing_profile_is_selectable_and_recorded(app):
+    from rl.timing_profile import PROFILES
+
+    options = list(app.sidebar.selectbox[1].options)
+    assert len(options) == len(PROFILES)
+    assert any("15-30 s" in option for option in options), (
+        "the standard profile must be offered")
+    app.sidebar.selectbox[1].set_value("standard").run()
+    assert not app.exception
+    assert app.session_state["timing_profile"] == "standard"
 
 
 def test_custom_traffic_is_offered_alongside_the_built_in_scenarios(app):
@@ -554,7 +569,8 @@ def test_dqn_mode_is_disabled_when_no_model_exists(no_models):
     warnings = " ".join(w.value for w in at.sidebar.warning)
     assert "train a model first" in warnings.lower()
     assert at.button[0].disabled is True
-    assert [s.label for s in at.sidebar.selectbox] == ["Traffic"], (
+    assert [s.label for s in at.sidebar.selectbox] == ["Traffic",
+                                                       "Timing profile"], (
         "no checkpoint picker when there is no model")
 
 

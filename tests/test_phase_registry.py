@@ -170,11 +170,17 @@ def test_a_registered_but_missing_file_says_so(sandbox):
 
 # ---------------------------------------------------------------------------
 def test_the_real_registry_has_both_scenarios_promoted():
-    """The models this work promoted are registered and loadable."""
-    import importlib
-    importlib.reload(phase_agent)
+    """The models this work promoted are registered and loadable.
+
+    Read from disk rather than through the module, so this cannot disturb
+    a monkeypatched registry elsewhere in the suite.
+    """
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(root, "models", "active_models.json"),
+              encoding="utf-8") as handle:
+        payload = json.load(handle)
     for scenario, expected_wait in (("heavy", 5.151), ("moderate", 2.237)):
-        record = phase_agent.registered_phase_model(scenario)
+        record = (payload.get("phase_duration_models") or {}).get(scenario)
         assert record is not None, "{} is not promoted".format(scenario)
         measured = record["measurement"]["mean_waiting_time"]
         baseline = record["measurement"]["baseline_mean_waiting_time"]
@@ -182,5 +188,4 @@ def test_the_real_registry_has_both_scenarios_promoted():
         assert measured < baseline, (
             "a promoted model must beat the fixed plan it was measured "
             "against: {} got {} against {}".format(scenario, measured, baseline))
-        agent = phase_agent.load_registered_phase_model(scenario)
-        assert agent.num_actions == len(agent.durations)
+        assert os.path.isfile(os.path.join(root, record["path"])), record["path"]

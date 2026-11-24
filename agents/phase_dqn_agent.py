@@ -191,11 +191,23 @@ class PhaseDQNAgent:
             return self.policy_net(tensor).cpu().numpy()
 
     # ------------------------------------------------------------------
-    def act(self, observation, training: bool = False) -> int:
-        """Pick a duration index. Epsilon-greedy while training, greedy after."""
+    def act(self, observation, training: bool = False,
+            valid_actions=None) -> int:
+        """Pick an action. Epsilon-greedy while training, greedy after.
+
+        `valid_actions` restricts both the greedy choice and the random
+        one. It is unused by the duration menu, where every action is
+        always legal, and used by the lock-and-extend action space, where
+        EXTEND is illegal once the green has reached its maximum.
+        """
+        legal = (list(range(self.num_actions)) if valid_actions is None
+                 else [int(a) for a in valid_actions])
+        if not legal:
+            raise ValueError("valid_actions must contain at least one action")
         if training and self._random.random() < self.epsilon:
-            return self._random.randrange(self.num_actions)
-        return int(np.argmax(self.q_values(observation)))
+            return self._random.choice(legal)
+        values = self.q_values(observation)
+        return int(max(legal, key=lambda action: values[action]))
 
     # ------------------------------------------------------------------
     def set_epsilon(self, value: float) -> float:
@@ -206,8 +218,17 @@ class PhaseDQNAgent:
     # Learning
     # ==================================================================
     def remember(self, state, action: int, reward: float, next_state,
-                 done: bool, duration: float) -> None:
+                 done: bool, duration: float,
+                 next_valid_actions=None) -> None:
+        """Store one transition.
+
+        `next_valid_actions` is what the NEXT state allows. It is carried
+        into the learning target, not only used when acting: bootstrapping
+        from an action the environment would have refused teaches the
+        network the value of something that cannot happen.
+        """
         self.memory.push(state, action, reward, next_state, done,
+                         next_valid_actions=next_valid_actions,
                          duration=duration)
 
     # ------------------------------------------------------------------
@@ -228,13 +249,27 @@ class PhaseDQNAgent:
         self.policy_net.train()
         current_q = self.policy_net(states).gather(1, actions).squeeze(1)
 
+        next_action_masks = torch.from_numpy(
+            batch.next_action_masks).to(self.device)
+
         with torch.no_grad():
+            # An action the next state forbids is excluded from the
+            # bootstrap, so the target never contains the value of a move
+            # the environment would refuse.
             if self.double_dqn:
                 # The policy network chooses, the target network scores.
-                best = self.policy_net(next_states).argmax(dim=1, keepdim=True)
+                policy_next = self.policy_net(next_states).masked_fill(
+                    ~next_action_masks, -torch.inf)
+                best = policy_next.argmax(dim=1, keepdim=True)
                 next_q = self.target_net(next_states).gather(1, best).squeeze(1)
             else:
-                next_q = self.target_net(next_states).max(dim=1).values
+                masked = self.target_net(next_states).masked_fill(
+                    ~next_action_masks, -torch.inf)
+                next_q = masked.max(dim=1).values
+            # A row whose mask excludes everything would give -inf here.
+            # ReplayBuffer.push refuses an empty mask, so it cannot happen,
+            # but -inf would poison the whole batch silently if it did.
+            next_q = torch.nan_to_num(next_q, neginf=0.0, posinf=0.0)
 
             target_q = self.bootstrap_target(rewards, next_q, dones, durations)
 
@@ -409,19 +444,72 @@ REGISTRY_PATH = os.path.join(PROJECT_ROOT, "models", "active_models.json")
 #: model there would not be a promotion, it would be a crash.
 REGISTRY_SECTION = "phase_duration_models"
 
+#: Models trained against a TIMING PROFILE on the varied workload library,
+#: rather than against one scenario. Keyed by profile name. Kept apart from
+#: `phase_duration_models` because the two answer different questions: one
+#: is "the best model for the heavy scenario", the other is "the best model
+#: for traffic in general under these timing rules".
+PROFILE_REGISTRY_SECTION = "profile_models"
+
 
 class PhaseModelError(RuntimeError):
     """Raised when a registered duration-choosing model cannot be used."""
 
 
-def _registry() -> Dict[str, Any]:
+def _registry(section: str = REGISTRY_SECTION) -> Dict[str, Any]:
     try:
         with open(REGISTRY_PATH, "r", encoding="utf-8") as handle:
             payload = json.load(handle)
     except (OSError, ValueError):
         return {}
-    section = payload.get(REGISTRY_SECTION, {}) if isinstance(payload, dict) else {}
-    return section if isinstance(section, dict) else {}
+    found = payload.get(section, {}) if isinstance(payload, dict) else {}
+    return found if isinstance(found, dict) else {}
+
+
+def registered_profile_model(profile: str) -> Optional[Dict[str, Any]]:
+    """The promoted model for a timing profile, if there is one."""
+    record = _registry(PROFILE_REGISTRY_SECTION).get(str(profile))
+    return dict(record) if isinstance(record, dict) else None
+
+
+def load_registered_profile_model(profile: str) -> "PhaseDQNAgent":
+    """Load the promoted model for a profile, refusing a mismatched one.
+
+    A checkpoint whose menu falls outside the profile's green limits is
+    refused rather than used conservatively: a 4 s-green policy under a
+    15 s minimum is not a safe fallback, it is an invalid controller.
+    """
+    from rl.timing_profile import compatible, get_profile
+
+    record = registered_profile_model(profile)
+    if not record:
+        raise PhaseModelError(
+            "No model is registered for the {!r} timing profile under "
+            "'{}' in {}.".format(profile, PROFILE_REGISTRY_SECTION,
+                                 REGISTRY_PATH))
+    path = str(record.get("path", ""))
+    if not os.path.isabs(path):
+        path = os.path.join(PROJECT_ROOT, path)
+    if not os.path.exists(path):
+        raise PhaseModelError("Registered model is missing: {}".format(path))
+
+    expected = str(record.get("sha256", "")).lower()
+    if expected:
+        digest = hashlib.sha256()
+        with open(path, "rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        if digest.hexdigest().lower() != expected:
+            raise PhaseModelError(
+                "Registered model for {!r} does not match its recorded "
+                "sha256: {}".format(profile, path))
+
+    agent = PhaseDQNAgent.load(path)
+    if not compatible(get_profile(profile), agent.durations):
+        raise PhaseModelError(
+            "The checkpoint registered for {!r} has greens {} s, which that "
+            "profile does not allow.".format(profile, agent.durations))
+    return agent
 
 
 def registered_phase_model(scenario: str) -> Optional[Dict[str, Any]]:

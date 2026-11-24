@@ -27,6 +27,22 @@
 > 5.754 s, moderate 2.918 s against 2.761 s. Section 11b below is historical
 > Stage 3 verification against a 30/30 plan and should be read as such.
 >
+> **24 Nov 2026 — operational timing profiles.** Greens are now bounded by
+> a selectable **timing profile** enforced everywhere a controller runs:
+> `responsive` (4–20 s, what the earlier models were trained with) and
+> `standard` (15–30 s, conventional practice). Under `standard`, on an
+> untouched test split of six varied workloads, the new DQN reaches
+> **15.89 s total delay per requested vehicle against the tuned fixed
+> plan's 22.51 s (−29.4 %), winning on 6 of 6 workloads** while completing
+> more vehicles. The repeated four-second greens were traced to
+> **observation saturation**, not to timing: on custom traffic the inputs
+> pinned at their clipping limit in up to 93 % of decisions. See
+> [`output/audit_20261123/FINDINGS.md`](output/audit_20261123/FINDINGS.md).
+>
+> The 15–30 s profile costs about **7.4×** on heavy traffic compared with
+> unconstrained short cycles. That is the price of the operating policy,
+> and the two profiles are never compared with each other.
+>
 > **23 Nov 2026 — built for the demonstration.** Three additions:
 > **Custom Traffic** (describe demand lane by lane, see the exact preview,
 > run precisely that), a **Hybrid** controller that gives the DQN a fixed

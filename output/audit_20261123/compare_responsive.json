@@ -1,0 +1,370 @@
+{
+  "profile": {
+    "name": "responsive",
+    "min_green": 4.0,
+    "max_green": 20.0,
+    "durations": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12,
+      15,
+      20
+    ],
+    "max_red_factor": 4.0,
+    "description": "Short greens, as every model up to 23 Nov 2026 was trained. The better-performing regime on this junction, because the clearance is only 4 s and demand is modest."
+  },
+  "fixed_plan": {
+    "ns": 10,
+    "ew": 4,
+    "delay": 12.461333333333334
+  },
+  "split": "test",
+  "workloads": [
+    {
+      "name": "lane_skew_light",
+      "id": "e3dd91d9",
+      "vehicles": 300
+    },
+    {
+      "name": "turn_heavy_light",
+      "id": "1354c508",
+      "vehicles": 304
+    },
+    {
+      "name": "lane_skew_moderate",
+      "id": "f3778b18",
+      "vehicles": 548
+    },
+    {
+      "name": "turn_heavy_moderate",
+      "id": "b6652013",
+      "vehicles": 552
+    },
+    {
+      "name": "lane_skew_heavy",
+      "id": "bdf0986d",
+      "vehicles": 844
+    },
+    {
+      "name": "turn_heavy_heavy",
+      "id": "eb4679f7",
+      "vehicles": 848
+    }
+  ],
+  "seeds": [
+    6100,
+    6101,
+    6102,
+    6103,
+    6104,
+    6105
+  ],
+  "table": [
+    {
+      "controller": "actuated (gap 3s)",
+      "profile": "responsive",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 9.443,
+      "sd_waiting": 7.38,
+      "mean_total_delay": 16.056,
+      "sd_total_delay": 10.243,
+      "mean_completed": 532.5,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 7.038,
+      "mean_green": 18.32,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 1
+    },
+    {
+      "controller": "max-pressure",
+      "profile": "responsive",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 10.917,
+      "sd_waiting": 7.729,
+      "mean_total_delay": 17.511,
+      "sd_total_delay": 10.424,
+      "mean_completed": 530.7,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 7.773,
+      "mean_green": 17.87,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 6
+    },
+    {
+      "controller": "candidate A",
+      "profile": "responsive",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 8.38,
+      "sd_waiting": 10.249,
+      "mean_total_delay": 18.196,
+      "sd_total_delay": 20.145,
+      "mean_completed": 521.2,
+      "mean_waiting_to_enter": 0.2,
+      "mean_queue": 6.762,
+      "mean_green": 7.13,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 5
+    },
+    {
+      "controller": "fixed",
+      "profile": "responsive",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 15.87,
+      "sd_waiting": 14.698,
+      "mean_total_delay": 26.833,
+      "sd_total_delay": 22.386,
+      "mean_completed": 494.7,
+      "mean_waiting_to_enter": 21.3,
+      "mean_queue": 12.363,
+      "mean_green": 7.0,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 6
+    }
+  ],
+  "per_workload": {
+    "fixed ns10/ew4": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 7.958,
+        "waiting": 3.25,
+        "completed": 291,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 7.575,
+        "waiting": 3.08,
+        "completed": 295,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 10.812,
+        "waiting": 5.15,
+        "completed": 527,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 19.6,
+        "waiting": 11.66,
+        "completed": 521,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 50.95,
+        "waiting": 32.36,
+        "completed": 691,
+        "pending": 42,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 64.103,
+        "waiting": 39.72,
+        "completed": 643,
+        "pending": 86,
+        "compliant": true
+      }
+    ],
+    "actuated (gap 3s)": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 11.367,
+        "waiting": 6.42,
+        "completed": 292,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 6.878,
+        "waiting": 2.38,
+        "completed": 295,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 11.857,
+        "waiting": 6.62,
+        "completed": 525,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 12.848,
+        "waiting": 7.05,
+        "completed": 530,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 15.091,
+        "waiting": 8.82,
+        "completed": 800,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 38.293,
+        "waiting": 25.37,
+        "completed": 753,
+        "pending": 0,
+        "compliant": true
+      }
+    ],
+    "max-pressure": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 10.511,
+        "waiting": 5.88,
+        "completed": 290,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 14.539,
+        "waiting": 9.18,
+        "completed": 292,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 11.97,
+        "waiting": 6.77,
+        "completed": 527,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 12.419,
+        "waiting": 6.83,
+        "completed": 528,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 15.06,
+        "waiting": 8.84,
+        "completed": 800,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 40.565,
+        "waiting": 28.0,
+        "completed": 747,
+        "pending": 0,
+        "compliant": true
+      }
+    ],
+    "DQN candidate A": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 7.799,
+        "waiting": 3.08,
+        "completed": 291,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 7.131,
+        "waiting": 2.47,
+        "completed": 296,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 8.673,
+        "waiting": 3.51,
+        "completed": 528,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 9.883,
+        "waiting": 4.27,
+        "completed": 532,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 12.623,
+        "waiting": 5.77,
+        "completed": 807,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 63.069,
+        "waiting": 31.18,
+        "completed": 673,
+        "pending": 1,
+        "compliant": true
+      }
+    ]
+  },
+  "notes": [
+    "Candidate B was not evaluated: no checkpoint at None"
+  ]
+}
