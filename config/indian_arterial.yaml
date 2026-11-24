@@ -1,0 +1,87 @@
+# ===========================================================================
+# IntelliSignal
+# Scenario : INDIAN URBAN ARTERIAL
+# ---------------------------------------------------------------------------
+# A signalised four-way junction on a busy Indian city arterial.
+#
+# What makes this different from `moderate` and `heavy`
+# ------------------------------------------------------
+# Those two scenarios use a single generic car that accelerates away the
+# instant the signal turns green. Real vehicles do not: a driver takes
+# about a second to react, the driver behind reacts to them, and the wave
+# takes several seconds to reach the back of the queue. That is startup
+# lost time, and it is worth two to four seconds of every green.
+#
+# `traffic_model: indian_urban` replaces the single car with the real mix -
+# 62 % two-wheelers, 22 % cars, 11 % auto-rickshaws, 5 % buses - each with
+# its own length, acceleration and `startupDelay`. See custom_traffic/fleet.py.
+#
+# The consequence is the point of the scenario: with startup lost time
+# modelled, a four-second green barely moves anything, so the measured
+# best plan lands where practitioners actually set it rather than at 7 s.
+#
+# `moderate` and `heavy` are untouched, so every number recorded against
+# them still reproduces exactly.
+# ===========================================================================
+
+scenario:
+  name: indian_arterial
+  description: Busy Indian urban arterial - mixed fleet with real startup lost time
+
+simulation:
+  duration: 1800          # seconds of simulated time
+  step_length: 1.0        # seconds per simulation step
+  seed: 42
+  time_to_teleport: 300   # SUMO removes a vehicle blocked this long (s)
+
+# Fixed-time plan. These are starting values; the tuned plan is measured,
+# never assumed. Indian practice on an arterial of this size runs cycles
+# of roughly 60-120 s, which is where the sweep lands it.
+signal:
+  ns_green: 30
+  ew_green: 25
+  yellow: 3               # Indian practice is a 3 s amber
+  all_red: 2              # a 2 s all-red clearance, which Indian junctions need
+
+# Vehicles per hour entering from each approach. Mixed fleet, so these are
+# VEHICLES, not PCU; at a mean 0.58 PCU per vehicle this is about
+# 1,450 PCU/h across the junction.
+#
+# The level was calibrated, not guessed. With realistic headways this
+# junction serves roughly 93 % of this demand under an untuned plan and
+# saturates above about 900 veh/h per approach:
+#
+#     ns/ew veh/h    completed    mean waiting
+#     1200 / 900        68 %         92.5 s     oversaturated
+#      900 / 700        87 %         38.5 s
+#      700 / 550        93 %         16.1 s     <- busy, still serviceable
+#      550 / 420        94 %          9.9 s
+#
+# 700/550 is busy enough that the signal plan matters and loose enough
+# that a controller can actually improve it.
+demand:
+  north: 700
+  south: 700
+  east: 550
+  west: 550
+  turn_ratios:
+    right: 0.25
+    straight: 0.55
+    left: 0.20
+
+# The fleet. `traffic_model` selects it; the scalar values below are the
+# fallback single-car parameters and are what a `generic` run would use.
+vehicle:
+  traffic_model: indian_urban
+  max_speed: 13.89        # m/s (= 50 km/h), the arterial speed limit
+  accel: 2.0
+  decel: 4.5
+  length: 4.5
+  min_gap: 2.0
+  sigma: 0.55             # Indian lane discipline is looser than the 0.5 default
+
+# Observation scales for the RL environment, measured under this scenario.
+rl:
+  observation:
+    max_queue_per_approach: 25
+    max_waiting_per_approach: 260

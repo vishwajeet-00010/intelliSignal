@@ -27,6 +27,22 @@
 > 5.754 s, moderate 2.918 s against 2.761 s. Section 11b below is historical
 > Stage 3 verification against a 30/30 plan and should be read as such.
 >
+> **25 Nov 2026 — realistic Indian traffic, and the four-second green
+> explained.** The repeated 4 s greens were not a tuning fault: the
+> simulation had **no startup lost time**, so a 4 s green really did
+> produce nearly 4 s of discharge. With an Indian urban fleet
+> (62 % two-wheelers, cars, autos, buses, each with a real pause before
+> it moves off) a 4 s green now gives **61.3 s** of mean waiting against
+> **8.2 s** at the 12 s optimum — the worst plan on the board.
+>
+> The dashboard opens on **Indian arterial · 15–30 s greens · Hybrid**.
+> On an untouched test split the DQN reaches **14.76 s total delay per
+> requested vehicle against the tuned fixed plan's 17.72 s (−16.7 %),
+> winning on 6 of 6 workloads** — the only controller that never loses on
+> any of them. If no validated DQN exists for the active profile, the
+> DQN mode **hands over to Hybrid automatically** rather than refusing.
+> See [`output/indian_20261125/FINDINGS.md`](output/indian_20261125/FINDINGS.md).
+>
 > **24 Nov 2026 — operational timing profiles.** Greens are now bounded by
 > a selectable **timing profile** enforced everywhere a controller runs:
 > `responsive` (4–20 s, what the earlier models were trained with) and

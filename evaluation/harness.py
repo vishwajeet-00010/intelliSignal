@@ -313,6 +313,8 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
     label = "actuated_{}_{}_{}".format(workload.workload_id, seed, WORKER)
     traci.start([sumo_binary(False), "-c", files["sumocfg"], "--seed",
                  str(int(seed)), "--no-warnings", "--no-step-log"], label=label)
+    connection = traci.getConnection(label)
+    collector.conn = connection
     try:
         while steps_done < total_steps:
             # The red limit caps how long this green may run, because the
@@ -324,16 +326,17 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
             ceiling = min(profile.max_green, max(profile.min_green,
                                                  red_cap - yellow - all_red))
 
-            traci.trafficlight.setRedYellowGreenState(TLS_ID, green_state[phase])
+            connection.trafficlight.setRedYellowGreenState(
+                TLS_ID, green_state[phase])
             served, idle, truncated = 0.0, 0.0, False
             while steps_done < total_steps:
-                traci.simulationStep()
+                connection.simulationStep()
                 collector.collect_step()
                 steps_done += 1
                 served += workload.step_length
                 if served >= ceiling:
                     break
-                present = sum(traci.lane.getLastStepVehicleNumber(lane)
+                present = sum(connection.lane.getLastStepVehicleNumber(lane)
                               for lane in DIRECTION_LANES[phase])
                 idle = 0.0 if present > 0 else idle + workload.step_length
                 if served >= profile.min_green and idle >= gap_seconds:
@@ -352,25 +355,26 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
                         "truncated_by_episode_end": truncated})
             last_green[phase] = served
 
-            traci.trafficlight.setRedYellowGreenState(TLS_ID, yellow_state[phase])
+            connection.trafficlight.setRedYellowGreenState(
+                TLS_ID, yellow_state[phase])
             for _ in range(int(round(yellow / workload.step_length))):
                 if steps_done >= total_steps:
                     break
-                traci.simulationStep()
+                connection.simulationStep()
                 collector.collect_step()
                 steps_done += 1
             if all_red > 0:
-                traci.trafficlight.setRedYellowGreenState(TLS_ID, ALL_RED)
+                connection.trafficlight.setRedYellowGreenState(TLS_ID, ALL_RED)
                 for _ in range(int(round(all_red / workload.step_length))):
                     if steps_done >= total_steps:
                         break
-                    traci.simulationStep()
+                    connection.simulationStep()
                     collector.collect_step()
                     steps_done += 1
             phase = 1 - phase
     finally:
         try:
-            traci.close()
+            connection.close()
         except Exception:
             pass
         cleanup_workload_inputs(workload, tag=scoped)

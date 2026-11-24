@@ -73,14 +73,18 @@ def run_fixed(workload: ResolvedWorkload, plan: Optional[FixedPlan] = None,
     if use_gui:
         command += ["--start", "--quit-on-end"]
 
+    # An explicit labelled connection, never the module-level default -
+    # see the note in simulation/hybrid.py.
     traci.start(command, label=label)
+    connection = traci.getConnection(label)
+    collector.conn = connection
     try:
         for _ in range(steps):
-            traci.simulationStep()
+            connection.simulationStep()
             collector.collect_step()
     finally:
         try:
-            traci.close()
+            connection.close()
         except Exception:
             pass
         cleanup_workload_inputs(workload, tag=tag)

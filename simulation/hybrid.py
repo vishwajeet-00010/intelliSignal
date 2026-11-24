@@ -303,16 +303,23 @@ def run_fixed_plan(workload: ResolvedWorkload, plan: FixedPlan, seed: int,
     steps = int(round(workload.duration_s / workload.step_length))
     label = "hybrid_fixed_{}_{}".format(workload.workload_id, seed)
 
+    # An explicit labelled connection, never the module-level default.
+    # `traci.start` makes its label the default, so a run that used the
+    # module functions would talk to whichever simulation happened to be
+    # current - which is how one test's SUMO ended up answering another's
+    # commands with "Vehicle 'W1_0000' is not known".
     traci.start([sumo_binary(False), "-c", files["sumocfg"],
                  "--seed", str(int(seed)), "--no-warnings", "--no-step-log"],
                 label=label)
+    connection = traci.getConnection(label)
+    collector.conn = connection
     try:
         for _ in range(steps):
-            traci.simulationStep()
+            connection.simulationStep()
             collector.collect_step()
     finally:
         try:
-            traci.close()
+            connection.close()
         except Exception:
             pass
         cleanup_workload_inputs(workload, tag=scoped)

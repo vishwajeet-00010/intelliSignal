@@ -74,7 +74,19 @@ SHAPES = ("balanced", "directional", "lane_skew", "burst", "ramp",
           "turn_heavy")
 
 #: Vehicles per hour per approach, before any shaping.
-INTENSITY = {"light": 300.0, "moderate": 550.0, "heavy": 850.0}
+#:
+#: Calibrated against the Indian fleet's real capacity. With startup lost
+#: time and safe headways this junction serves about 93 % of 700 veh/h per
+#: approach and saturates above roughly 900, so "heavy" sits just inside
+#: the serviceable range rather than beyond it - an oversaturated training
+#: set teaches a controller nothing except that it cannot win.
+INTENSITY = {"light": 280.0, "moderate": 480.0, "heavy": 700.0}
+
+#: The scenario every generated workload inherits its fleet, clearance and
+#: step length from. `indian_arterial` carries the mixed fleet with real
+#: startup delay; `moderate` and `heavy` keep the single generic car and
+#: are left alone so their recorded results still reproduce.
+BASE_SCENARIO = "indian_arterial"
 
 
 # ---------------------------------------------------------------------------
@@ -103,7 +115,7 @@ def build(shape: str, intensity: str, duration_s: float, seed: int
     """One workload of a given shape and intensity."""
     base = INTENSITY[intensity]
     spec = CustomSpec(name="{}_{}".format(shape, intensity),
-                      base_scenario="moderate" if intensity != "heavy" else "heavy",
+                      base_scenario=BASE_SCENARIO,
                       duration_s=float(duration_s), seed=int(seed),
                       lanes=[LaneInput(approach=a, lane=l)
                              for a in APPROACHES

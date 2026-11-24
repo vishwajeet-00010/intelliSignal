@@ -210,7 +210,12 @@ PROFILES: Dict[str, TimingProfile] = {
     ),
 }
 
-DEFAULT_PROFILE = RESPONSIVE
+#: The 15-30 s profile is the default. With the Indian fleet's startup
+#: lost time modelled, a 4 s green gives 61 s of mean waiting against
+#: 8 s at the 12 s optimum, so short greens are no longer merely
+#: impractical - they are measurably bad. 15 s is the pedestrian-safe
+#: minimum and costs about half the difference to that optimum.
+DEFAULT_PROFILE = STANDARD
 
 
 def get_profile(name: Optional[str]) -> TimingProfile:

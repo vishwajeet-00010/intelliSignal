@@ -192,7 +192,9 @@ def resolve(spec: CustomSpec,
                     "vehicle count above zero."))
         return Resolution(None, issues)
 
-    vehicles = _build_vehicle_list(resolved_lanes, step_length)
+    traffic_model = str((config.get("vehicle") or {}).get(
+        "traffic_model", "generic"))
+    vehicles = _build_vehicle_list(resolved_lanes, step_length, traffic_model)
 
     workload = ResolvedWorkload(
         name=spec.name or "custom",
@@ -207,6 +209,7 @@ def resolve(spec: CustomSpec,
         vehicle_type={key: float(config["vehicle"][key])
                       for key in ("max_speed", "accel", "decel", "length",
                                   "min_gap", "sigma")},
+        traffic_model=traffic_model,
         notes=[str(issue) for issue in issues if not issue.is_error],
     )
     return Resolution(workload, issues)
@@ -409,8 +412,8 @@ def _resolve_turns(entry: LaneInput, count: int, config: Dict[str, Any],
 
 
 # ---------------------------------------------------------------------------
-def _build_vehicle_list(lanes: List[ResolvedLane],
-                        step_length: float) -> List[Vehicle]:
+def _build_vehicle_list(lanes: List[ResolvedLane], step_length: float,
+                        traffic_model: str = "generic") -> List[Vehicle]:
     """Expand the lane totals into one entry per vehicle.
 
     Departures are spread evenly across each lane's window, which is what
@@ -419,11 +422,15 @@ def _build_vehicle_list(lanes: List[ResolvedLane],
     one every 1.5 s. Movements are interleaved rather than served in blocks,
     so a lane's right-turners are not all at the end.
     """
+    from custom_traffic.fleet import assign, get_fleet
+
+    fleet = get_fleet(traffic_model)
     vehicles: List[Vehicle] = []
     for lane in lanes:
         if lane.count <= 0:
             continue
         order = _interleave(lane.turns)
+        classes = assign(len(order), fleet)
         window = max(lane.window_end_s - lane.window_start_s, 0.0)
         gap = (window / lane.count) if lane.count > 1 and window > 0 else 0.0
         for index, movement in enumerate(order):
@@ -435,6 +442,7 @@ def _build_vehicle_list(lanes: List[ResolvedLane],
                 approach=lane.approach, lane=lane.lane, movement=movement,
                 depart=round(float(depart), 2),
                 speed_kmh=float(lane.speed_kmh),
+                vehicle_class=classes[index].name,
             ))
     vehicles.sort(key=lambda v: (v.depart, v.vehicle_id))
     return vehicles

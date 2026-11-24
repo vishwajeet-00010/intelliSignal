@@ -286,5 +286,7 @@ def test_the_real_registry_has_a_standard_profile_model():
     measurement = record["measurement"]
     assert measurement["mean_total_delay"] < measurement["baseline_total_delay"]
     assert measurement["paired"]["wins"] == measurement["paired"]["workloads"]
-    assert min(record["durations"]) >= 15.0
+    assert min(record["durations"]) >= 15.0, (
+        "the promoted model must not be able to ask for a green shorter "
+        "than the profile's 15 s minimum")
     assert os.path.isfile(os.path.join(root, record["path"])), record["path"]

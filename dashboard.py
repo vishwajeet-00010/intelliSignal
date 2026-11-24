@@ -64,7 +64,7 @@ st.set_page_config(
 )
 
 from dashboard import (charts, components, controls, custom_form,  # noqa: E402
-                       hybrid_panel, state)
+                       hybrid_panel, state, traffic_panel)
 from dashboard.theme import CSS, fmt, scenario_label          # noqa: E402
 from rl.timing_profile import PROFILES, compatible, get_profile  # noqa: E402
 from simulation.controller import (ControlModeUnavailableError,  # noqa: E402
@@ -120,7 +120,20 @@ def traffic_label(selection) -> str:
 
 
 def active_profile(selection):
-    return get_profile(selection.get("profile") or "responsive")
+    return get_profile(selection.get("profile") or "standard")
+
+
+def active_traffic_model(controller, selection) -> str:
+    """Which fleet the current traffic uses: the Indian mix, or the car."""
+    if selection.get("is_custom"):
+        workload = current_workload()
+        return workload.traffic_model if workload else "indian_urban"
+    try:
+        config = controller.scenario_config(selection["scenario"])
+        return str((config.get("vehicle") or {}).get("traffic_model",
+                                                     "generic"))
+    except Exception:
+        return "generic"
 
 
 def profile_banner(selection) -> None:
@@ -186,18 +199,15 @@ def do_run(controller, selection) -> None:
             profile = active_profile(selection)
             agent = None
             if mode == MODE_DQN:
-                agent = controller.load_phase_agent(workload.base_scenario,
-                                                    profile=profile.name)
-                if not compatible(profile, agent.durations):
-                    state.record_error(
-                        "The registered model's greens are {} s, which the "
-                        "{} profile ({:g}-{:g} s) does not allow. It is kept "
-                        "as historical evidence, not activated here. Train a "
-                        "model for this profile, or switch the profile back."
-                        .format("/".join("{:g}".format(d)
-                                         for d in agent.durations),
-                                profile.name, profile.min_green,
-                                profile.max_green))
+                agent, why = controller.qualified_phase_model(
+                    workload.base_scenario, profile=profile.name)
+                if agent is None:
+                    # The DQN cannot honestly drive this profile, so hand
+                    # the decision to Hybrid instead of refusing the run.
+                    # Hybrid measures the tuned fixed plan against whatever
+                    # DQN exists and picks the one that actually wins.
+                    state.set_value("auto_hybrid_reason", why)
+                    _run_hybrid(controller, selection)
                     return
             run = controller.run_custom(workload, mode=mode, agent=agent,
                                         seed=selection["seed"],
@@ -222,7 +232,11 @@ def do_run(controller, selection) -> None:
 
 
 def _run_hybrid(controller, selection) -> None:
-    """Start the Hybrid search, or reconnect to the one already running."""
+    """Start the Hybrid search, or reconnect to the one already running.
+
+    Reached either because the user chose Hybrid, or because the DQN mode
+    had no validated model for the active profile and fell back here.
+    """
     from custom_traffic.resolver import workload_from_scenario
     from simulation.hybrid import configured_plan_for
     from simulation.hybrid_job import start_job
@@ -264,7 +278,8 @@ def page_dashboard(controller, selection, env) -> None:
         st.markdown("### {}".format(traffic_label(selection)))
         st.caption("Controller: **{}**".format(
             controller_label(selection["mode"])))
-        profile_banner(selection)
+        traffic_panel.practical_note(active_profile(selection))
+        traffic_panel.fleet_summary(active_traffic_model(controller, selection))
 
         if run is not None and getattr(run, "metrics", None):
             columns = st.columns(3)
@@ -285,9 +300,17 @@ def page_dashboard(controller, selection, env) -> None:
                 st.warning("Custom traffic is selected but no traffic has "
                            "been defined. Open **Custom Traffic**.")
             else:
-                st.caption("Workload `{}` · {} vehicles over {:.0f} s".format(
-                    workload.workload_id[:8], workload.total_vehicles,
-                    workload.duration_s))
+                st.caption("Workload `{}`".format(workload.workload_id[:8]))
+        else:
+            try:
+                summary = controller.scenario_summary(selection["scenario"])
+                traffic_panel.signal_plan(
+                    summary["ns_green"], summary["ew_green"],
+                    summary["yellow"], summary["all_red"],
+                    source="configured in config/{}.yaml".format(
+                        selection["scenario"]))
+            except Exception:
+                pass
 
     if state.get("last_error"):
         st.error(state.get("last_error"))
@@ -312,6 +335,8 @@ def page_custom(controller, selection, env) -> None:
         st.info("Press **Preview traffic** to resolve the form. Run stays "
                 "disabled until there is a preview to run.")
         return
+    traffic_panel.demand_summary(workload)
+    traffic_panel.fleet_summary(workload.traffic_model)
     custom_form.render_preview(workload)
 
     st.divider()
@@ -357,6 +382,11 @@ def page_simulation(controller, selection, env) -> None:
                        float(row.get("running_vehicles", 0)),
                        float(row.get("queue_length", 0))))
         _headline_metrics(run)
+        report = run.metric("timing_compliance") or {}
+        if report.get("min_green_seen"):
+            traffic_panel.green_explainer(
+                float(report["min_green_seen"]),
+                active_traffic_model(controller, selection))
 
     with st.expander("Decision details"):
         _decision_details(controller, run, selection, moment)
@@ -441,6 +471,7 @@ def _decision_details(controller, run, selection, moment) -> None:
 # --------------------------------------------------------------------------
 def page_comparison(controller, selection, env) -> None:
     st.markdown("## Comparison")
+    traffic_panel.auto_hybrid_notice(state.get("auto_hybrid_reason"))
 
     workload_id = state.get("hybrid_workload_id")
     if workload_id:
@@ -681,6 +712,20 @@ def page_about(controller, selection, env) -> None:
     columns[0].metric("Scenarios", str(len(env.get("scenarios") or [])))
     columns[1].metric("SUMO", env.get("sumo_version") or "not found")
     columns[2].metric("PyTorch", env.get("torch_version") or "not installed")
+
+    st.markdown("#### Why the greens are not short")
+    st.write(
+        "When a signal turns green the first driver takes about a second "
+        "to react, the driver behind reacts to them, and the wave takes "
+        "several seconds to reach the back of the queue. Those seconds are "
+        "spent whatever the green length, so a short green spends almost "
+        "all of itself on them.")
+    traffic_panel.green_comparison("indian_urban")
+    st.caption(
+        "Measured on this junction with the Indian fleet: a 4 s green "
+        "gives 61.3 s of mean waiting, a 12 s green gives 8.2 s. The old "
+        "model had no startup delay at all, which is why it used to "
+        "prefer 7 s greens that no engineer would deploy.")
 
     with st.expander("The three controllers"):
         st.markdown(

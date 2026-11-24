@@ -283,3 +283,69 @@ def test_the_contract_carries_the_version():
     contract = PhaseStateExtractor(saturation=SATURATION_SOFT).contract()
     assert contract["observation_version"] == 2.0
     assert contract["saturation"] == SATURATION_SOFT
+
+
+# ===========================================================================
+# The Indian fleet, and why 15 s is the minimum
+# ===========================================================================
+def test_the_indian_fleet_is_a_mix_not_one_car():
+    from custom_traffic.fleet import INDIAN_URBAN_FLEET, mean_pcu
+
+    names = {v.name for v in INDIAN_URBAN_FLEET}
+    assert names == {"motorcycle", "car", "auto", "bus"}
+    assert sum(v.share for v in INDIAN_URBAN_FLEET) == pytest.approx(1.0)
+    # Two-wheeler dominant, so the mean vehicle is well under one PCU.
+    assert INDIAN_URBAN_FLEET[0].name == "motorcycle"
+    assert INDIAN_URBAN_FLEET[0].share > 0.5
+    assert 0.4 < mean_pcu(INDIAN_URBAN_FLEET) < 0.8
+
+
+def test_every_vehicle_waits_before_it_moves_off():
+    """Startup lost time is the whole reason a 4 s green is useless."""
+    from custom_traffic.fleet import INDIAN_URBAN_FLEET, mean_startup_delay
+
+    for vehicle in INDIAN_URBAN_FLEET:
+        assert vehicle.startup_delay > 0, vehicle.name
+    assert mean_startup_delay(INDIAN_URBAN_FLEET) > 0.5
+
+
+def test_no_vehicle_has_an_unsafe_headway():
+    """Krauss is collision-free only while tau >= the simulation step.
+
+    A first attempt used tau 0.8 with a 1.0 s step and produced 400-565
+    rear-end collisions per run, which would have made every measurement
+    taken from it meaningless.
+    """
+    from custom_traffic.fleet import INDIAN_URBAN_FLEET
+
+    for vehicle in INDIAN_URBAN_FLEET:
+        assert vehicle.tau >= 1.0, (
+            "{} has tau {} - below the 1 s step, Krauss stops being "
+            "collision-free".format(vehicle.name, vehicle.tau))
+
+
+def test_a_short_green_is_mostly_wasted():
+    from custom_traffic.fleet import INDIAN_URBAN_FLEET, effective_green_note
+
+    four = effective_green_note(4, INDIAN_URBAN_FLEET)
+    fifteen = effective_green_note(15, INDIAN_URBAN_FLEET)
+    assert "29 %" in four or "2" in four
+    assert "81 %" in fifteen or "8" in fifteen
+
+
+def test_the_default_profile_is_the_practical_one():
+    """15-30 s, not the 4-20 s the earlier models were trained with."""
+    from rl.timing_profile import DEFAULT_PROFILE, STANDARD, get_profile
+
+    assert DEFAULT_PROFILE == STANDARD
+    assert get_profile(None).min_green == 15.0
+
+
+def test_the_dashboard_opens_on_practical_settings():
+    from dashboard.state import DEFAULTS
+
+    assert DEFAULTS["timing_profile"] == "standard"
+    assert DEFAULTS["scenario"] == "indian_arterial"
+    assert DEFAULTS["control_mode"] == "hybrid", (
+        "Hybrid is the safe default: it measures the tuned fixed plan "
+        "against the DQN and uses whichever actually wins")

@@ -218,7 +218,11 @@ def test_status_indicators_have_the_three_expected_lights(controller):
 
 
 def test_controller_lists_both_scenarios_lightest_first(controller):
-    assert controller.available_scenarios() == ["moderate", "heavy"]
+    scenarios = controller.available_scenarios()
+    # The two original scenarios still come first, lightest first, and the
+    # Indian arterial is listed alongside them.
+    assert scenarios[:2] == ["moderate", "heavy"]
+    assert "indian_arterial" in scenarios
 
 
 def test_scenario_summary_comes_from_the_yaml_file(controller):
@@ -540,6 +544,9 @@ def test_dqn_mode_is_offered_and_explained(app):
     """The mode is always listed; whether it can run depends on the model."""
     from simulation.controller import SimulationController
 
+    # The dashboard now opens on the Indian arterial; this test is about
+    # the Moderate scenario's own checkpoints.
+    app.sidebar.selectbox[0].set_value("moderate").run()
     modes = app.sidebar.radio[1]
     assert "DQN Adaptive" in modes.options
     app.sidebar.radio[1].set_value("dqn_adaptive").run()
@@ -587,6 +594,11 @@ def test_no_simulation_runs_until_the_button_is_pressed(app):
 
 
 def test_running_a_simulation_from_the_dashboard_produces_real_metrics(app):
+    # Pin the scenario and the controller: the dashboard's own defaults are
+    # the Indian arterial under Hybrid, which is a background search, not a
+    # single measured run.
+    app.sidebar.selectbox[0].set_value("moderate").run()
+    app.sidebar.radio[1].set_value("fixed_time").run()
     app.sidebar.number_input[0].set_value(120).run()
     app.button[0].click().run()
     assert not app.exception

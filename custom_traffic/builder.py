@@ -32,6 +32,7 @@ import glob
 import os
 from typing import Any, Dict, List
 
+from custom_traffic.fleet import get_fleet, vtype_id as fleet_vtype_id, vtype_xml
 from custom_traffic.network import route_edges, route_id
 from custom_traffic.workload import ResolvedWorkload, mps_speed
 from utils.config_loader import load_config
@@ -54,8 +55,13 @@ def scenario_name(workload: ResolvedWorkload, tag: str = "") -> str:
 
 
 # ---------------------------------------------------------------------------
+def _speed_suffix(speed_kmh: float) -> str:
+    return "_{:.0f}".format(round(float(speed_kmh)))
+
+
 def vtype_id(speed_kmh: float) -> str:
-    return "car_{:.0f}".format(round(float(speed_kmh)))
+    """Kept for the generic single-car fleet and for older callers."""
+    return "car{}".format(_speed_suffix(speed_kmh))
 
 
 def build_route_file(workload: ResolvedWorkload, name: str) -> str:
@@ -71,18 +77,23 @@ def build_route_file(workload: ResolvedWorkload, name: str) -> str:
         '<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
         ' xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">',
         "",
-        "    <!-- One vehicle type per desired speed used by the workload -->",
+        "    <!-- Vehicle types: one per (class, desired speed) in use.",
+        "         `startupDelay` is the pause before a stopped vehicle moves",
+        "         off, and `tau` the desired headway. Together they are what",
+        "         makes a short green mostly useless: the queue has barely",
+        "         begun to move before the light changes. -->",
     ]
 
-    for speed_kmh in workload.speeds_used():
-        lines.append(
-            '    <vType id="{vid}" vClass="passenger" accel="{accel}"'
-            ' decel="{decel}" sigma="{sigma}" length="{length}"'
-            ' minGap="{gap}" maxSpeed="{speed:.2f}" guiShape="passenger"/>'
-            .format(vid=vtype_id(speed_kmh), accel=veh["accel"],
-                    decel=veh["decel"], sigma=veh["sigma"],
-                    length=veh["length"], gap=veh["min_gap"],
-                    speed=mps_speed(speed_kmh)))
+    fleet = {v.name: v for v in get_fleet(workload.traffic_model)}
+    speeds = workload.speeds_used()
+    used_classes = sorted({v.vehicle_class for v in workload.vehicles})
+    for class_name in used_classes:          # NOT `name`: that is the file
+        vehicle = fleet.get(class_name)
+        if vehicle is None:
+            continue
+        for speed_kmh in speeds:
+            lines.append(vtype_xml(vehicle, speed_kmh=speed_kmh,
+                                   suffix=_speed_suffix(speed_kmh)))
 
     lines += ["", "    <!-- Routes: one per approach and turning movement -->"]
     used_routes = sorted({(v.approach, v.movement) for v in workload.vehicles})
@@ -93,11 +104,14 @@ def build_route_file(workload: ResolvedWorkload, name: str) -> str:
 
     lines += ["", "    <!-- Vehicles, in departure order -->"]
     for vehicle in workload.vehicles:
+        klass = fleet.get(vehicle.vehicle_class)
+        suffix = _speed_suffix(vehicle.speed_kmh)
+        type_id = (fleet_vtype_id(klass, suffix) if klass is not None
+                   else "car" + suffix)
         lines.append(
             '    <vehicle id="{vid}" type="{vtype}" route="{route}"'
             ' depart="{depart:.2f}" departLane="{lane}" departSpeed="max"/>'
-            .format(vid=vehicle.vehicle_id,
-                    vtype=vtype_id(vehicle.speed_kmh),
+            .format(vid=vehicle.vehicle_id, vtype=type_id,
                     route=route_id(vehicle.approach, vehicle.movement),
                     depart=vehicle.depart, lane=vehicle.lane))
 

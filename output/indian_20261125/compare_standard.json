@@ -1,0 +1,440 @@
+{
+  "profile": {
+    "name": "standard",
+    "min_green": 15.0,
+    "max_green": 30.0,
+    "durations": [
+      15,
+      16,
+      17,
+      18,
+      20,
+      22,
+      25,
+      30
+    ],
+    "max_red_factor": 4.0,
+    "description": "Conventional signal practice: a 15 s minimum green, long enough for a pedestrian phase. More realistic and markedly more expensive on this junction - the best plan under it is 42.50 s on heavy against 5.754 s unconstrained."
+  },
+  "fixed_plan": {
+    "ns": 22,
+    "ew": 15,
+    "delay": 17.783
+  },
+  "split": "test",
+  "workloads": [
+    {
+      "name": "lane_skew_light",
+      "id": "5d0a1d23",
+      "vehicles": 276
+    },
+    {
+      "name": "turn_heavy_light",
+      "id": "62b3fcc9",
+      "vehicles": 280
+    },
+    {
+      "name": "lane_skew_moderate",
+      "id": "771f4fd3",
+      "vehicles": 480
+    },
+    {
+      "name": "turn_heavy_moderate",
+      "id": "b1b2c470",
+      "vehicles": 480
+    },
+    {
+      "name": "lane_skew_heavy",
+      "id": "059b0f51",
+      "vehicles": 700
+    },
+    {
+      "name": "turn_heavy_heavy",
+      "id": "94cfb733",
+      "vehicles": 704
+    }
+  ],
+  "seeds": [
+    6100,
+    6101,
+    6102,
+    6103,
+    6104,
+    6105
+  ],
+  "table": [
+    {
+      "controller": "candidate A",
+      "profile": "standard",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 8.327,
+      "sd_waiting": 3.951,
+      "mean_total_delay": 14.756,
+      "sd_total_delay": 5.923,
+      "mean_completed": 463.5,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 4.745,
+      "mean_green": 17.07,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 6
+    },
+    {
+      "controller": "candidate B",
+      "profile": "standard",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 8.395,
+      "sd_waiting": 3.224,
+      "mean_total_delay": 14.942,
+      "sd_total_delay": 4.878,
+      "mean_completed": 463.2,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 4.648,
+      "mean_green": 15.23,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 6
+    },
+    {
+      "controller": "actuated (gap 3s)",
+      "profile": "standard",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 10.77,
+      "sd_waiting": 3.978,
+      "mean_total_delay": 16.915,
+      "sd_total_delay": 5.094,
+      "mean_completed": 461.7,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 6.098,
+      "mean_green": 27.71,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 6
+    },
+    {
+      "controller": "fixed",
+      "profile": "standard",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 11.495,
+      "sd_waiting": 7.07,
+      "mean_total_delay": 17.72,
+      "sd_total_delay": 7.734,
+      "mean_completed": 458.5,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 6.823,
+      "mean_green": 18.21,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 6
+    },
+    {
+      "controller": "max-pressure",
+      "profile": "standard",
+      "seeds": [
+        6100,
+        6101,
+        6102,
+        6103,
+        6104,
+        6105
+      ],
+      "n": 6,
+      "mean_waiting": 11.67,
+      "sd_waiting": 2.497,
+      "mean_total_delay": 18.05,
+      "sd_total_delay": 3.999,
+      "mean_completed": 462.2,
+      "mean_waiting_to_enter": 0.0,
+      "mean_queue": 6.327,
+      "mean_green": 28.49,
+      "all_compliant": true,
+      "red_breaches": 0,
+      "truncated_phases": 5
+    }
+  ],
+  "per_workload": {
+    "fixed ns22/ew15": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 12.927,
+        "waiting": 7.67,
+        "completed": 266,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 12.644,
+        "waiting": 7.28,
+        "completed": 272,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 12.705,
+        "waiting": 7.17,
+        "completed": 460,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 16.645,
+        "waiting": 9.77,
+        "completed": 459,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 16.853,
+        "waiting": 9.98,
+        "completed": 663,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 34.546,
+        "waiting": 27.1,
+        "completed": 631,
+        "pending": 0,
+        "compliant": true
+      }
+    ],
+    "actuated (gap 3s)": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 15.112,
+        "waiting": 9.87,
+        "completed": 268,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 7.91,
+        "waiting": 3.41,
+        "completed": 272,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 16.753,
+        "waiting": 10.71,
+        "completed": 460,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 18.154,
+        "waiting": 11.56,
+        "completed": 456,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 18.43,
+        "waiting": 12.19,
+        "completed": 658,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 25.129,
+        "waiting": 16.88,
+        "completed": 656,
+        "pending": 0,
+        "compliant": true
+      }
+    ],
+    "max-pressure": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 14.478,
+        "waiting": 9.61,
+        "completed": 264,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 15.916,
+        "waiting": 10.57,
+        "completed": 268,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 14.874,
+        "waiting": 9.69,
+        "completed": 455,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 17.198,
+        "waiting": 10.59,
+        "completed": 459,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 19.723,
+        "waiting": 12.84,
+        "completed": 664,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 26.113,
+        "waiting": 16.72,
+        "completed": 663,
+        "pending": 0,
+        "compliant": true
+      }
+    ],
+    "DQN candidate A": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 11.275,
+        "waiting": 6.21,
+        "completed": 268,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 9.517,
+        "waiting": 5.03,
+        "completed": 268,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 12.406,
+        "waiting": 6.8,
+        "completed": 459,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 13.973,
+        "waiting": 7.52,
+        "completed": 460,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 13.807,
+        "waiting": 7.44,
+        "completed": 666,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 27.559,
+        "waiting": 16.96,
+        "completed": 660,
+        "pending": 0,
+        "compliant": true
+      }
+    ],
+    "DQN candidate B": [
+      {
+        "workload": "lane_skew_light",
+        "delay": 11.586,
+        "waiting": 6.45,
+        "completed": 266,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_light",
+        "delay": 12.073,
+        "waiting": 6.73,
+        "completed": 269,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_moderate",
+        "delay": 12.657,
+        "waiting": 6.81,
+        "completed": 462,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_moderate",
+        "delay": 13.735,
+        "waiting": 7.31,
+        "completed": 460,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "lane_skew_heavy",
+        "delay": 13.912,
+        "waiting": 7.51,
+        "completed": 664,
+        "pending": 0,
+        "compliant": true
+      },
+      {
+        "workload": "turn_heavy_heavy",
+        "delay": 25.691,
+        "waiting": 15.56,
+        "completed": 658,
+        "pending": 0,
+        "compliant": true
+      }
+    ]
+  },
+  "notes": []
+}

@@ -157,7 +157,7 @@
   },
   "profile_models": {
     "standard": {
-      "label": "Profile DQN, candidate B (standard 15-30 s)",
+      "label": "Profile DQN, candidate B (standard 15-30 s, Indian fleet)",
       "profile": {
         "name": "standard",
         "min_green": 15.0,
@@ -177,8 +177,8 @@
       },
       "controller_family": "phase_duration",
       "candidate": "B",
-      "path": "output/audit_20261123/runs/B_std_s44/models/best.pt",
-      "sha256": "6D4A3749AC4311B7B8C5E197EE4B0CCC144F8C66FFE44DFF53DC81D59B89521B",
+      "path": "output/indian_20261125/runs/B_s42/models/best.pt",
+      "sha256": "478955AD4364543AE100E94CA633D412F5DAB739C755538AC780C3CFBB716E1E",
       "durations": [
         15.0,
         16.0,
@@ -204,24 +204,24 @@
       "measurement": {
         "split": "test",
         "profile": "standard",
-        "mean_total_delay": 15.893,
-        "sd_total_delay": 10.907,
-        "mean_waiting": 9.332,
-        "mean_completed": 531.2,
+        "mean_total_delay": 14.942,
+        "sd_total_delay": 4.878,
+        "mean_waiting": 8.395,
+        "mean_completed": 463.2,
         "mean_waiting_to_enter": 0.0,
         "all_compliant": true,
         "baseline_controller": "fixed",
-        "baseline_total_delay": 22.508,
-        "baseline_completed": 512.7,
+        "baseline_total_delay": 17.72,
+        "baseline_completed": 458.5,
         "paired": {
           "workloads": 6,
           "wins": 6,
-          "worst_delta": -1.515,
-          "mean_delta": -6.615
+          "worst_delta": -0.048,
+          "mean_delta": -2.778
         }
       },
-      "promoted_on": "2026-11-24",
-      "note": "Selected on the validation split (best of six runs at 16.28 s). Reported on the untouched test split: 15.89 s total delay per requested vehicle against the tuned fixed plan's 22.51 s, winning on 6 of 6 workloads. Candidate A happened to edge it on test (15.56 s) but was not the validation winner, so it was not promoted."
+      "promoted_on": "2026-11-25",
+      "note": "Trained on the Indian urban fleet with real startup lost time, on 18 varied workloads. Selected on validation (15.14 s, best of six runs); reported on the untouched test split: 14.94 s total delay per requested vehicle against the tuned fixed plan's 17.72 s, winning on 6 of 6 workloads. Candidate A reached 14.76 s on test but was not the validation winner."
     }
   }
 }

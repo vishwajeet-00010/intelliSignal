@@ -52,7 +52,7 @@
   {
     "check": "requested / entered / completed are all reported",
     "passed": true,
-    "detail": "448 requested, 448 entered, 396 completed, 0 waiting to enter"
+    "detail": "448 requested, 448 entered, 404 completed, 0 waiting to enter"
   },
   {
     "check": "the saved run reloads from disk",
@@ -62,22 +62,22 @@
   {
     "check": "the reloaded numbers match what was displayed",
     "passed": true,
-    "detail": "waiting 12.63 s, completed 396"
+    "detail": "waiting 10.8 s, completed 404"
   },
   {
     "check": "the replay timeseries was written",
     "passed": true,
-    "detail": "results\\custom_runs\\76b230bc88f797a1_dqn_timeseries.csv"
+    "detail": "results\\custom_runs\\bfb6ca0b8298db9c_dqn_timeseries.csv"
   },
   {
     "check": "live collector and SUMO trip info agree on completions",
     "passed": true,
-    "detail": "393 vs 393"
+    "detail": "397 vs 397"
   },
   {
     "check": "total delay per requested vehicle is reported",
     "passed": true,
-    "detail": "24.74 s, of which 0.00 s is insertion delay"
+    "detail": "22.86 s, of which 0.00 s is insertion delay"
   },
   {
     "check": "heavy ns7/ew6 on seed 6101",

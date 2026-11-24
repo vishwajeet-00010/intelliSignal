@@ -56,6 +56,11 @@ class Vehicle:
     movement: str
     depart: float            # seconds from the start of the simulation
     speed_kmh: float         # desired maximum speed
+    #: Which class of vehicle this is - motorcycle, car, auto, bus. The
+    #: mix is decided once, when the workload is resolved, so the same
+    #: workload always puts the same vehicle in the same place and both
+    #: controllers in a comparison meet identical traffic.
+    vehicle_class: str = "car"
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -127,6 +132,9 @@ class ResolvedWorkload:
     #: from the base scenario, copied in so the workload is self-contained.
     signal: Dict[str, float] = field(default_factory=dict)
     vehicle_type: Dict[str, float] = field(default_factory=dict)
+    #: "generic" (the single car every earlier result used) or
+    #: "indian_urban" (the two-wheeler-dominant mix with startup delay).
+    traffic_model: str = "generic"
     notes: List[str] = field(default_factory=list)
     created_at: str = ""
 
@@ -162,6 +170,22 @@ class ResolvedWorkload:
         return sorted({round(lane.speed_kmh, 1)
                        for lane in self.lanes if lane.count > 0})
 
+    def fleet_mix(self) -> Dict[str, int]:
+        """How many of each vehicle class the workload actually contains."""
+        counts: Dict[str, int] = {}
+        for vehicle in self.vehicles:
+            counts[vehicle.vehicle_class] = counts.get(
+                vehicle.vehicle_class, 0) + 1
+        return dict(sorted(counts.items(), key=lambda kv: -kv[1]))
+
+    def total_pcu(self) -> float:
+        """The demand in passenger car units, which is how Indian signal
+        design measures capacity. Sixty motorcycles are not sixty cars."""
+        from custom_traffic.fleet import get_fleet
+        pcu = {v.name: v.pcu for v in get_fleet(self.traffic_model)}
+        return round(sum(pcu.get(v.vehicle_class, 1.0)
+                         for v in self.vehicles), 1)
+
     # ------------------------------------------------------------------
     def signature(self) -> Dict[str, Any]:
         """Everything that changes the simulation, and nothing that does not.
@@ -178,9 +202,11 @@ class ResolvedWorkload:
             "signal": {k: round(float(v), 3) for k, v in sorted(self.signal.items())},
             "vehicle_type": {k: round(float(v), 4)
                              for k, v in sorted(self.vehicle_type.items())},
+            "traffic_model": self.traffic_model,
             "vehicles": [
                 [v.vehicle_id, v.approach, v.lane, v.movement,
-                 round(float(v.depart), 3), round(float(v.speed_kmh), 2)]
+                 round(float(v.depart), 3), round(float(v.speed_kmh), 2),
+                 v.vehicle_class]
                 for v in self.vehicles],
         }
 
@@ -201,6 +227,7 @@ class ResolvedWorkload:
             "seed": self.seed,
             "signal": dict(self.signal),
             "vehicle_type": dict(self.vehicle_type),
+            "traffic_model": self.traffic_model,
             "lanes": [lane.to_dict() for lane in self.lanes],
             "vehicles": [v.to_dict() for v in self.vehicles],
             "notes": list(self.notes),
@@ -218,6 +245,7 @@ class ResolvedWorkload:
             vehicles=[Vehicle.from_dict(entry) for entry in data["vehicles"]],
             signal=dict(data.get("signal") or {}),
             vehicle_type=dict(data.get("vehicle_type") or {}),
+            traffic_model=data.get("traffic_model", "generic"),
             notes=list(data.get("notes") or []),
             created_at=data.get("created_at", ""),
         )

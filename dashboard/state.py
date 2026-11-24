@@ -22,8 +22,8 @@ PAGES: List[str] = ["Dashboard", "Custom Traffic", "Simulation",
 
 DEFAULTS: Dict[str, Any] = {
     "page": "Dashboard",
-    "scenario": "moderate",
-    "control_mode": "fixed_time",
+    "scenario": "indian_arterial",
+    "control_mode": "hybrid",
     "duration": 1800,
     "seed": 42,                # SUMO seed for a DQN run
     "model_name": None,        # which checkpoint the DQN run should use
@@ -40,6 +40,7 @@ DEFAULTS: Dict[str, Any] = {
     "custom_workload": None,      # ResolvedWorkload.to_dict()
     "custom_issues": [],          # [{where, message, severity}]
     "custom_regen_token": 0,      # bumped only by "Regenerate"
+    "auto_hybrid_reason": None,   # why the DQN mode handed over to Hybrid
 
     # --- hybrid ----------------------------------------------------------
     "hybrid_wall_clock_s": 300,
@@ -51,7 +52,7 @@ DEFAULTS: Dict[str, Any] = {
     # Which green limits every controller is held to. It changes what is
     # reachable, so it is recorded with every run and shown on the pages
     # rather than left implicit.
-    "timing_profile": "responsive",
+    "timing_profile": "standard",
 }
 
 

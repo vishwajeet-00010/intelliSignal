@@ -893,6 +893,60 @@ class SimulationController:
                         " or for the '{}' profile".format(profile)
                         if profile else "", exc)) from exc
 
+    def qualified_phase_model(self, scenario: str,
+                              profile: Optional[str] = None):
+        """The model to use, or the reason there is none.
+
+        Returns `(agent, reason)`. `agent` is None when the DQN cannot
+        honestly drive the signal under this profile, and `reason` says
+        why in words a non-specialist can read. The caller is expected to
+        fall back to Hybrid rather than to refuse the run: the point of
+        Hybrid is that it measures both and picks, so "we have no
+        validated network here" is a reason to let it choose, not a
+        reason to stop.
+
+        A model qualifies only if it is registered for this profile, its
+        green menu fits the profile, and its promotion record shows it
+        actually beating the tuned fixed plan it was measured against.
+        """
+        from agents.phase_dqn_agent import (PhaseModelError,
+                                            registered_phase_model,
+                                            registered_profile_model)
+        from rl.timing_profile import compatible, get_profile
+
+        timing = get_profile(profile) if profile else None
+        record = (registered_profile_model(profile) if profile else None)
+        if record is None and profile:
+            scenario_record = registered_phase_model(scenario)
+            if scenario_record is None:
+                return None, (
+                    "No DQN has been trained and validated for the '{}' "
+                    "timing profile yet.".format(profile))
+            if timing is not None and not compatible(
+                    timing, scenario_record.get("durations") or []):
+                return None, (
+                    "The only trained model here uses {:g}-{:g} s greens, "
+                    "which the '{}' profile ({:g}-{:g} s) does not allow. "
+                    "It is kept as historical evidence, not used."
+                    .format(min(scenario_record["durations"]),
+                            max(scenario_record["durations"]), profile,
+                            timing.min_green, timing.max_green))
+
+        measurement = (record or {}).get("measurement") or {}
+        learned = measurement.get("mean_total_delay")
+        baseline = measurement.get("baseline_total_delay")
+        if record is not None and learned is not None and baseline is not None:
+            if learned >= baseline:
+                return None, (
+                    "The DQN registered for this profile did not beat the "
+                    "tuned fixed plan when it was measured ({:.2f} s against "
+                    "{:.2f} s).".format(learned, baseline))
+
+        try:
+            return self.load_phase_agent(scenario, profile=profile), ""
+        except Exception as exc:
+            return None, str(exc)
+
     def has_phase_model(self, scenario: str,
                         profile: Optional[str] = None) -> bool:
         from agents.phase_dqn_agent import (registered_phase_model,
