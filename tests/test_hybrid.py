@@ -167,10 +167,10 @@ def staged(monkeypatch, tmp_path):
 
     state = {"fixed_wait": 8.0, "dqn_waits": [], "trained": 0}
 
-    def fake_fixed(workload, plan, seed, tag="_x"):
+    def fake_fixed(workload, plan, seed, tag="_x", **kwargs):
         return metrics("fixed_time", state["fixed_wait"], seed=seed)
 
-    def fake_dqn(workload, agent, seed, tag="_x"):
+    def fake_dqn(workload, agent, seed, tag="_x", **kwargs):
         # A check runs the policy once per validation seed. The scripted
         # value belongs to the CHECK, not to the seed, so it is drawn on the
         # first seed and reused for the rest.

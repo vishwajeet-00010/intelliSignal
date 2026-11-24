@@ -1,0 +1,54 @@
+{
+  "profile": {
+    "name": "responsive",
+    "min_green": 4.0,
+    "max_green": 20.0,
+    "durations": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      12,
+      15,
+      20
+    ],
+    "max_red_factor": 4.0,
+    "description": "Short greens, as every model up to 23 Nov 2026 was trained. The better-performing regime on this junction, because the clearance is only 4 s and demand is modest."
+  },
+  "candidate": "A",
+  "extension": 3.0,
+  "seed": 42,
+  "episodes": 300,
+  "pilot": false,
+  "seconds_per_episode": 3.5,
+  "best_validation_total_delay": 9.92,
+  "best_validation_episode": 30,
+  "best_model": "output/audit_20261123/runs/A_rsp_s42\\models\\best.pt",
+  "final_model": "output/audit_20261123/runs/A_rsp_s42\\models\\final.pt",
+  "observation_contract": {
+    "observation_size": 10.0,
+    "observation_version": 2.0,
+    "saturation": "soft",
+    "max_queue_per_direction": 25.0,
+    "max_waiting_per_direction": 250.0,
+    "max_vehicles_per_direction": 40.0,
+    "max_queue_per_approach": 15.0,
+    "max_green_seconds": 20.0
+  },
+  "durations": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12,
+    15,
+    20
+  ],
+  "wall_clock_s": 1050.9
+}

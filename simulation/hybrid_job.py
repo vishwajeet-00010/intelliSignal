@@ -58,7 +58,12 @@ class HybridJob:
 
     def __init__(self, workload: ResolvedWorkload, limits: HybridLimits,
                  configured_plan: FixedPlan, validate_every: int = 5,
-                 validation_seeds: Sequence[int] = VALIDATION_SEEDS):
+                 validation_seeds: Sequence[int] = VALIDATION_SEEDS,
+                 profile=None):
+        from rl.timing_profile import get_profile
+        #: Every plan Hybrid tunes and every candidate it trains is held to
+        #: this profile, so its fallback is a plan the profile allows.
+        self.profile = get_profile(profile) if profile is not None else None
         self.workload = workload
         self.limits = limits.validate()
         self.configured_plan = configured_plan
@@ -175,7 +180,7 @@ class HybridJob:
         plan, tuning_complete = tune_fixed_plan(
             self.workload, self.configured_plan, seed=self.validation_seeds[0],
             deadline=self.deadline, should_stop=self._should_stop,
-            on_progress=self._say)
+            on_progress=self._say, profile=self.profile)
         if not tuning_complete:
             notes.append("Tuning did not finish inside the time limit; the "
                          "best plan measured so far was used.")
@@ -231,7 +236,18 @@ class HybridJob:
         """A registered phase-duration model for this workload's scenario."""
         try:
             from agents.phase_dqn_agent import (load_registered_phase_model,
-                                                registered_phase_model)
+                                                load_registered_profile_model,
+                                                registered_phase_model,
+                                                registered_profile_model)
+            if self.profile is not None:
+                record = registered_profile_model(self.profile.name)
+                if not record:
+                    return None, ""
+                return (load_registered_profile_model(self.profile.name),
+                        "{} [profile {}]".format(
+                            record.get("label", "registered model"),
+                            self.profile.name))
+
             record = registered_phase_model(self.workload.base_scenario)
             if not record:
                 return None, ""
@@ -247,7 +263,8 @@ class HybridJob:
     def _check(self, index: int, episode: int, agent,
                fixed_runs: Sequence[RunMetrics]) -> ValidationCheck:
         """Freeze the candidate and compare it with the tuned plan."""
-        dqn_runs = [run_dqn_policy(self.workload, agent, seed)
+        dqn_runs = [run_dqn_policy(self.workload, agent, seed,
+                                   profile=self.profile)
                     for seed in self.validation_seeds]
         qualified, reason = judge(dqn_runs, fixed_runs)
         check = ValidationCheck(
@@ -283,10 +300,13 @@ class HybridJob:
         torch.set_num_threads(1)
         self.phase = "training a candidate"
 
+        durations = (self.profile.durations if self.profile is not None
+                     else DEFAULT_DURATIONS)
         extractor = PhaseStateExtractor(
-            max_green_seconds=float(max(DEFAULT_DURATIONS)))
+            max_green_seconds=float(max(durations)))
         env = PhaseDurationEnv(
-            workload=self.workload, durations=DEFAULT_DURATIONS,
+            workload=self.workload, durations=durations,
+            profile=self.profile.name if self.profile is not None else None,
             state_extractor=extractor, gamma_per_second=0.99,
             reward_scale=0.005, tag="_hybtrain")
         agent = PhaseDQNAgent(

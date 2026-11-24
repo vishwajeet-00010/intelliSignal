@@ -815,7 +815,8 @@ class SimulationController:
     # ------------------------------------------------------------------
     def run_custom(self, workload, mode: str = MODE_FIXED_TIME,
                    plan=None, agent=None, seed: Optional[int] = None,
-                   use_gui: bool = False) -> SimulationRun:
+                   use_gui: bool = False,
+                   profile: Optional[str] = None) -> SimulationRun:
         """Run a user-defined workload under one controller.
 
         The workload carries its own explicit vehicle list, so `scenario` is
@@ -837,10 +838,12 @@ class SimulationController:
             if agent is None:
                 agent = self.load_phase_agent(workload.base_scenario)
             summary, timeseries, decisions = run_dqn(workload, agent,
-                                                     seed=seed)
+                                                     seed=seed,
+                                                     profile=profile)
         else:
             summary, timeseries = run_fixed(workload, plan=plan, seed=seed,
                                             use_gui=use_gui)
+        summary["timing_profile"] = profile or "responsive"
 
         paths = save_custom_run(workload, summary, timeseries, decisions)
         summary["workload_id"] = workload.workload_id
@@ -856,8 +859,13 @@ class SimulationController:
         )
 
     # ------------------------------------------------------------------
-    def load_phase_agent(self, scenario: str):
-        """The promoted duration-choosing model for a scenario.
+    def load_phase_agent(self, scenario: str, profile: Optional[str] = None):
+        """The promoted duration-choosing model to use.
+
+        When a timing profile is in force, the model registered for THAT
+        PROFILE is used: it was trained under those green limits, on the
+        varied workload library. The per-scenario models are used only
+        when no profile is given, or when no model exists for the profile.
 
         Separate from `load_dqn_agent`, which loads the Stage 3 KEEP/SWITCH
         agent the Moderate and Heavy pages use. The two are different action
@@ -865,16 +873,32 @@ class SimulationController:
         fallback, it would be a crash.
         """
         from agents.phase_dqn_agent import (PhaseModelError,
-                                            load_registered_phase_model)
+                                            load_registered_phase_model,
+                                            load_registered_profile_model,
+                                            registered_profile_model)
+
+        if profile and registered_profile_model(profile):
+            try:
+                return load_registered_profile_model(profile)
+            except PhaseModelError as exc:
+                raise ModelMissingError(
+                    "The model registered for the '{}' timing profile "
+                    "cannot be used.\n\n{}".format(profile, exc)) from exc
         try:
             return load_registered_phase_model(scenario)
         except PhaseModelError as exc:
             raise ModelMissingError(
-                "No duration-choosing model is registered for '{}'.\n\n{}"
-                .format(scenario, exc)) from exc
+                "No duration-choosing model is registered for '{}'{}.\n\n{}"
+                .format(scenario,
+                        " or for the '{}' profile".format(profile)
+                        if profile else "", exc)) from exc
 
-    def has_phase_model(self, scenario: str) -> bool:
-        from agents.phase_dqn_agent import registered_phase_model
+    def has_phase_model(self, scenario: str,
+                        profile: Optional[str] = None) -> bool:
+        from agents.phase_dqn_agent import (registered_phase_model,
+                                            registered_profile_model)
+        if profile and registered_profile_model(profile):
+            return True
         return bool(registered_phase_model(scenario))
 
     # ------------------------------------------------------------------

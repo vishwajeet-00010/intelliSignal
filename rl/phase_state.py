@@ -94,14 +94,60 @@ OBSERVATION_LABELS = (
 OBSERVATION_SIZE = len(OBSERVATION_LABELS)      # 10
 
 
+#: How an unbounded reading is squeezed into [0, 1].
+#:
+#: ``clip``  value / scale, then clipped. Everything at or above the scale
+#:           reads exactly 1.0. This is what every model up to 23 Nov 2026
+#:           was trained with, so it stays the default and those checkpoints
+#:           keep behaving as they did.
+#: ``soft``  value / (value + scale). Strictly increasing everywhere, so no
+#:           two different congestion levels ever produce the same number.
+#:           At the scale it reads 0.5, at twice the scale 0.67, at five
+#:           times 0.83, and it approaches 1.0 without reaching it.
+SATURATION_CLIP = "clip"
+SATURATION_SOFT = "soft"
+
+#: Bumped when the meaning of the observation changes. A checkpoint records
+#: it, and `extractor_from_contract` rebuilds the extractor the policy was
+#: trained with rather than today's default.
+OBSERVATION_VERSION_CLIP = 1
+OBSERVATION_VERSION_SOFT = 2
+
+
 class PhaseStateExtractor:
-    """Reads the traffic state from SUMO, from the served direction's view."""
+    """Reads the traffic state from SUMO, from the served direction's view.
+
+    Why the saturation mode exists
+    ------------------------------
+    The scales are measured from one scenario, and a custom workload can
+    be far outside it. Measured on a 528-vehicle custom workload with
+    1312 veh/h on a single lane, against the moderate model's own scales:
+
+        worst_approach      93.2 % of observations pinned at exactly 1.0
+        served_waiting      74.8 %
+        served_queue        46.6 %
+
+    A pinned input carries no information. The policy was shown a nearly
+    constant vector and returned a nearly constant action - 88 % of its
+    greens were the shortest on the menu. That is not a timing fault and
+    not a reward fault; the controller simply could not see the difference
+    between busy and very busy.
+
+    ``saturation="soft"`` removes the pinning without changing what the
+    numbers mean near the calibrated range.
+    """
 
     def __init__(self, max_queue_per_direction: float = 20.0,
                  max_waiting_per_direction: float = 200.0,
                  max_vehicles_per_direction: float = 30.0,
                  max_queue_per_approach: float = 12.0,
-                 max_green_seconds: float = 20.0):
+                 max_green_seconds: float = 20.0,
+                 saturation: str = SATURATION_CLIP):
+        if saturation not in (SATURATION_CLIP, SATURATION_SOFT):
+            raise ValueError(
+                "saturation must be {!r} or {!r}".format(SATURATION_CLIP,
+                                                         SATURATION_SOFT))
+        self.saturation = saturation
         self.max_queue = float(max_queue_per_direction)
         self.max_waiting = float(max_waiting_per_direction)
         self.max_vehicles = float(max_vehicles_per_direction)
@@ -116,6 +162,25 @@ class PhaseStateExtractor:
                             ("max_green_seconds", self.max_green)):
             if value <= 0:
                 raise ValueError("{} must be positive".format(name))
+
+    # ------------------------------------------------------------------
+    def _scale(self, value: float, scale: float) -> float:
+        """Squeeze an unbounded reading into [0, 1).
+
+        `soft` is `v / (v + k)`: monotone for every v >= 0, so ten halting
+        vehicles and forty halting vehicles are still different numbers
+        even when the scale was calibrated at four.
+        """
+        value = max(float(value), 0.0)
+        if self.saturation == SATURATION_SOFT:
+            return value / (value + float(scale))
+        return value / float(scale)
+
+    @property
+    def observation_version(self) -> int:
+        return (OBSERVATION_VERSION_SOFT
+                if self.saturation == SATURATION_SOFT
+                else OBSERVATION_VERSION_CLIP)
 
     # ------------------------------------------------------------------
     def subscribe(self, conn) -> None:
@@ -190,15 +255,16 @@ class PhaseStateExtractor:
         other_approaching = max(raw["vehicles"][other] - other_queue, 0.0)
         worst_approach = max(raw["approach_queues"].values())
 
+        scale = self._scale
         values = [
-            served_queue / self.max_queue,
-            other_queue / self.max_queue,
-            served_approaching / self.max_vehicles,
-            other_approaching / self.max_vehicles,
-            raw["waiting"][phase] / self.max_waiting,
-            raw["waiting"][other] / self.max_waiting,
+            scale(served_queue, self.max_queue),
+            scale(other_queue, self.max_queue),
+            scale(served_approaching, self.max_vehicles),
+            scale(other_approaching, self.max_vehicles),
+            scale(raw["waiting"][phase], self.max_waiting),
+            scale(raw["waiting"][other], self.max_waiting),
             1.0 if phase == PHASE_NS else 0.0,
-            worst_approach / self.max_approach_queue,
+            scale(worst_approach, self.max_approach_queue),
             float(last_served_green) / self.max_green,
             float(last_other_green) / self.max_green,
         ]
@@ -220,6 +286,8 @@ class PhaseStateExtractor:
         """
         return {
             "observation_size": float(OBSERVATION_SIZE),
+            "observation_version": float(self.observation_version),
+            "saturation": self.saturation,
             "max_queue_per_direction": self.max_queue,
             "max_waiting_per_direction": self.max_waiting,
             "max_vehicles_per_direction": self.max_vehicles,
@@ -242,9 +310,15 @@ KNOWN_CONTRACT_KEYS = ("max_queue_per_direction", "max_waiting_per_direction",
 
 def extractor_from_contract(contract: Optional[Dict[str, Any]]
                             ) -> PhaseStateExtractor:
-    """Rebuild the extractor a checkpoint was trained with."""
+    """Rebuild the extractor a checkpoint was trained with.
+
+    A contract with no `saturation` key predates the soft mode, so it gets
+    the clipping it was trained with. Reading an old policy with the new
+    scaling would feed it inputs it has never seen.
+    """
     if not contract:
         return PhaseStateExtractor()
-    return PhaseStateExtractor(**{key: float(contract[key])
-                                  for key in KNOWN_CONTRACT_KEYS
-                                  if key in contract})
+    scales = {key: float(contract[key]) for key in KNOWN_CONTRACT_KEYS
+              if key in contract}
+    return PhaseStateExtractor(
+        saturation=str(contract.get("saturation", SATURATION_CLIP)), **scales)

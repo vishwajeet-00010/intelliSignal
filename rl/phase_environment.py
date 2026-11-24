@@ -96,6 +96,8 @@ class PhaseDurationEnv(gym.Env):
                  state_extractor: Optional[PhaseStateExtractor] = None,
                  extra_sumo_args: Optional[list] = None,
                  workload=None,
+                 profile=None,
+                 tripinfo_path: Optional[str] = None,
                  tag: str = ""):
         super().__init__()
 
@@ -108,6 +110,10 @@ class PhaseDurationEnv(gym.Env):
         self.render_mode = render_mode
         self.tag = str(tag)
         self.extra_sumo_args = list(extra_sumo_args or [])
+        #: When set, SUMO writes per-trip information here. The inputs are
+        #: regenerated on every reset, so the option has to be re-applied
+        #: after the build and before SUMO reads the file.
+        self.tripinfo_path = tripinfo_path
 
         #: Optional hook called after every simulated second, so the Stage 1
         #: MetricsCollector can measure an agent-driven run with the code
@@ -136,6 +142,13 @@ class PhaseDurationEnv(gym.Env):
             self.episode_duration = float(simulation["duration"])
         self.total_steps = int(round(self.episode_duration / self.step_length))
 
+        # A timing profile supplies the menu and the limits together, so
+        # the same rules apply during exploration, evaluation, custom runs
+        # and Hybrid - there is no path that reaches SUMO without them.
+        from rl.timing_profile import get_profile
+        self.profile = get_profile(profile) if profile is not None else None
+        if self.profile is not None:
+            durations = self.profile.durations
         self.controller = PhaseDurationController(
             durations=durations,
             yellow_time=float(signal["yellow"]),
@@ -143,6 +156,7 @@ class PhaseDurationEnv(gym.Env):
             min_green=float(min(durations)),
             max_green=float(max(durations)),
             step_length=self.step_length,
+            profile=self.profile,
         )
         self.state_extractor = state_extractor or PhaseStateExtractor()
 
@@ -217,7 +231,11 @@ class PhaseDurationEnv(gym.Env):
                 .format(action, self.controller.num_actions - 1))
 
         requested_green = self.controller.duration_for(action)
-        plan = self.controller.plan(action)
+        # The red limit is applied here, before SUMO is touched, so an
+        # intervention is part of the record rather than something that
+        # happened invisibly inside the simulation.
+        executed_action, action_info = self.controller.resolve(action)
+        plan = self.controller.plan(executed_action)
 
         waiting_cost = 0.0
         queue_cost = 0.0
@@ -257,8 +275,9 @@ class PhaseDurationEnv(gym.Env):
         # The green that was actually served, which is what the controller
         # must record - a decision cut short at 1800 s did not get its full
         # duration and the observation must not claim it did.
-        self.controller.commit(action)
-        self.controller.last_green[1 - self.controller.phase] = green_served
+        truncated_phase = bool(hit_end)
+        self.controller.commit(executed_action, served=green_served,
+                               truncated=truncated_phase, info=action_info)
         self._greens.append(green_served)
         self._decision += 1
 
@@ -276,8 +295,15 @@ class PhaseDurationEnv(gym.Env):
 
         info = self._build_info(last_raw, action)
         info.update({
+            "requested_action": int(action),
+            "executed_action": int(executed_action),
             "requested_green": float(requested_green),
+            "executed_green": float(action_info["executed_green"]),
             "green_served": float(green_served),
+            "intervention": action_info.get("intervention", ""),
+            "red_limit": float(action_info.get("red_limit", 0.0) or 0.0),
+            "other_group_red": float(green_served + self.controller.clearance),
+            "truncated_by_episode_end": truncated_phase,
             # `duration` is what the semi-Markov discount uses. It is the
             # simulated seconds this decision actually occupied, clearance
             # included, which is not the same as the green it asked for.
@@ -297,6 +323,8 @@ class PhaseDurationEnv(gym.Env):
             steps = max(self._steps_done, 1)
             info["episode_mean_queue"] = self._episode_queue_cost / steps
             info["episode_mean_waiting_sum"] = self._episode_waiting_cost / steps
+            info["timing_compliance"] = self.controller.compliance()
+            info["decision_log"] = list(self.controller.decision_log)
 
         return observation, float(reward), terminated, truncated, info
 
@@ -363,6 +391,9 @@ class PhaseDurationEnv(gym.Env):
         import traci
 
         self._files = self._build_inputs()
+        if self.tripinfo_path:
+            from utils.delay_accounting import enable_tripinfo
+            enable_tripinfo(self._files["sumocfg"], self.tripinfo_path)
         cmd = [
             sumo_binary(self.render_mode == "human"),
             "-c", self._files["sumocfg"],

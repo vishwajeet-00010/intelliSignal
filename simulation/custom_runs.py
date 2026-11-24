@@ -95,17 +95,18 @@ def run_fixed(workload: ResolvedWorkload, plan: Optional[FixedPlan] = None,
 
 # ---------------------------------------------------------------------------
 def run_dqn(workload: ResolvedWorkload, agent, seed: Optional[int] = None,
-            tag: str = "_rundqn"):
+            tag: str = "_rundqn", profile: Optional[str] = None):
     """One greedy run of a phase-duration policy on the workload."""
     from rl.phase_environment import PhaseDurationEnv
     from rl.phase_state import extractor_from_contract
 
     seed = int(seed if seed is not None else workload.seed)
     env = PhaseDurationEnv(
-        workload=workload, durations=agent.durations,
+        workload=workload, durations=agent.durations, profile=profile,
         state_extractor=extractor_from_contract(agent.observation_contract),
         tag=tag)
     greens: List[Dict[str, Any]] = []
+    compliance = None
     try:
         observation, _ = env.reset(seed=seed)
         collector = MetricsCollector(step_length=env.step_length,
@@ -124,8 +125,10 @@ def run_dqn(workload: ResolvedWorkload, agent, seed: Optional[int] = None,
                              for d, v in zip(agent.durations, values)},
             })
             if terminated or truncated:
+                compliance = info.get("timing_compliance")
                 break
         summary = collector.summary(workload.name)
+        summary["timing_compliance"] = compliance
         timeseries = collector.timeseries
     finally:
         env.close()

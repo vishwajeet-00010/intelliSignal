@@ -101,6 +101,25 @@ def sidebar(controller) -> Dict[str, Any]:
         if not selected.available:
             st.warning(selected.unavailable_reason)
 
+        # --- timing profile --------------------------------------------
+        from rl.timing_profile import PROFILES
+        profile_names = list(PROFILES)
+        current_profile = state.get("timing_profile")
+        if current_profile not in profile_names:
+            current_profile = profile_names[0]
+        st.markdown('<div class="is-side-label">Timing profile</div>',
+                    unsafe_allow_html=True)
+        profile_name = st.selectbox(
+            "Timing profile", profile_names,
+            index=profile_names.index(current_profile),
+            format_func=lambda n: "{} ({:g}-{:g} s green)".format(
+                n, PROFILES[n].min_green, PROFILES[n].max_green),
+            label_visibility="collapsed", key="profile_select",
+            help="The green limits every controller is held to. Changing it "
+                 "changes what any controller can do, so results from two "
+                 "profiles are never compared with each other.")
+        state.set_value("timing_profile", profile_name)
+
         # --- run --------------------------------------------------------
         st.write("")
         ready = selected.available and (scenario != CUSTOM or bool(workload))
@@ -181,6 +200,7 @@ def sidebar(controller) -> Dict[str, Any]:
     return {
         "page": page,
         "scenario": scenario,
+        "profile": profile_name,
         "mode": mode_key,
         "mode_object": selected,
         "duration": int(duration),
@@ -193,6 +213,7 @@ def sidebar(controller) -> Dict[str, Any]:
 
 
 def _empty(page: str) -> Dict[str, Any]:
-    return {"page": page, "scenario": None, "mode": None, "mode_object": None,
-            "duration": None, "seed": 42, "model_name": None,
-            "run_clicked": False, "gui": False, "is_custom": False}
+    return {"page": page, "scenario": None, "profile": "responsive",
+            "mode": None, "mode_object": None, "duration": None, "seed": 42,
+            "model_name": None, "run_clicked": False, "gui": False,
+            "is_custom": False}

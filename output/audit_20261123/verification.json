@@ -1,0 +1,92 @@
+[
+  {
+    "check": "responsive fixed         greens 4-12 s",
+    "passed": true,
+    "detail": "0 truncated"
+  },
+  {
+    "check": "responsive max-pressure  greens 4-20 s",
+    "passed": true,
+    "detail": "1 truncated"
+  },
+  {
+    "check": "responsive actuated      greens 12-20 s",
+    "passed": true,
+    "detail": "1 truncated"
+  },
+  {
+    "check": "standard   fixed         greens 15-30 s",
+    "passed": true,
+    "detail": "1 truncated"
+  },
+  {
+    "check": "standard   max-pressure  greens 15-30 s",
+    "passed": true,
+    "detail": "1 truncated"
+  },
+  {
+    "check": "standard   actuated      greens 30-30 s",
+    "passed": true,
+    "detail": "1 truncated"
+  },
+  {
+    "check": "the standard profile loads a 15-30 s model",
+    "passed": true,
+    "detail": "menu [15, 16, 17, 18, 20, 22, 25, 30]"
+  },
+  {
+    "check": "a responsive model is NOT valid under standard",
+    "passed": true,
+    "detail": "menu [4, 5, 6, 7, 8, 9, 10, 12, 15, 20] is refused"
+  },
+  {
+    "check": "the run records its timing compliance",
+    "passed": true,
+    "detail": "greens 15-16 s"
+  },
+  {
+    "check": "the run records its profile",
+    "passed": true,
+    "detail": "standard"
+  },
+  {
+    "check": "requested / entered / completed are all reported",
+    "passed": true,
+    "detail": "448 requested, 448 entered, 396 completed, 0 waiting to enter"
+  },
+  {
+    "check": "the saved run reloads from disk",
+    "passed": true,
+    "detail": ""
+  },
+  {
+    "check": "the reloaded numbers match what was displayed",
+    "passed": true,
+    "detail": "waiting 12.63 s, completed 396"
+  },
+  {
+    "check": "the replay timeseries was written",
+    "passed": true,
+    "detail": "results\\custom_runs\\76b230bc88f797a1_dqn_timeseries.csv"
+  },
+  {
+    "check": "live collector and SUMO trip info agree on completions",
+    "passed": true,
+    "detail": "393 vs 393"
+  },
+  {
+    "check": "total delay per requested vehicle is reported",
+    "passed": true,
+    "detail": "24.74 s, of which 0.00 s is insertion delay"
+  },
+  {
+    "check": "heavy ns7/ew6 on seed 6101",
+    "passed": true,
+    "detail": "saved 6.670 s, now 6.670 s"
+  },
+  {
+    "check": "moderate ns6/ew4 on seed 6101",
+    "passed": true,
+    "detail": "saved 2.790 s, now 2.790 s"
+  }
+]

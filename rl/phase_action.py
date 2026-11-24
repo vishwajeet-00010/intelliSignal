@@ -83,7 +83,14 @@ class PhaseDurationController:
     def __init__(self, durations: Sequence[float] = DEFAULT_DURATIONS,
                  yellow_time: float = 4.0, all_red_time: float = 0.0,
                  min_green: float = 4.0, max_green: float = 60.0,
-                 step_length: float = 1.0):
+                 step_length: float = 1.0, profile=None):
+        # A profile supplies the menu and the limits together, so a
+        # controller cannot be built with a menu its own limits forbid.
+        self.profile = profile
+        if profile is not None:
+            durations = profile.durations
+            min_green = profile.min_green
+            max_green = profile.max_green
         self.durations = tuple(float(d) for d in durations)
         if not self.durations:
             raise ValueError("durations must not be empty.")
@@ -118,6 +125,15 @@ class PhaseDurationController:
         self.switch_count = 0
         self.last_green = {PHASE_NS: 0.0, PHASE_EW: 0.0}
 
+        #: Controller-local clock, in simulated seconds. The controller has
+        #: no SUMO connection, so it counts the time its own plans occupy.
+        self.clock = 0.0
+        #: Completed red spells, per group, for the compliance report.
+        self.red_history = {PHASE_NS: [], PHASE_EW: []}
+        #: One entry per decision: what was asked for, what was executed,
+        #: when the phase ran, and whether anything intervened.
+        self.decision_log = []
+
     # ------------------------------------------------------------------
     @property
     def num_actions(self) -> int:
@@ -129,6 +145,9 @@ class PhaseDurationController:
         self.green_elapsed = 0.0
         self.switch_count = 0
         self.last_green = {PHASE_NS: 0.0, PHASE_EW: 0.0}
+        self.clock = 0.0
+        self.red_history = {PHASE_NS: [], PHASE_EW: []}
+        self.decision_log = []
 
     # ------------------------------------------------------------------
     def duration_for(self, action: int) -> float:
@@ -140,6 +159,82 @@ class PhaseDurationController:
                 .format(action, len(self.durations) - 1,
                         ", ".join("{:g}".format(d) for d in self.durations)))
         return self.durations[action]
+
+    # ------------------------------------------------------------------
+    @property
+    def clearance(self) -> float:
+        return self.yellow_time + self.all_red_time
+
+    def max_red_for(self, group: int) -> float:
+        """The longest continuous red this group may be held for.
+
+        It is `max_red_factor` times that group's own preceding completed
+        green. Before the group has been green, there is no preceding
+        green to multiply, so the profile's minimum green stands in - the
+        strictest reading, and one that cannot be gamed by opening the
+        episode on a very short green.
+        """
+        if self.profile is None:
+            return float("inf")
+        previous = self.last_green.get(group, 0.0)
+        if previous <= 0.0:
+            return self.profile.initial_max_red_seconds()
+        return self.profile.max_red_seconds(previous)
+
+    def resolve(self, action: int) -> Tuple[int, dict]:
+        """Decide what will actually run, before the simulation is touched.
+
+        The menu already keeps every green inside `min_green`/`max_green`,
+        so the only rule that can intervene here is the red limit. On this
+        two-group junction the waiting group's red will be exactly this
+        green plus the clearance, so a green is shortened when
+
+            green + clearance  >  max_red_factor x the waiting group's
+                                  own preceding green
+
+        If even the shortest green on the menu would breach the limit, the
+        shortest green runs and the breach is recorded rather than hidden:
+        the alternative would be a green below the minimum, which is the
+        one thing the profile is there to prevent.
+        """
+        action = int(action)
+        requested = self.duration_for(action)
+        info = {
+            "requested_action": action,
+            "requested_green": requested,
+            "executed_action": action,
+            "executed_green": requested,
+            "intervention": "",
+            "red_limit": self.max_red_for(self.other_phase()),
+        }
+        limit = info["red_limit"]
+        if limit == float("inf"):
+            return action, info
+
+        allowed_green = limit - self.clearance
+        if requested <= allowed_green + 1e-9:
+            return action, info
+
+        feasible = [index for index, value in enumerate(self.durations)
+                    if value <= allowed_green + 1e-9]
+        if feasible:
+            chosen = max(feasible)
+            info.update({
+                "executed_action": chosen,
+                "executed_green": self.durations[chosen],
+                "intervention": (
+                    "green shortened from {:g} s to {:g} s: holding the "
+                    "other group would have exceeded its {:g} s red limit"
+                    .format(requested, self.durations[chosen], limit)),
+            })
+            return chosen, info
+
+        info["intervention"] = (
+            "red limit of {:g} s cannot be met without a green below the "
+            "{:g} s minimum; the minimum green ran and the limit was "
+            "exceeded".format(limit, self.min_green))
+        return 0, dict(info, executed_action=0,
+                       executed_green=self.durations[0])
 
     # ------------------------------------------------------------------
     def plan(self, action: int) -> List[Tuple[str, int]]:
@@ -170,12 +265,50 @@ class PhaseDurationController:
                 + self.all_red_time)
 
     # ------------------------------------------------------------------
-    def commit(self, action: int) -> None:
-        """Update the controller's state after the plan has been run."""
-        served = self.duration_for(action)
+    def commit(self, action: int, served: float = None,
+               truncated: bool = False, info: dict = None) -> None:
+        """Update the controller's state after the plan has been run.
+
+        `served` is the green that actually ran, which is shorter than the
+        green that was asked for when the episode ended mid-phase. That
+        case is recorded as a truncation, never as a completed short green.
+        """
+        requested = self.duration_for(action)
+        served = requested if served is None else float(served)
+        waiting = self.other_phase()
+
+        # The waiting group's red ends now and its length was exactly this
+        # green plus the clearance.
+        red_seconds = served + self.clearance
+        limit = self.max_red_for(waiting)
+        self.red_history[waiting].append({
+            "started_at": self.clock - self.clearance,
+            "seconds": red_seconds,
+            "limit": limit,
+            "within_limit": bool(red_seconds <= limit + 1e-9),
+        })
+
+        entry = {
+            "decision": len(self.decision_log),
+            "phase": self.phase,
+            "phase_name": PHASE_NAMES[self.phase],
+            "started_at": self.clock,
+            "ended_at": self.clock + served + self.clearance,
+            "requested_green": requested,
+            "served_green": served,
+            "clearance": self.clearance,
+            "other_group_red": red_seconds,
+            "red_limit": limit,
+            "red_within_limit": bool(red_seconds <= limit + 1e-9),
+            "truncated_by_episode_end": bool(truncated),
+        }
+        entry.update(info or {})
+        self.decision_log.append(entry)
+
+        self.clock += served + self.clearance
         self.last_green[self.phase] = served
         self.green_elapsed = served
-        self.phase = self.other_phase()
+        self.phase = waiting
         self.switch_count += 1
 
     # ------------------------------------------------------------------
@@ -190,6 +323,31 @@ class PhaseDurationController:
 
     def _steps(self, seconds: float) -> int:
         return int(round(float(seconds) / self.step_length))
+
+    # ------------------------------------------------------------------
+    def compliance(self) -> dict:
+        """Did the run obey its own timing rules? Measured, not assumed."""
+        completed = [e for e in self.decision_log
+                     if not e["truncated_by_episode_end"]]
+        greens = [e["served_green"] for e in completed]
+        red_breaches = [e for e in completed if not e["red_within_limit"]]
+        below_min = [g for g in greens if g < self.min_green - 1e-9]
+        above_max = [g for g in greens if g > self.max_green + 1e-9]
+        return {
+            "profile": self.profile.name if self.profile else "none",
+            "decisions": len(self.decision_log),
+            "completed_phases": len(completed),
+            "truncated_phases": len(self.decision_log) - len(completed),
+            "min_green_seen": min(greens) if greens else None,
+            "max_green_seen": max(greens) if greens else None,
+            "greens_below_min": len(below_min),
+            "greens_above_max": len(above_max),
+            "red_limit_breaches": len(red_breaches),
+            "interventions": sum(1 for e in self.decision_log
+                                 if e.get("intervention")),
+            "compliant": (not below_min and not above_max
+                          and not red_breaches),
+        }
 
     def describe(self) -> str:
         return ("duration menu {} s, clearance {:g} s, "
