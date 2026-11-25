@@ -11,10 +11,21 @@ keep going:
     phase starts
         run min_green           <- the lock, not a decision
         repeat:
-            observe
-            EXTEND -> run `extension` more seconds of green
-            END    -> run the clearance and hand over
-        forced END at max_green
+            observe             <- AFTER the lock, so the queue the agent
+            EXTEND -> run `extension` more seconds of green    sees is the
+            END    -> run the clearance and hand over          one it is
+        forced END at max_green                                deciding on
+
+The order matters more than it looks. Until 25 Nov 2026 the lock was
+served at the start of the step that followed it, which meant the first
+EXTEND/END of every phase was decided from the junction as it looked
+fifteen seconds earlier - before the green it was being asked about had
+done any work. A policy cannot learn to extend on a queue it is not
+shown, and the promoted model duly ended almost every green at the lock,
+behaving as a fifteen-second fixed plan while reporting itself adaptive.
+The lock is now served at the end of the step that starts the phase, so
+every observation the agent acts on is the state at a real decision
+point.
 
 With the standard profile and a three-second extension the reachable
 greens are 15, 18, 21, 24, 27 and 30 seconds - the same range Candidate A
@@ -64,6 +75,7 @@ from rl.timing_profile import get_profile
 from simulation.run_simulation import prepare_sumo_imports, sumo_binary
 from utils.config_loader import load_config
 from utils.scenario_builder import ALL_RED, TLS_ID, build_scenario
+from utils.sumo_launch import SumoStartError, start_sumo
 
 EXTEND = 0
 END = 1
@@ -156,6 +168,18 @@ class PhaseExtendEnv(gym.Env):
         self._decision = 0
         self._greens: List[float] = []
         self._cumulative_reward = 0.0
+        #: The lock of the current phase is served at the end of the step
+        #: before it, so its seconds and its cost are carried here and
+        #: charged to the decision they belong to.
+        self._lock_cost = None
+        self._lock_seconds = 0.0
+        self._lock_hit_end = False
+        self._green_truncated = False
+        #: Called with the connection the moment SUMO is up and before
+        #: a single second is simulated. A caller that measures the run
+        #: attaches here, because `reset` itself advances the clock and
+        #: anything attached afterwards would miss the opening seconds.
+        self.on_connect = None
 
     # ==================================================================
     @property
@@ -175,6 +199,8 @@ class PhaseExtendEnv(gym.Env):
             self._sumo_seed = int(seed)
         self.close()
         self._start_sumo()
+        if self.on_connect is not None:
+            self.on_connect(self._conn)
 
         self.controller.reset(PHASE_NS)
         self._steps_done = 0
@@ -183,11 +209,31 @@ class PhaseExtendEnv(gym.Env):
         self._decision = 0
         self._greens = []
         self._cumulative_reward = 0.0
+        self._lock_cost = None
+        self._lock_seconds = 0.0
+        self._lock_hit_end = False
+        self._green_truncated = False
 
+        # The first phase's lock runs before anything is asked, so the
+        # first question is put at the same point in the phase as every
+        # later one: the junction as it stands after the minimum green.
+        raw = self._serve_lock()
+        return self._observe(raw), self._info(raw)
+
+    # ------------------------------------------------------------------
+    def _serve_lock(self):
+        """Show green and run the minimum, which is never a decision."""
         self._conn.trafficlight.setRedYellowGreenState(
             TLS_ID, GREEN_STATE[self.controller.phase])
-        raw = self.state_extractor.raw(self._conn)
-        return self._observe(raw), self._info(raw)
+        cost = {"waiting": 0.0, "queue": 0.0, "raw_q": 0.0, "raw_w": 0.0}
+        ran, seconds, raw, hit_end = self._run(
+            int(round(self.profile.min_green / self.step_length)), cost, 0.0)
+        self._green_so_far += ran
+        self._phase_open = True
+        self._lock_cost = cost
+        self._lock_seconds = seconds
+        self._lock_hit_end = hit_end
+        return raw if raw is not None else self.state_extractor.raw(self._conn)
 
     # ------------------------------------------------------------------
     def step(self, action: int):
@@ -199,27 +245,25 @@ class PhaseExtendEnv(gym.Env):
                              .format(action))
 
         phase = self.controller.phase
-        forced = action == EXTEND and END in self.valid_actions() \
-            and EXTEND not in self.valid_actions()
+        # "Forced" means the agent asked to extend and the maximum green
+        # refused it - not that it chose to end at the maximum itself.
+        forced = (action == EXTEND and EXTEND not in self.valid_actions())
         if EXTEND not in self.valid_actions():
             action = END
-            forced = True
 
-        cost = {"waiting": 0.0, "queue": 0.0, "raw_q": 0.0, "raw_w": 0.0}
-        seconds = 0.0
+        # The lock of this phase was served at the end of the previous
+        # step, and its cost belongs to this decision - the agent is
+        # choosing what happens from here, with those seconds already on
+        # the clock.
+        cost = self._lock_cost or {"waiting": 0.0, "queue": 0.0,
+                                   "raw_q": 0.0, "raw_w": 0.0}
+        seconds = self._lock_seconds
         green_ran = 0.0
         last_raw = None
-        hit_end = False
-
-        # --- the lock, served once per phase and never asked about -----
-        if not self._phase_open:
-            self._conn.trafficlight.setRedYellowGreenState(TLS_ID,
-                                                           GREEN_STATE[phase])
-            ran, seconds, last_raw, hit_end = self._run(
-                int(round(self.profile.min_green / self.step_length)),
-                cost, seconds)
-            green_ran += ran
-            self._phase_open = True
+        hit_end = self._lock_hit_end
+        self._lock_cost = None
+        self._lock_seconds = 0.0
+        self._lock_hit_end = False
 
         if not hit_end and action == EXTEND:
             self._conn.trafficlight.setRedYellowGreenState(TLS_ID,
@@ -230,6 +274,8 @@ class PhaseExtendEnv(gym.Env):
 
         self._green_so_far += green_ran
         ended = action == END or hit_end
+        # Did the clock stop the GREEN, or only the clearance after it?
+        green_cut_short = bool(hit_end)
 
         if ended and not hit_end:
             self._conn.trafficlight.setRedYellowGreenState(TLS_ID,
@@ -250,8 +296,12 @@ class PhaseExtendEnv(gym.Env):
             served = self._green_so_far
             index = min(range(len(self.ladder)),
                         key=lambda i: abs(self.ladder[i] - served))
+            # Only a green the clock cut short is evidence of nothing. A
+            # green that ran its full length and then had its clearance
+            # cut off was still chosen by the controller.
+            green_truncated = bool(hit_end) and green_cut_short
             self.controller.commit(
-                index, served=served, truncated=bool(hit_end),
+                index, served=served, truncated=green_truncated,
                 info={"requested_action": int(action),
                       "executed_action": int(action),
                       "forced_end_at_max_green": bool(forced),
@@ -261,13 +311,23 @@ class PhaseExtendEnv(gym.Env):
             self._greens.append(served)
             self._green_so_far = 0.0
             self._phase_open = False
+            self._green_truncated = green_truncated
+            if not hit_end:
+                # `commit` has already handed the junction to the other
+                # group. Serving its lock here is what makes the next
+                # observation a decision point rather than a phase start.
+                last_raw = self._serve_lock()
 
         self._decision += 1
         reward = -self.reward_scale * (self.waiting_weight * cost["waiting"]
                                        + self.queue_weight * cost["queue"])
         self._cumulative_reward += reward
 
-        terminated = bool(self._conn.simulation.getMinExpectedNumber() <= 0)
+        # Every controller is given the same horizon. Stopping early
+        # when the network happens to drain would average the queue over
+        # fewer seconds than a controller that ran to the end, and the
+        # two numbers would then not be comparable.
+        terminated = False
         truncated = bool(self._steps_done >= self.total_steps)
 
         info = self._info(last_raw)
@@ -277,6 +337,10 @@ class PhaseExtendEnv(gym.Env):
             "green_so_far": float(self._green_so_far),
             "green_served": float(self._greens[-1]) if ended and self._greens else 0.0,
             "phase_ended": bool(ended),
+            # A green the end of the episode cut short was not chosen by
+            # the controller, so it is no evidence about the controller.
+            # A green that finished and only lost its clearance was.
+            "truncated_by_episode_end": bool(ended and green_cut_short),
             "duration": float(max(seconds, self.step_length)),
             "valid_actions": self.valid_actions(),
         })
@@ -349,15 +413,23 @@ class PhaseExtendEnv(gym.Env):
 
     def _start_sumo(self) -> None:
         import traci
-        self._files = self._build_inputs()
-        if self.tripinfo_path:
-            from utils.delay_accounting import enable_tripinfo
-            enable_tripinfo(self._files["sumocfg"], self.tripinfo_path)
-        traci.start([sumo_binary(False), "-c", self._files["sumocfg"],
+        # Two tries, rebuilding the inputs in between - see the note in
+        # rl/phase_environment.py.
+        for attempt in (1, 2):
+            self._files = self._build_inputs()
+            if self.tripinfo_path:
+                from utils.delay_accounting import enable_tripinfo
+                enable_tripinfo(self._files["sumocfg"], self.tripinfo_path)
+            try:
+                self._conn = start_sumo(
+                    [sumo_binary(False), "-c", self._files["sumocfg"],
                      "--seed", str(self._sumo_seed), "--start",
                      "--quit-on-end", "--no-warnings", "true"],
                     label=self._label)
-        self._conn = traci.getConnection(self._label)
+                break
+            except SumoStartError:
+                if attempt == 2:
+                    raise
         self.state_extractor.subscribe(self._conn)
 
     def close(self) -> None:

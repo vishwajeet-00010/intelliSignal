@@ -1,0 +1,1218 @@
+[
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 16.387,
+    "sd_waiting": 20.869,
+    "mean_total_delay": 26.396,
+    "sd_total_delay": 29.464,
+    "mean_completed": 382.2,
+    "mean_waiting_to_enter": 1.5,
+    "mean_queue": 10.427,
+    "mean_green": 17.78,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 0,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 12.292,
+        "waiting": 6.42,
+        "completed": 267,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 11.659,
+        "waiting": 6.41,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.155,
+        "waiting": 8.73,
+        "completed": 455,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.898,
+        "waiting": 6.21,
+        "completed": 336,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 92.187,
+        "waiting": 63.01,
+        "completed": 554,
+        "pending": 9
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 14.188,
+        "waiting": 7.54,
+        "completed": 485,
+        "pending": 0
+      }
+    ],
+    "episode": 20
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 15.613,
+    "sd_waiting": 18.615,
+    "mean_total_delay": 25.367,
+    "sd_total_delay": 26.714,
+    "mean_completed": 384.7,
+    "mean_waiting_to_enter": 1.8,
+    "mean_queue": 9.617,
+    "mean_green": 20.93,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 0,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 13.034,
+        "waiting": 7.12,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 11.7,
+        "waiting": 6.91,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 17.422,
+        "waiting": 9.72,
+        "completed": 459,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.237,
+        "waiting": 6.41,
+        "completed": 337,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 84.955,
+        "waiting": 57.16,
+        "completed": 563,
+        "pending": 11
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.851,
+        "waiting": 6.36,
+        "completed": 485,
+        "pending": 0
+      }
+    ],
+    "episode": 40
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 18.958,
+    "sd_waiting": 28.662,
+    "mean_total_delay": 25.505,
+    "sd_total_delay": 30.072,
+    "mean_completed": 361.2,
+    "mean_waiting_to_enter": 9.2,
+    "mean_queue": 11.328,
+    "mean_green": 18.97,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.367,
+        "waiting": 5.62,
+        "completed": 267,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 10.503,
+        "waiting": 5.41,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 14.277,
+        "waiting": 7.52,
+        "completed": 456,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.772,
+        "waiting": 6.07,
+        "completed": 335,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 92.698,
+        "waiting": 83.03,
+        "completed": 427,
+        "pending": 55
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.416,
+        "waiting": 6.1,
+        "completed": 486,
+        "pending": 0
+      }
+    ],
+    "episode": 60
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 10.085,
+    "sd_waiting": 7.969,
+    "mean_total_delay": 18.049,
+    "sd_total_delay": 12.665,
+    "mean_completed": 396.2,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.648,
+    "mean_green": 20.64,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 2,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.375,
+        "waiting": 6.1,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.863,
+        "waiting": 5.15,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.548,
+        "waiting": 9.11,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.531,
+        "waiting": 5.92,
+        "completed": 337,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.991,
+        "waiting": 6.54,
+        "completed": 491,
+        "pending": 0
+      }
+    ],
+    "episode": 80
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.968,
+    "sd_waiting": 8.046,
+    "mean_total_delay": 18.014,
+    "sd_total_delay": 12.702,
+    "mean_completed": 396.0,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.627,
+    "mean_green": 19.86,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 2,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 10.962,
+        "waiting": 5.38,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.349,
+        "waiting": 4.63,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.548,
+        "waiting": 9.11,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.221,
+        "waiting": 6.46,
+        "completed": 336,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 13.016,
+        "waiting": 6.54,
+        "completed": 491,
+        "pending": 0
+      }
+    ],
+    "episode": 100
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.753,
+    "sd_waiting": 8.111,
+    "mean_total_delay": 17.692,
+    "sd_total_delay": 12.798,
+    "mean_completed": 395.7,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.523,
+    "mean_green": 19.46,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 10.897,
+        "waiting": 5.35,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.235,
+        "waiting": 4.55,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 15.521,
+        "waiting": 8.48,
+        "completed": 457,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.738,
+        "waiting": 6.07,
+        "completed": 335,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.773,
+        "waiting": 6.38,
+        "completed": 487,
+        "pending": 0
+      }
+    ],
+    "episode": 120
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.79,
+    "sd_waiting": 8.091,
+    "mean_total_delay": 17.701,
+    "sd_total_delay": 12.789,
+    "mean_completed": 396.3,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.525,
+    "mean_green": 19.86,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 10.897,
+        "waiting": 5.35,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.271,
+        "waiting": 4.66,
+        "completed": 198,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 15.521,
+        "waiting": 8.48,
+        "completed": 457,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.051,
+        "waiting": 6.33,
+        "completed": 337,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.479,
+        "waiting": 6.23,
+        "completed": 487,
+        "pending": 0
+      }
+    ],
+    "episode": 140
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.867,
+    "sd_waiting": 8.06,
+    "mean_total_delay": 17.822,
+    "sd_total_delay": 12.748,
+    "mean_completed": 395.5,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.545,
+    "mean_green": 20.13,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 10.897,
+        "waiting": 5.35,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.663,
+        "waiting": 4.95,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.044,
+        "waiting": 8.72,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.883,
+        "waiting": 6.31,
+        "completed": 334,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.455,
+        "waiting": 6.18,
+        "completed": 490,
+        "pending": 0
+      }
+    ],
+    "episode": 160
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.818,
+    "sd_waiting": 8.087,
+    "mean_total_delay": 17.784,
+    "sd_total_delay": 12.771,
+    "mean_completed": 395.7,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.532,
+    "mean_green": 20.03,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 10.897,
+        "waiting": 5.35,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.467,
+        "waiting": 4.78,
+        "completed": 198,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.044,
+        "waiting": 8.72,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.86,
+        "waiting": 6.22,
+        "completed": 336,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.447,
+        "waiting": 6.15,
+        "completed": 487,
+        "pending": 0
+      }
+    ],
+    "episode": 180
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.995,
+    "sd_waiting": 7.993,
+    "mean_total_delay": 18.005,
+    "sd_total_delay": 12.657,
+    "mean_completed": 394.2,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.588,
+    "mean_green": 20.45,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.233,
+        "waiting": 5.61,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.847,
+        "waiting": 5.13,
+        "completed": 192,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.044,
+        "waiting": 8.72,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.031,
+        "waiting": 6.34,
+        "completed": 334,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.886,
+        "waiting": 6.48,
+        "completed": 486,
+        "pending": 0
+      }
+    ],
+    "episode": 200
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 10.003,
+    "sd_waiting": 7.989,
+    "mean_total_delay": 17.97,
+    "sd_total_delay": 12.672,
+    "mean_completed": 395.3,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.602,
+    "mean_green": 20.66,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.152,
+        "waiting": 5.52,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.908,
+        "waiting": 5.22,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.044,
+        "waiting": 8.72,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.913,
+        "waiting": 6.42,
+        "completed": 337,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 45.987,
+        "waiting": 27.69,
+        "completed": 631,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.815,
+        "waiting": 6.45,
+        "completed": 486,
+        "pending": 0
+      }
+    ],
+    "episode": 220
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.377,
+    "sd_waiting": 7.05,
+    "mean_total_delay": 17.106,
+    "sd_total_delay": 11.109,
+    "mean_completed": 395.2,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.15,
+    "mean_green": 19.3,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 1,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.674,
+        "waiting": 5.83,
+        "completed": 267,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.001,
+        "waiting": 4.34,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 15.896,
+        "waiting": 8.69,
+        "completed": 458,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.75,
+        "waiting": 6.13,
+        "completed": 334,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 41.528,
+        "waiting": 24.88,
+        "completed": 629,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.789,
+        "waiting": 6.39,
+        "completed": 487,
+        "pending": 0
+      }
+    ],
+    "episode": 240
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.6,
+    "sd_waiting": 7.236,
+    "mean_total_delay": 17.336,
+    "sd_total_delay": 11.321,
+    "mean_completed": 395.3,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.322,
+    "mean_green": 20.02,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 0,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.431,
+        "waiting": 5.73,
+        "completed": 267,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.249,
+        "waiting": 4.6,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.035,
+        "waiting": 8.91,
+        "completed": 460,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 11.99,
+        "waiting": 6.29,
+        "completed": 336,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 42.241,
+        "waiting": 25.52,
+        "completed": 627,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 13.07,
+        "waiting": 6.55,
+        "completed": 486,
+        "pending": 0
+      }
+    ],
+    "episode": 260
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.708,
+    "sd_waiting": 7.188,
+    "mean_total_delay": 17.546,
+    "sd_total_delay": 11.236,
+    "mean_completed": 394.5,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.355,
+    "mean_green": 19.43,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 0,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 12.044,
+        "waiting": 6.15,
+        "completed": 267,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.265,
+        "waiting": 4.49,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.358,
+        "waiting": 8.92,
+        "completed": 456,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.403,
+        "waiting": 6.62,
+        "completed": 337,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 42.241,
+        "waiting": 25.52,
+        "completed": 627,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 12.964,
+        "waiting": 6.55,
+        "completed": 484,
+        "pending": 0
+      }
+    ],
+    "episode": 280
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 9.705,
+    "sd_waiting": 7.197,
+    "mean_total_delay": 17.459,
+    "sd_total_delay": 11.278,
+    "mean_completed": 395.5,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 5.382,
+    "mean_green": 19.83,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 0,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 11.126,
+        "waiting": 5.51,
+        "completed": 268,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.249,
+        "waiting": 4.6,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.035,
+        "waiting": 8.91,
+        "completed": 460,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.469,
+        "waiting": 6.71,
+        "completed": 336,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 42.241,
+        "waiting": 25.52,
+        "completed": 627,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 13.635,
+        "waiting": 6.98,
+        "completed": 486,
+        "pending": 0
+      }
+    ],
+    "episode": 300
+  },
+  {
+    "controller": "candidate B",
+    "profile": "standard",
+    "seeds": [
+      7000,
+      7001,
+      7002,
+      7003,
+      7004,
+      7005
+    ],
+    "n": 6,
+    "mean_waiting": 10.585,
+    "sd_waiting": 9.037,
+    "mean_total_delay": 19.025,
+    "sd_total_delay": 14.379,
+    "mean_completed": 390.7,
+    "mean_waiting_to_enter": 0.0,
+    "mean_queue": 6.072,
+    "mean_green": 19.59,
+    "all_compliant": true,
+    "unchecked_runs": 0,
+    "red_breaches": 0,
+    "truncated_phases": 0,
+    "per_workload": [
+      {
+        "workload": "directional_light",
+        "id": "00fbdb41",
+        "total_delay": 12.044,
+        "waiting": 6.15,
+        "completed": 267,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_light",
+        "id": "ae7d87de",
+        "total_delay": 9.186,
+        "waiting": 4.52,
+        "completed": 196,
+        "pending": 0
+      },
+      {
+        "workload": "directional_moderate",
+        "id": "63a51a21",
+        "total_delay": 16.904,
+        "waiting": 9.27,
+        "completed": 454,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_moderate",
+        "id": "4a3f22b5",
+        "total_delay": 12.218,
+        "waiting": 6.48,
+        "completed": 336,
+        "pending": 0
+      },
+      {
+        "workload": "directional_heavy",
+        "id": "41f59416",
+        "total_delay": 50.775,
+        "waiting": 30.55,
+        "completed": 603,
+        "pending": 0
+      },
+      {
+        "workload": "ramp_heavy",
+        "id": "54842ef1",
+        "total_delay": 13.023,
+        "waiting": 6.54,
+        "completed": 488,
+        "pending": 0
+      }
+    ],
+    "episode": 320
+  }
+]

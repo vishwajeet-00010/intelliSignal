@@ -1,0 +1,102 @@
+==============================================================================
+Model selection | standard profile | 20 runs | 3 seeds per workload
+  validation seeds [7000, 7001, 7002]   test seeds [6100, 6101, 6102]
+  selection metric: mean total delay per requested vehicle
+==============================================================================
+
+[1/5] every fixed plan on the menu (8 x 8) on VALIDATION
+    fixed grid 115/1152  (80 s)
+    fixed grid 230/1152  (145 s)
+    fixed grid 345/1152  (221 s)
+    fixed grid 460/1152  (297 s)
+    fixed grid 575/1152  (376 s)
+    fixed grid 690/1152  (449 s)
+    fixed grid 805/1152  (512 s)
+    fixed grid 920/1152  (572 s)
+    fixed grid 1035/1152  (641 s)
+    fixed grid 1150/1152  (701 s)
+    fixed grid done: 1152 runs in 702 s
+  best fixed plan on validation: ns 25 / ew 15  -> 16.89 s delay, 14.60 s waiting
+      next: ns 30 / ew 15 -> 18.39 s
+      next: ns 25 / ew 17 -> 18.50 s
+      next: ns 30 / ew 17 -> 18.67 s
+      next: ns 25 / ew 16 -> 19.12 s
+
+[2/5] every trained run re-scored on VALIDATION
+    runs 36/360  (39 s)
+    runs 72/360  (57 s)
+    runs 108/360  (78 s)
+    runs 144/360  (107 s)
+    runs 180/360  (136 s)
+    runs 216/360  (167 s)
+    runs 252/360  (191 s)
+    runs 288/360  (222 s)
+    runs 324/360  (251 s)
+    runs 360/360  (271 s)
+    runs done: 360 runs in 273 s
+  B_s43    cand B  seed  43  validation delay   16.07  wait  13.84  compliant yes
+  B_s49    cand B  seed  49  validation delay   16.28  wait   9.72  compliant yes
+  B_s51    cand B  seed  51  validation delay   16.53  wait  12.08  compliant yes
+  A_s47    cand A  seed  47  validation delay   16.58  wait  14.06  compliant yes
+  A_s48    cand A  seed  48  validation delay   16.81  wait  10.09  compliant yes
+  B_s50    cand B  seed  50  validation delay   16.98  wait  10.63  compliant yes
+  B_s46    cand B  seed  46  validation delay   17.00  wait  12.34  compliant yes
+  B_s44    cand B  seed  44  validation delay   17.11  wait  10.59  compliant yes
+  A_s44    cand A  seed  44  validation delay   17.44  wait  10.63  compliant yes
+  A_s51    cand A  seed  51  validation delay   17.56  wait  10.78  compliant yes
+  A_s46    cand A  seed  46  validation delay   17.66  wait  13.64  compliant yes
+  A_s49    cand A  seed  49  validation delay   17.88  wait  10.84  compliant yes
+  A_s43    cand A  seed  43  validation delay   18.23  wait  11.07  compliant yes
+  A_s42    cand A  seed  42  validation delay   18.79  wait  11.75  compliant yes
+  B_s48    cand B  seed  48  validation delay   19.12  wait  12.75  compliant yes
+  A_s45    cand A  seed  45  validation delay   19.79  wait  13.34  compliant yes
+  A_s50    cand A  seed  50  validation delay   19.82  wait  12.66  compliant yes
+  B_s47    cand B  seed  47  validation delay   20.39  wait  15.49  compliant yes
+  B_s42    cand B  seed  42  validation delay   20.76  wait  18.54  compliant yes
+  B_s45    cand B  seed  45  validation delay   20.98  wait  18.73  compliant yes
+
+[3/5] averaged ensembles of the leading runs, on VALIDATION
+    ensembles 7/72  (21 s)
+    ensembles 14/72  (31 s)
+    ensembles 21/72  (33 s)
+    ensembles 28/72  (41 s)
+    ensembles 35/72  (45 s)
+    ensembles 42/72  (51 s)
+    ensembles 49/72  (60 s)
+    ensembles 56/72  (62 s)
+    ensembles 63/72  (69 s)
+    ensembles 70/72  (76 s)
+    ensembles done: 72 runs in 80 s
+  ensemble Ax3   of A_s47, A_s48, A_s44  validation delay   17.09  wait  10.36
+  ensemble Ax5   of A_s47, A_s48, A_s44, A_s51, A_s46  validation delay   16.57  wait   9.93
+  ensemble Bx3   of B_s43, B_s49, B_s51  validation delay   16.70  wait  12.14
+  ensemble Bx5   of B_s43, B_s49, B_s51, B_s50, B_s46  validation delay   16.71  wait  12.29
+
+[4/5] selected on VALIDATION, before the test split is read:
+  WINNER      B_s43            16.07 s
+  best single B_s43            16.07 s
+  best fixed  ns 25 / ew 15    16.89 s
+
+[5/5] the TEST split, measured once
+    test 10/108  (31 s)
+    test 20/108  (40 s)
+    test 30/108  (50 s)
+    test 40/108  (58 s)
+    test 50/108  (69 s)
+    test 60/108  (74 s)
+    test 70/108  (82 s)
+    test 80/108  (88 s)
+    test 90/108  (95 s)
+    test 100/108  (103 s)
+    test done: 108 runs in 114 s
+
+controller (test split)            delay/veh  wait/veh  completed  pending   green  vs best fixed
+--------------------------------------------------------------------------------------------------------
+best candidate A run (A_s47)           14.92      8.41      463.3      0.0    17.4  -18.6 %  wins 5/6  worst +0.07 s
+selected model                         14.97      8.39      463.0      0.0    17.4  -18.3 %  wins 6/6  worst -0.62 s
+actuated (gap 3 s)                     17.58     11.27      461.3      0.0    28.4  -4.0 %  wins 2/6  worst +3.44 s
+best fixed plan                        18.32     12.49      455.7      0.0    20.0  -
+max-pressure                           18.43     11.94      460.8      0.0    28.8  +0.6 %  wins 1/6  worst +3.34 s
+fixed plan with least waiting          22.15     16.77      450.1      0.0    22.5  +20.9 %  wins 0/6  worst +9.02 s
+
+saved output/selection_20261125\selection.json  (1168 s)

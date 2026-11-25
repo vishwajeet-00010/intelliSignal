@@ -31,12 +31,20 @@ from utils.scenario_builder import ALL_RED, EW_YELLOW, NS_YELLOW     # noqa: E40
 
 
 def metrics(controller, wait, completed=190, pending=0, requested=200,
-            seed=7001):
+            seed=7001, delay=None):
+    """One scripted run.
+
+    `judge` decides on delay per requested vehicle, so that is what these
+    fakes vary; unless a test says otherwise it moves with the waiting
+    time, which is how the two behave on real traffic.
+    """
     return RunMetrics(controller=controller, seed=seed, requested=requested,
                       entered=requested - pending, completed=completed,
                       still_on_road=requested - pending - completed,
                       waiting_to_enter=pending, mean_waiting_time=wait,
-                      mean_queue_length=2.0, max_queue_length=9, teleports=0)
+                      mean_queue_length=2.0, max_queue_length=9, teleports=0,
+                      delay_per_requested=(wait * 1.5 if delay is None
+                                           else delay))
 
 
 def small_workload(duration=300.0, seed=6101):
@@ -404,3 +412,58 @@ def test_a_real_short_search_produces_a_defensible_decision(duration,
     # Whatever it chose, it must not claim a comparison it did not run.
     if not decision.checks:
         assert not decision.validation_complete
+
+
+# ===========================================================================
+# Hybrid decides the way the rest of the project does
+# ===========================================================================
+def test_the_judge_decides_on_delay_not_on_waiting():
+    """The measure the trainer selects on and the promoter gates on.
+
+    Judging on mean waiting instead meant the dashboard could reject a
+    model the evaluation had just accepted, on the same traffic: waiting
+    is per vehicle that got in, so a controller that admits fewer
+    vehicles can show a lower one while losing more time overall.
+    """
+    # The DQN waits longer per admitted vehicle but loses less time
+    # overall, because it admitted more of them.
+    dqn = [metrics("dqn", wait=11.0, completed=195, delay=14.0)]
+    fixed = [metrics("fixed_time", wait=9.0, completed=190, delay=18.0)]
+    qualified, reason = judge(dqn, fixed)
+    assert qualified is True
+    assert "delay" in reason.lower() or "lost" in reason.lower()
+
+    # And the other way round: lower waiting, higher delay, so no.
+    dqn = [metrics("dqn", wait=5.0, completed=150, delay=22.0)]
+    fixed = [metrics("fixed_time", wait=9.0, completed=190, delay=18.0)]
+    qualified, reason = judge(dqn, fixed)
+    assert qualified is False
+    assert "22" in reason and "18" in reason
+
+
+def test_a_tie_on_delay_still_goes_to_fixed_time():
+    dqn = [metrics("dqn", wait=4.0, delay=15.0)]
+    fixed = [metrics("fixed_time", wait=9.0, delay=15.0)]
+    qualified, reason = judge(dqn, fixed)
+    assert qualified is False
+    assert "tie goes to fixed time" in reason
+
+
+def test_the_baseline_is_not_tuned_on_a_seed_it_is_judged_on():
+    """Tuning keeps the best of two dozen draws, so the seed it was
+    tuned on is a seed it has been fitted to."""
+    from simulation.hybrid_job import TUNE_SEED, VALIDATION_SEEDS
+
+    assert TUNE_SEED not in VALIDATION_SEEDS
+
+
+def test_a_hybrid_job_always_has_timing_rules():
+    """Without a profile it used to sweep 4-30 s greens under a product
+    whose minimum green is fifteen seconds."""
+    from simulation.hybrid_job import HybridJob
+
+    job = HybridJob(small_workload(), HybridLimits(), FixedPlan(30, 30, 3, 2,
+                                                                "configured"))
+    assert job.profile is not None
+    assert job.profile.min_green == 15.0
+    assert job.profile.max_green == 30.0

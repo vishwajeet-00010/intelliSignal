@@ -65,12 +65,16 @@ from custom_traffic.builder import build_workload, cleanup_workload_inputs
 from custom_traffic.workload import ResolvedWorkload
 from simulation.run_simulation import prepare_sumo_imports, sumo_binary
 from utils.metrics import MetricsCollector
+from utils.sumo_launch import start_sumo
 
 #: Where Hybrid keeps its own candidates and decisions, away from the
 #: registered Moderate/Heavy models.
 HYBRID_DIR = os.path.join(PROJECT_ROOT, "results", "hybrid")
 
 #: Green durations the tuner will try, in seconds.
+#: Kept only so an old call that passes `greens=` still works. The menu
+#: Hybrid actually sweeps is the active profile's, because a "fallback"
+#: plan the profile forbids is not a fallback.
 TUNE_GREENS: Tuple[int, ...] = (4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30)
 
 SELECTED_DQN = "dqn"
@@ -111,6 +115,9 @@ class RunMetrics:
     mean_queue_length: float
     max_queue_length: float
     teleports: int
+    #: Total delay per REQUESTED vehicle, from SUMO's own trip records.
+    #: The measure the whole project selects and promotes on.
+    delay_per_requested: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -266,6 +273,16 @@ class HybridDecision:
 # ===========================================================================
 # Measurement - the one place a run is turned into numbers
 # ===========================================================================
+def _from_run(run, requested: int, controller: str, seed: int) -> RunMetrics:
+    """A harness `ControllerRun`, as the five counts Hybrid reports."""
+    metrics = _accounting(run.summary, requested, controller, seed)
+    metrics.delay_per_requested = float(run.mean_total_delay)
+    metrics.completed = int(run.completed)
+    metrics.waiting_to_enter = int(run.waiting_to_enter)
+    metrics.still_on_road = max(metrics.entered - metrics.completed, 0)
+    return metrics
+
+
 def _accounting(summary: Dict[str, Any], requested: int, controller: str,
                 seed: int) -> RunMetrics:
     """Turn a MetricsCollector summary into the five vehicle counts.
@@ -292,69 +309,40 @@ def _accounting(summary: Dict[str, Any], requested: int, controller: str,
 
 
 def run_fixed_plan(workload: ResolvedWorkload, plan: FixedPlan, seed: int,
-                   tag: str = "_hybfix") -> RunMetrics:
-    """One fixed-time run of this workload, through SUMO's own TLS program."""
-    prepare_sumo_imports()
-    import traci
+                   tag: str = "_hybfix", profile=None) -> RunMetrics:
+    """One fixed-time run of this workload, measured like every other run.
 
-    scoped = "{}_{}".format(tag, seed)
-    files = build_workload(workload, tag=scoped, signal=plan.signal())
-    collector = MetricsCollector(step_length=workload.step_length)
-    steps = int(round(workload.duration_s / workload.step_length))
-    label = "hybrid_fixed_{}_{}".format(workload.workload_id, seed)
+    Through `evaluation/harness.py`, so the plan Hybrid tunes is scored
+    by the same code, on the same two measurements, as the model it is
+    being compared with. It used to be run here by hand, which left the
+    comparison depending on two implementations agreeing.
+    """
+    from evaluation.harness import fixed_policy, run_policy
+    from rl.timing_profile import get_profile
 
-    # An explicit labelled connection, never the module-level default.
-    # `traci.start` makes its label the default, so a run that used the
-    # module functions would talk to whichever simulation happened to be
-    # current - which is how one test's SUMO ended up answering another's
-    # commands with "Vehicle 'W1_0000' is not known".
-    traci.start([sumo_binary(False), "-c", files["sumocfg"],
-                 "--seed", str(int(seed)), "--no-warnings", "--no-step-log"],
-                label=label)
-    connection = traci.getConnection(label)
-    collector.conn = connection
-    try:
-        for _ in range(steps):
-            connection.simulationStep()
-            collector.collect_step()
-    finally:
-        try:
-            connection.close()
-        except Exception:
-            pass
-        cleanup_workload_inputs(workload, tag=scoped)
-
-    return _accounting(collector.summary(workload.name),
-                       workload.total_vehicles, "fixed_time", seed)
+    chosen = get_profile(getattr(profile, "name", profile))
+    run = run_policy(workload,
+                     fixed_policy(chosen, plan.ns_green, plan.ew_green),
+                     chosen, int(seed), controller="fixed_time",
+                     tag="{}_{}".format(tag, seed))
+    return _from_run(run, workload.total_vehicles, "fixed_time", seed)
 
 
 def run_dqn_policy(workload: ResolvedWorkload, agent, seed: int,
                    tag: str = "_hybdqn", profile=None) -> RunMetrics:
-    """One greedy run of a phase-duration policy on this workload."""
-    from rl.phase_environment import PhaseDurationEnv
-    from rl.phase_state import extractor_from_contract
+    """One greedy run of a trained policy on this workload.
 
-    env = PhaseDurationEnv(
-        workload=workload, durations=agent.durations,
-        profile=getattr(profile, "name", profile),
-        state_extractor=extractor_from_contract(agent.observation_contract),
+    Through `evaluation/harness.py`, which reads the action space from
+    the checkpoint and runs the policy in the environment it was trained
+    for. Hybrid's verdict is only as good as this run.
+    """
+    from evaluation.harness import run_agent
+    from rl.timing_profile import get_profile
+
+    run = run_agent(workload, agent, get_profile(
+        getattr(profile, "name", profile)), int(seed), controller="dqn",
         tag="{}_{}".format(tag, seed))
-    try:
-        observation, _ = env.reset(seed=int(seed))
-        collector = MetricsCollector(step_length=env.step_length,
-                                     conn=env.connection)
-        env.step_callback = collector.collect_step
-        while True:
-            action = agent.act(observation, training=False)
-            observation, _, terminated, truncated, _ = env.step(action)
-            if terminated or truncated:
-                break
-        summary = collector.summary(workload.name)
-    finally:
-        env.close()
-        env.cleanup_generated_inputs()
-
-    return _accounting(summary, workload.total_vehicles, "dqn", seed)
+    return _from_run(run, workload.total_vehicles, "dqn", seed)
 
 
 # ===========================================================================
@@ -364,14 +352,24 @@ def judge(dqn: Sequence[RunMetrics], fixed: Sequence[RunMetrics]
           ) -> Tuple[bool, str]:
     """Does the DQN qualify against the fixed plan on matched runs?
 
-    Returns (qualified, reason). The reason is written for a reader, because
-    it is what the Comparison page shows.
+    Returns (qualified, reason). The reason is written for a reader,
+    because it is what the Comparison page shows.
+
+    The test is **delay per requested vehicle** - the same measure the
+    trainer selects a checkpoint on and the promotion script refuses a
+    model on. Judging here on mean waiting instead meant the dashboard
+    could reject a model the evaluation had just accepted, on the same
+    traffic. Throughput and the insertion backlog remain side
+    constraints: a lower delay bought by turning traffic away is not an
+    improvement.
     """
     if not dqn or not fixed:
         return False, "No completed comparison, so nothing was selected on."
     if len(dqn) != len(fixed):
         return False, "The two controllers were not run on the same seeds."
 
+    dqn_delay = statistics.fmean(m.delay_per_requested for m in dqn)
+    fixed_delay = statistics.fmean(m.delay_per_requested for m in fixed)
     dqn_wait = statistics.fmean(m.mean_waiting_time for m in dqn)
     fixed_wait = statistics.fmean(m.mean_waiting_time for m in fixed)
     dqn_thru = statistics.fmean(m.completed for m in dqn)
@@ -379,28 +377,30 @@ def judge(dqn: Sequence[RunMetrics], fixed: Sequence[RunMetrics]
     dqn_pending = statistics.fmean(m.waiting_to_enter for m in dqn)
     fixed_pending = statistics.fmean(m.waiting_to_enter for m in fixed)
 
-    if dqn_wait >= fixed_wait:
+    if dqn_delay >= fixed_delay:
         return False, (
-            "Mean waiting was {:.2f} s with the DQN against {:.2f} s with "
-            "fixed time, so fixed time keeps the signal. A tie goes to fixed "
-            "time.".format(dqn_wait, fixed_wait))
+            "Delay per requested vehicle was {:.2f} s with the DQN against "
+            "{:.2f} s with fixed time, so fixed time keeps the signal. A tie "
+            "goes to fixed time.".format(dqn_delay, fixed_delay))
     if dqn_thru < fixed_thru:
         return False, (
-            "The DQN waited less ({:.2f} s against {:.2f} s) but completed "
-            "fewer journeys ({:.0f} against {:.0f}), which is not an "
-            "improvement.".format(dqn_wait, fixed_wait, dqn_thru, fixed_thru))
+            "The DQN lost less time ({:.2f} s against {:.2f} s) but "
+            "completed fewer journeys ({:.0f} against {:.0f}), which is not "
+            "an improvement.".format(dqn_delay, fixed_delay, dqn_thru,
+                                     fixed_thru))
     if dqn_pending > fixed_pending:
         return False, (
-            "The DQN waited less ({:.2f} s against {:.2f} s) but left more "
-            "vehicles waiting to enter ({:.0f} against {:.0f}), so the gain "
-            "is only on the vehicles it let in.".format(
-                dqn_wait, fixed_wait, dqn_pending, fixed_pending))
+            "The DQN lost less time ({:.2f} s against {:.2f} s) but left "
+            "more vehicles waiting to enter ({:.0f} against {:.0f}), so the "
+            "gain is only on the vehicles it let in.".format(
+                dqn_delay, fixed_delay, dqn_pending, fixed_pending))
 
     return True, (
-        "The DQN waited {:.2f} s against {:.2f} s, completed {:.0f} journeys "
-        "against {:.0f}, and left {:.0f} waiting to enter against {:.0f}."
-        .format(dqn_wait, fixed_wait, dqn_thru, fixed_thru,
-                dqn_pending, fixed_pending))
+        "The DQN lost {:.2f} s per requested vehicle against {:.2f} s, "
+        "waited {:.2f} s against {:.2f} s, completed {:.0f} journeys against "
+        "{:.0f}, and left {:.0f} waiting to enter against {:.0f}.".format(
+            dqn_delay, fixed_delay, dqn_wait, fixed_wait, dqn_thru,
+            fixed_thru, dqn_pending, fixed_pending))
 
 
 # ===========================================================================
@@ -422,9 +422,13 @@ def tune_fixed_plan(workload: ResolvedWorkload, start: FixedPlan,
 
     Returns the best plan ACTUALLY MEASURED and whether the sweep finished.
     """
-    # Under a timing profile the sweep may only try greens that profile
-    # allows, and the starting plan is pulled onto the menu - otherwise
-    # Hybrid's "fallback" could be a plan the profile forbids.
+    # The sweep may only try greens the profile allows, and the starting
+    # plan is pulled onto the menu - otherwise Hybrid's "fallback" could
+    # be a plan the profile forbids. There is no profile-less Hybrid: the
+    # product has one set of timing rules and this is held to them.
+    from rl.timing_profile import get_profile
+
+    profile = get_profile(getattr(profile, "name", profile))
     if profile is not None:
         greens = [int(d) for d in profile.durations]
         start = FixedPlan(
@@ -470,20 +474,45 @@ def tune_fixed_plan(workload: ResolvedWorkload, start: FixedPlan,
 # ===========================================================================
 # Remembering a decision
 # ===========================================================================
-def decision_path(workload_id: str) -> str:
-    return os.path.join(HYBRID_DIR, workload_id, "decision.json")
+#: Bumped whenever a stored decision stops meaning what it meant.
+DECISION_FORMAT = 2
 
 
-def save_decision(decision: HybridDecision) -> str:
+def decision_key(workload_id: str, profile=None, limits=None) -> str:
+    """What a stored decision is an answer to, not just which traffic.
+
+    A verdict reached under one set of timing rules, or with a different
+    time budget, is not an answer to today's question - Hybrid's whole
+    claim is that it measured the two controllers under the conditions
+    being asked about.
+    """
+    name = getattr(profile, "name", profile) or "none"
+    budget = ""
+    if limits is not None:
+        budget = "_{:.0f}s_{}ep_p{}".format(
+            float(limits.wall_clock_s), int(limits.max_episodes),
+            int(limits.patience))
+    return "{}__v{}_{}{}".format(workload_id, DECISION_FORMAT, name, budget)
+
+
+def decision_path(workload_id: str, profile=None, limits=None) -> str:
+    return os.path.join(HYBRID_DIR,
+                        decision_key(workload_id, profile, limits),
+                        "decision.json")
+
+
+def save_decision(decision: HybridDecision, profile=None,
+                  limits=None) -> str:
     import json
-    path = decision_path(decision.workload_id)
+    path = decision_path(decision.workload_id, profile, limits)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(decision.to_dict(), handle, indent=2)
     return path
 
 
-def load_decision(workload_id: str) -> Optional[HybridDecision]:
+def load_decision(workload_id: str, profile=None,
+                  limits=None) -> Optional[HybridDecision]:
     """A previous decision for this exact workload, if one was saved.
 
     Reused only when the workload id matches, and that id is a hash of every
@@ -491,7 +520,7 @@ def load_decision(workload_id: str) -> Optional[HybridDecision]:
     edited workload is never answered with the previous workload's result.
     """
     import json
-    path = decision_path(workload_id)
+    path = decision_path(workload_id, profile, limits)
     if not os.path.isfile(path):
         return None
     try:

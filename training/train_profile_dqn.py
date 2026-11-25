@@ -54,6 +54,7 @@ from evaluation.harness import (aggregate, greedy_agent_policy,
 from rl.phase_environment import PhaseDurationEnv
 from rl.phase_extend_env import PhaseExtendEnv
 from rl.phase_state import SATURATION_SOFT, PhaseStateExtractor
+from rl.policy_rollout import ACTION_SPACE_EXTEND, ACTION_SPACE_MENU
 from rl.timing_profile import get_profile
 from training.workload_library import split, sumo_seeds
 
@@ -226,9 +227,19 @@ def train(candidate: str = "A", extension: float = 3.0,
         target_update_frequency=target_update, double_dqn=True, seed=seed,
         scenario="profile:{}|candidate:{}".format(profile.name, candidate),
         durations=list(env.controller.durations),
-        observation_contract=extractor.contract())
+        observation_contract=extractor.contract(),
+        action_space=(ACTION_SPACE_EXTEND if masked else ACTION_SPACE_MENU),
+        extension=(float(extension) if masked else 0.0))
 
-    per_episode = max(int(duration_s / (profile.min_green + 4.0)), 1)
+    # How many decisions an episode holds depends on the action space -
+    # a lock-and-extend policy is asked something several times per green
+    # and a duration menu once - so it is measured on the first episode
+    # rather than estimated from the green length. Estimating it made
+    # candidate B stop exploring at episode 116 of 320 while candidate A
+    # explored until 241, and then the two were compared as equals.
+    clearance = float(env.controller.yellow_time
+                      + env.controller.all_red_time)
+    per_episode = max(int(duration_s / (profile.min_green + clearance)), 1)
     schedule = EpsilonSchedule(
         start=1.0, end=epsilon_end,
         decay_steps=max(int(episodes * per_episode * exploration_fraction), 1))
@@ -261,11 +272,35 @@ def train(candidate: str = "A", extension: float = 3.0,
     try:
         for episode in range(1, budget + 1):
             workload = train_loads[(episode - 1) % len(train_loads)]
+            if (workload.duration_s != env.episode_duration
+                    or workload.step_length != env.step_length):
+                raise RuntimeError(
+                    "workload {} is {:.0f} s at {:.2f} s steps but the "
+                    "environment was built for {:.0f} s at {:.2f} s; the "
+                    "horizon would be wrong.".format(
+                        workload.name, workload.duration_s,
+                        workload.step_length, env.episode_duration,
+                        env.step_length))
             env.workload = workload
             result = train_episode(
                 env, agent, schedule, global_step,
                 seed=train_seeds[(episode - 1) % len(train_seeds)],
                 n_step=n_step, masked=masked)
+            if episode == 1:
+                # Now the real number is known, re-size the schedule so
+                # both action spaces explore for the same share of the
+                # training budget.
+                measured = max(result["global_step"], 1)
+                schedule = EpsilonSchedule(
+                    start=1.0, end=epsilon_end,
+                    decay_steps=max(int(episodes * measured
+                                        * exploration_fraction), 1))
+                if not quiet:
+                    print("  exploration  : {} decisions in episode 1, so "
+                          "epsilon reaches {:.2f} at episode {}".format(
+                              measured, epsilon_end,
+                              int(episodes * exploration_fraction)),
+                          flush=True)
             global_step = result["global_step"]
 
             row = {

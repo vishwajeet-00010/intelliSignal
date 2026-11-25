@@ -1,0 +1,50 @@
+{
+  "profile": {
+    "name": "standard",
+    "min_green": 15.0,
+    "max_green": 30.0,
+    "durations": [
+      15,
+      16,
+      17,
+      18,
+      20,
+      22,
+      25,
+      30
+    ],
+    "max_red_factor": 4.0,
+    "description": "Conventional signal practice: a 15 s minimum green, long enough for a pedestrian phase. More realistic and markedly more expensive on this junction - the best plan under it is 42.50 s on heavy against 5.754 s unconstrained."
+  },
+  "candidate": "A",
+  "extension": 3.0,
+  "seed": 42,
+  "episodes": 3,
+  "pilot": true,
+  "seconds_per_episode": 0.99,
+  "best_validation_total_delay": null,
+  "best_validation_episode": 0,
+  "best_model": "output/indian_20261125/pilot\\models\\best.pt",
+  "final_model": "output/indian_20261125/pilot\\models\\final.pt",
+  "observation_contract": {
+    "observation_size": 10.0,
+    "observation_version": 2.0,
+    "saturation": "soft",
+    "max_queue_per_direction": 25.0,
+    "max_waiting_per_direction": 250.0,
+    "max_vehicles_per_direction": 40.0,
+    "max_queue_per_approach": 15.0,
+    "max_green_seconds": 30.0
+  },
+  "durations": [
+    15,
+    16,
+    17,
+    18,
+    20,
+    22,
+    25,
+    30
+  ],
+  "wall_clock_s": 3.0
+}

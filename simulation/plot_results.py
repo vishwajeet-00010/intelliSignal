@@ -73,7 +73,7 @@ def _style_axes(ax) -> None:
 
 
 def bar_chart(df: pd.DataFrame, column: str, title: str, ylabel: str,
-              value_format: str, filename: str) -> str:
+              value_format: str, filename: str, out_dir: str = None) -> str:
     """One metric, one bar per scenario, value printed on top of the bar."""
     labels = [SCENARIO_LABEL.get(s, s) for s in df["scenario"]]
     colors = [SCENARIO_COLOR.get(s, "#7a7f85") for s in df["scenario"]]
@@ -100,13 +100,13 @@ def bar_chart(df: pd.DataFrame, column: str, title: str, ylabel: str,
              fontsize=7.5, color=INK_MUTED)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
 
-    path = os.path.join(PLOT_DIR, filename)
+    path = os.path.join(out_dir or PLOT_DIR, filename)
     fig.savefig(path, facecolor=SURFACE)
     plt.close(fig)
     return path
 
 
-def queue_over_time() -> str:
+def queue_over_time(out_dir: str = None) -> str:
     """Queue length second by second, taken from the time-series CSV files."""
     series = {}
     for scenario in SCENARIO_ORDER:
@@ -139,13 +139,14 @@ def queue_over_time() -> str:
              fontsize=7.5, color=INK_MUTED)
     fig.tight_layout(rect=(0, 0.03, 1, 1))
 
-    path = os.path.join(PLOT_DIR, "04_queue_length_over_time.png")
+    path = os.path.join(out_dir or PLOT_DIR,
+                        "04_queue_length_over_time.png")
     fig.savefig(path, facecolor=SURFACE)
     plt.close(fig)
     return path
 
 
-def summary_panel(df: pd.DataFrame) -> str:
+def summary_panel(df: pd.DataFrame, out_dir: str = None) -> str:
     """The three Stage 1 metrics side by side - one figure for a slide."""
     labels = [SCENARIO_LABEL.get(s, s).replace(" traffic", "") for s in df["scenario"]]
     colors = [SCENARIO_COLOR.get(s, "#7a7f85") for s in df["scenario"]]
@@ -179,16 +180,24 @@ def summary_panel(df: pd.DataFrame) -> str:
              fontsize=7.5, color=INK_MUTED)
     fig.tight_layout(rect=(0, 0.04, 1, 0.92))
 
-    path = os.path.join(PLOT_DIR, "05_summary_comparison.png")
+    path = os.path.join(out_dir or PLOT_DIR,
+                        "05_summary_comparison.png")
     fig.savefig(path, facecolor=SURFACE)
     plt.close(fig)
     return path
 
 
 # --------------------------------------------------------------------------
-def generate_plots() -> list:
-    """Create every Stage 1 graph from the CSV results. Returns the paths."""
-    os.makedirs(PLOT_DIR, exist_ok=True)
+def generate_plots(out_dir: str = None) -> list:
+    """Create every Stage 1 graph from the CSV results. Returns the paths.
+
+    `out_dir` is where they go. It exists so a test can write into its
+    own temporary directory: the committed figures under `results/plots`
+    are the ones in the report, and a test run used to overwrite five of
+    them every time it passed.
+    """
+    out_dir = out_dir or PLOT_DIR
+    os.makedirs(out_dir, exist_ok=True)
     df = load_summary()
 
     print("Generating graphs from:", os.path.relpath(CSV_DIR, PROJECT_ROOT))
@@ -196,20 +205,20 @@ def generate_plots() -> list:
         bar_chart(df, "average_waiting_time",
                   "Average waiting time per vehicle",
                   "seconds / vehicle", "{:.2f} s",
-                  "01_average_waiting_time.png"),
+                  "01_average_waiting_time.png", out_dir=out_dir),
         bar_chart(df, "average_queue_length",
                   "Average queue length at the intersection",
                   "vehicles", "{:.2f}",
-                  "02_average_queue_length.png"),
+                  "02_average_queue_length.png", out_dir=out_dir),
         bar_chart(df, "throughput",
                   "Throughput - vehicles that passed through",
                   "vehicles", "{:.0f}",
-                  "03_throughput.png"),
+                  "03_throughput.png", out_dir=out_dir),
     ]
-    ts = queue_over_time()
+    ts = queue_over_time(out_dir=out_dir)
     if ts:
         created.append(ts)
-    created.append(summary_panel(df))
+    created.append(summary_panel(df, out_dir=out_dir))
 
     for path in created:
         print("  saved:", os.path.relpath(path, PROJECT_ROOT))

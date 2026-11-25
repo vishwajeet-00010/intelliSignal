@@ -430,3 +430,83 @@ def test_generated_inputs_can_be_removed():
     build_route_file(workload, name)
     removed = cleanup_workload_inputs(workload, tag="_cleanup")
     assert removed >= 1
+
+
+# ===========================================================================
+# Generated inputs belong to exactly one run
+# ===========================================================================
+def test_cleanup_removes_this_tag_and_not_a_longer_one():
+    """Two workers on the same workload must not delete each other's files.
+
+    The harness tags its generated inputs with the process id, so one
+    worker's tag is a prefix of another's whenever the ids differ in
+    length - `_val7001_p1236` and `_val7001_p12364`. Cleaning up by
+    prefix meant the shorter-numbered process deleted the other's route
+    file, usually while SUMO was reading it.
+    """
+    from custom_traffic.builder import build_workload, cleanup_workload_inputs
+
+    workload = _resolved_example()
+    build_workload(workload, tag="_a_p123")
+    build_workload(workload, tag="_a_p1234")
+    try:
+        removed = cleanup_workload_inputs(workload, tag="_a_p123")
+        assert removed == 3, "its own route, config and traffic-light file"
+        assert _generated(workload, "_a_p1234"), \
+            "the other worker's inputs must still be there"
+    finally:
+        cleanup_workload_inputs(workload, tag="_a_p1234")
+    assert not _generated(workload, "_a_p1234")
+
+
+def test_cleanup_can_sweep_every_tag_of_one_workload_when_asked():
+    """The net underneath a job that was interrupted."""
+    from custom_traffic.builder import build_workload, cleanup_workload_inputs
+
+    workload = _resolved_example()
+    build_workload(workload, tag="_hyb_a")
+    build_workload(workload, tag="_hyb_b")
+    try:
+        removed = cleanup_workload_inputs(workload, tag="_hyb", prefix=True)
+        assert removed == 6
+        assert not _generated(workload, "_hyb_a")
+        assert not _generated(workload, "_hyb_b")
+    finally:
+        cleanup_workload_inputs(workload, tag="_hyb", prefix=True)
+
+
+def _resolved_example():
+    from custom_traffic.resolver import example_spec, resolve
+
+    resolution = resolve(example_spec())
+    assert resolution.workload is not None
+    return resolution.workload
+
+
+def _generated(workload, tag):
+    import glob
+
+    from custom_traffic.builder import ROUTES_DIR, scenario_name
+
+    stem = scenario_name(workload, tag)
+    return glob.glob(os.path.join(ROUTES_DIR, stem + ".rou.xml"))
+
+
+def test_traffic_built_by_the_dashboard_uses_the_indian_fleet():
+    """Nothing in the product should put the old generic car on the road."""
+    from custom_traffic.spec import CustomSpec
+    from custom_traffic.resolver import example_spec, resolve
+
+    # An empty form is refused, which is the point: it says so rather
+    # than inventing traffic.
+    assert resolve(CustomSpec.empty()).workload is None
+    assert CustomSpec.empty().base_scenario == "indian_arterial"
+
+    # The worked example the form offers, and anything built from it.
+    workload = resolve(example_spec()).workload
+    assert workload is not None
+    assert workload.base_scenario == "indian_arterial"
+    assert workload.traffic_model == "indian_urban"
+    assert set(workload.fleet_mix()) <= {"motorcycle", "car", "auto", "bus"}
+    assert workload.signal["yellow"] == 3.0
+    assert workload.signal["all_red"] == 2.0

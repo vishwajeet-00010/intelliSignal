@@ -202,8 +202,13 @@ def compare(scenario: str = "moderate", model: Optional[str] = None,
             "comparison_{}_improvement".format(scenario), scenario)
         try:
             from evaluation.plot_comparison import plot_comparison
-            result["plots"] = plot_comparison(scenario,
-                                              results_dir=results_dir)
+            # Into the directory the results went to, not the committed
+            # figures: a comparison run from a test used to rewrite the
+            # charts in the report.
+            result["plots"] = plot_comparison(
+                scenario, results_dir=results_dir,
+                output_dir=(None if results_dir == EVALUATION_RESULTS_DIR
+                            else os.path.join(results_dir, "plots")))
         except Exception as exc:                    # pragma: no cover
             result["plots"] = []
             if not quiet:

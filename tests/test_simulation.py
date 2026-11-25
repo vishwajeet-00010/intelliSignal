@@ -257,7 +257,7 @@ def test_timeseries_csv_is_written(smoke_run):
 
 
 # ---------------------------------------------------------------- plots
-def test_plots_are_generated_from_the_csv_files():
+def test_plots_are_generated_from_the_csv_files(tmp_path):
     """Uses the real results in results/csv/ produced by the two scenarios."""
     from simulation import plot_results
 
@@ -267,7 +267,10 @@ def test_plots_are_generated_from_the_csv_files():
         if not os.path.isfile(path):
             pytest.skip("run both scenarios first: {} is missing".format(path))
 
-    created = plot_results.generate_plots()
+    # Into the test's own directory: results/plots holds the figures the
+    # report uses, and this test used to overwrite five of them on every
+    # run that passed.
+    created = plot_results.generate_plots(out_dir=str(tmp_path / "plots"))
     assert len(created) >= 3
     for path in created:
         assert os.path.isfile(path)

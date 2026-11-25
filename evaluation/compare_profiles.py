@@ -51,8 +51,8 @@ if PROJECT_ROOT not in sys.path:
 
 from agents.phase_dqn_agent import PhaseDQNAgent
 from evaluation.harness import (ControllerRun, aggregate, fixed_policy,
-                                greedy_agent_policy, max_pressure_policy,
-                                run_actuated, run_extend_policy, run_policy)
+                                max_pressure_policy, run_actuated, run_agent,
+                                run_policy)
 from rl.phase_state import extractor_from_contract
 from rl.timing_profile import compatible, get_profile
 from training.workload_library import split, sumo_seeds
@@ -171,29 +171,22 @@ def evaluate_all(profile_name: str, candidate_a: Optional[str],
         for index, workload in enumerate(test)])
 
     notes: List[str] = []
-    agent_a, why = load_candidate(candidate_a, profile)
-    if agent_a is not None:
-        record("DQN candidate A", [
-            run_policy(workload, greedy_agent_policy(agent_a), profile,
-                       test_seeds[index % len(test_seeds)],
-                       controller="candidate A",
-                       extractor=extractor_from_contract(
-                           agent_a.observation_contract), tag="_cmpA")
+    # Both candidates go through `run_agent`, which reads the action space
+    # from the checkpoint. Choosing the runner here by hand is how a
+    # lock-and-extend model came to be evaluated correctly in this script
+    # and incorrectly everywhere else.
+    for label, path in (("DQN candidate A", candidate_a),
+                        ("DQN candidate B", candidate_b)):
+        agent, why = load_candidate(path, profile)
+        if agent is None:
+            if why:
+                notes.append("{} was not evaluated: {}".format(label, why))
+            continue
+        record(label, [
+            run_agent(workload, agent, profile,
+                      test_seeds[index % len(test_seeds)],
+                      controller=label, tag="_cmp")
             for index, workload in enumerate(test)])
-    elif why:
-        notes.append("Candidate A was not evaluated: {}".format(why))
-
-    agent_b, why = load_candidate(candidate_b, profile)
-    if agent_b is not None:
-        record("DQN candidate B", [
-            run_extend_policy(workload, agent_b, profile,
-                              test_seeds[index % len(test_seeds)],
-                              extension=extension,
-                              extractor=extractor_from_contract(
-                                  agent_b.observation_contract), tag="_cmpB")
-            for index, workload in enumerate(test)])
-    elif why:
-        notes.append("Candidate B was not evaluated: {}".format(why))
 
     table = [aggregate(runs) for runs in results.values()]
     table.sort(key=lambda row: row["mean_total_delay"])

@@ -57,8 +57,15 @@ from simulation.run_simulation import prepare_sumo_imports, sumo_binary
 from utils.delay_accounting import (account, cross_check, enable_tripinfo,
                                     read_tripinfo)
 from utils.metrics import MetricsCollector
+from utils.sumo_launch import start_sumo
 
 TRIPINFO_DIR = os.path.join(PROJECT_ROOT, "results", "tripinfo")
+
+#: SUMO's trip-information file is read once, straight after the run that
+#: wrote it, and never again - so it is deleted once it has been read.
+#: Kept, they piled up to three hundred files and 39 MB of by-product. Set
+#: this to True to inspect one.
+KEEP_TRIPINFO = False
 
 #: Every generated SUMO input is named after the workload and the tag, so
 #: two processes evaluating the SAME workload on the SAME seed - which is
@@ -87,6 +94,9 @@ class ControllerRun:
     crosscheck: Dict[str, Any] = field(default_factory=dict)
     greens: List[float] = field(default_factory=list)
     detail: Dict[str, Any] = field(default_factory=dict)
+    #: The collector's per-second rows. Not part of `to_dict()`: it is for
+    #: a caller that wants to draw the run, not for a results file.
+    timeseries: List[Dict[str, Any]] = field(default_factory=list)
 
     # -- the four numbers a comparison leads with ----------------------
     @property
@@ -108,8 +118,16 @@ class ControllerRun:
         return int(self.delay.get("waiting_to_enter", 0))
 
     @property
-    def compliant(self) -> bool:
-        return bool(self.compliance.get("compliant", True))
+    def compliant(self) -> Optional[bool]:
+        """True, False, or None when nothing checked.
+
+        None is not True. A run with no compliance report has not been
+        shown to obey the timing rules, and saying it has would be the
+        one kind of mistake this module exists to prevent.
+        """
+        if not self.compliance:
+            return None
+        return bool(self.compliance.get("compliant"))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -136,6 +154,11 @@ def _finish(workload: ResolvedWorkload, controller: str, profile: str,
             detail: Dict[str, Any] = None) -> ControllerRun:
     summary = collector.summary(workload.name)
     trips = read_tripinfo(tripinfo)
+    if not KEEP_TRIPINFO:
+        try:
+            os.remove(tripinfo)
+        except OSError:
+            pass
     still = max(int(summary.get("vehicles", 0)) - int(summary.get("throughput", 0)), 0)
     delay = account(trips,
                     scheduled_departures=[v.depart for v in workload.vehicles],
@@ -144,7 +167,34 @@ def _finish(workload: ResolvedWorkload, controller: str, profile: str,
         controller=controller, profile=profile, seed=int(seed),
         summary=summary, delay=delay, compliance=compliance or {},
         crosscheck=cross_check(delay, summary), greens=greens,
-        detail=detail or {})
+        detail=detail or {}, timeseries=collector.timeseries)
+
+
+def _watch(collector: MetricsCollector, observer):
+    """Wire a collector, and an observer if there is one, to an environment.
+
+    Returns the two hooks an environment takes: `on_connect`, called the
+    moment SUMO is up and before any second is simulated, and the
+    per-step callback. Both are set BEFORE `reset`, because `reset` can
+    advance the clock - the lock-and-extend environment serves its first
+    minimum green there - and anything attached afterwards would miss
+    those seconds in every measurement and in the recording the audit
+    reads.
+
+    An observer only reads, so a run measures the same with or without
+    one.
+    """
+    def on_connect(connection):
+        collector.conn = connection
+        if observer is not None:
+            observer.attach(connection)
+
+    def step():
+        collector.collect_step()
+        if observer is not None:
+            observer.on_step()
+
+    return on_connect, step
 
 
 # ===========================================================================
@@ -155,7 +205,7 @@ def _finish(workload: ResolvedWorkload, controller: str, profile: str,
 def run_policy(workload: ResolvedWorkload, policy: Callable, profile,
                seed: int, controller: str = "policy",
                extractor: Optional[PhaseStateExtractor] = None,
-               tag: str = "_h") -> ControllerRun:
+               tag: str = "_h", observer=None) -> ControllerRun:
     """Run anything that picks a menu index from the observation."""
     profile = get_profile(profile)
     tripinfo = _tripinfo_path(workload, controller, seed)
@@ -165,15 +215,18 @@ def run_policy(workload: ResolvedWorkload, policy: Callable, profile,
                            tag="{}{}_{}".format(tag, seed, WORKER))
     greens: List[float] = []
     compliance: Dict[str, Any] = {}
+    collector = MetricsCollector(step_length=env.step_length)
+    env.on_connect, env.step_callback = _watch(collector, observer)
     try:
         observation, _ = env.reset(seed=int(seed))
-        collector = MetricsCollector(step_length=env.step_length,
-                                     conn=env.connection)
-        env.step_callback = collector.collect_step
         while True:
             action = int(policy(observation, env))
             observation, _, terminated, truncated, info = env.step(action)
-            greens.append(float(info["green_served"]))
+            # The green the end of the episode cut short was not chosen by
+            # the controller, so it is left out of what is reported about
+            # the controller - exactly as the compliance report does.
+            if not info.get("truncated_by_episode_end"):
+                greens.append(float(info["green_served"]))
             if terminated or truncated:
                 compliance = info.get("timing_compliance", {})
                 break
@@ -188,7 +241,7 @@ def run_extend_policy(workload: ResolvedWorkload, agent, profile,
                       seed: int, extension: float = 3.0,
                       controller: str = "candidate B",
                       extractor: Optional[PhaseStateExtractor] = None,
-                      tag: str = "_hx") -> ControllerRun:
+                      tag: str = "_hx", observer=None) -> ControllerRun:
     """Run a lock-and-extend policy, measured exactly like every other one."""
     from rl.phase_extend_env import PhaseExtendEnv
 
@@ -201,16 +254,16 @@ def run_extend_policy(workload: ResolvedWorkload, agent, profile,
                          tag="{}{}_{}".format(tag, seed, WORKER))
     greens: List[float] = []
     compliance: Dict[str, Any] = {}
+    collector = MetricsCollector(step_length=env.step_length)
+    env.on_connect, env.step_callback = _watch(collector, observer)
     try:
         observation, _ = env.reset(seed=int(seed))
-        collector = MetricsCollector(step_length=env.step_length,
-                                     conn=env.connection)
-        env.step_callback = collector.collect_step
         while True:
             action = int(agent.act(observation, training=False,
                                    valid_actions=env.valid_actions()))
             observation, _, terminated, truncated, info = env.step(action)
-            if info.get("phase_ended"):
+            if info.get("phase_ended") and not info.get(
+                    "truncated_by_episode_end"):
                 greens.append(float(info["green_served"]))
             if terminated or truncated:
                 compliance = info.get("timing_compliance", {})
@@ -220,6 +273,36 @@ def run_extend_policy(workload: ResolvedWorkload, agent, profile,
         env.cleanup_generated_inputs()
     return _finish(workload, controller, profile.name, seed, collector,
                    tripinfo, greens, compliance, {"extension": extension})
+
+
+def run_agent(workload: ResolvedWorkload, agent, profile, seed: int,
+              controller: Optional[str] = None,
+              tag: str = "_ha", observer=None) -> ControllerRun:
+    """Run a trained model in whichever environment it was trained for.
+
+    The one entry point for "measure this checkpoint": the action space is
+    read from the checkpoint, never chosen by the caller. The run's
+    `detail["decisions"]` holds one row per green with the network's own
+    values at the moment it committed.
+    """
+    from rl.policy_rollout import (ACTION_SPACE_EXTEND, extension_of,
+                                   greedy_rollout)
+
+    profile = get_profile(profile)
+    name = controller or "DQN"
+    tripinfo = _tripinfo_path(workload, name, seed)
+    rollout = greedy_rollout(
+        workload, agent, int(seed), profile=profile,
+        tag="{}{}_{}".format(tag, seed, WORKER), tripinfo_path=tripinfo,
+        observer=observer)
+    detail: Dict[str, Any] = {"action_space": rollout.action_space,
+                              "decisions": rollout.greens,
+                              "decision_log": rollout.decision_log}
+    if rollout.action_space == ACTION_SPACE_EXTEND:
+        detail["extension"] = extension_of(agent)
+    return _finish(workload, name, profile.name, seed, rollout.collector,
+                   tripinfo, rollout.completed_greens, rollout.compliance,
+                   detail)
 
 
 def fixed_policy(profile: TimingProfile, ns_green: float, ew_green: float):
@@ -270,7 +353,8 @@ def greedy_agent_policy(agent):
 # Actuated control, which has to decide second by second
 # ===========================================================================
 def run_actuated(workload: ResolvedWorkload, profile, seed: int,
-                 gap_seconds: float = 3.0, tag: str = "_act") -> ControllerRun:
+                 gap_seconds: float = 3.0, tag: str = "_act",
+                 observer=None) -> ControllerRun:
     """Minimum green, then extend while vehicles keep arriving.
 
     The classic vehicle-actuated rule, bounded by the profile: serve
@@ -311,10 +395,13 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
     breaches = 0
 
     label = "actuated_{}_{}_{}".format(workload.workload_id, seed, WORKER)
-    traci.start([sumo_binary(False), "-c", files["sumocfg"], "--seed",
-                 str(int(seed)), "--no-warnings", "--no-step-log"], label=label)
-    connection = traci.getConnection(label)
+    connection = start_sumo(
+        [sumo_binary(False), "-c", files["sumocfg"], "--seed",
+         str(int(seed)), "--no-warnings", "--no-step-log"], label=label)
     collector.conn = connection
+    if observer is not None:
+        observer.attach(connection)
+    _, step = _watch(collector, observer)
     try:
         while steps_done < total_steps:
             # The red limit caps how long this green may run, because the
@@ -331,7 +418,7 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
             served, idle, truncated = 0.0, 0.0, False
             while steps_done < total_steps:
                 connection.simulationStep()
-                collector.collect_step()
+                step()
                 steps_done += 1
                 served += workload.step_length
                 if served >= ceiling:
@@ -349,7 +436,8 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
             red_seconds = served + yellow + all_red
             within = red_seconds <= red_cap + 1e-9
             breaches += 0 if within else 1
-            greens.append(served)
+            if not truncated:
+                greens.append(served)
             log.append({"phase": phase, "served_green": served,
                         "red_limit": red_cap, "red_within_limit": within,
                         "truncated_by_episode_end": truncated})
@@ -361,7 +449,7 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
                 if steps_done >= total_steps:
                     break
                 connection.simulationStep()
-                collector.collect_step()
+                step()
                 steps_done += 1
             if all_red > 0:
                 connection.trafficlight.setRedYellowGreenState(TLS_ID, ALL_RED)
@@ -369,7 +457,7 @@ def run_actuated(workload: ResolvedWorkload, profile, seed: int,
                     if steps_done >= total_steps:
                         break
                     connection.simulationStep()
-                    collector.collect_step()
+                    step()
                     steps_done += 1
             phase = 1 - phase
     finally:
@@ -431,7 +519,8 @@ def aggregate(runs: Sequence[ControllerRun]) -> Dict[str, Any]:
         "mean_waiting_to_enter": round(statistics.fmean(pending), 1),
         "mean_queue": round(statistics.fmean(queues), 3),
         "mean_green": round(statistics.fmean(greens), 2) if greens else 0.0,
-        "all_compliant": all(run.compliant for run in runs),
+        "all_compliant": all(run.compliant is True for run in runs),
+        "unchecked_runs": sum(1 for run in runs if run.compliant is None),
         "red_breaches": sum(int(run.compliance.get("red_limit_breaches", 0))
                             for run in runs),
         "truncated_phases": sum(int(run.compliance.get("truncated_phases", 0))

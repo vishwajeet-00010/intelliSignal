@@ -1509,22 +1509,30 @@ def test_environment_status_detects_torch_and_models():
     assert isinstance(status.trained_models, list)
 
 
-def test_comparison_chart_builders_handle_real_and_empty_data(
+def test_the_stage_3_comparison_still_produces_a_readable_table(
         monkeypatch, tmp_path, trained_model):
+    """The Stage 3 comparison, which the historical results came from.
+
+    It used to be asserted through the old dashboard's chart builders.
+    Those were deleted with that dashboard, so what is checked now is
+    the thing that actually matters: the comparison runs and writes an
+    aggregated table with the columns the reports quote.
+    """
     import pandas as pd
 
-    from dashboard import charts
     from evaluation.compare_controllers import compare
-
-    assert charts.controller_metric_chart(pd.DataFrame(), "x", "t") is None
-    assert charts.queue_by_controller_chart({}) is None
-    assert charts.training_curve_chart(pd.DataFrame(), "total_reward", "t") is None
 
     result = compare(scenario="moderate", model=trained_model, seeds=[42],
                      duration=SHORT_DURATION, results_dir=str(tmp_path),
                      quiet=True)
     aggregated = pd.read_csv(result["aggregated_csv"])
-    chart = charts.controller_metric_chart(aggregated, "average_waiting_time",
-                                           "Average waiting time", "s")
-    assert chart is not None
-    chart.to_dict()                            # raises if the spec is invalid
+    assert not aggregated.empty
+    for column in ("scenario", "controller", "metric", "mean", "std",
+                   "seeds"):
+        assert column in aggregated.columns, column
+    assert set(aggregated["controller"]) >= {"fixed_time", "dqn"}
+    assert set(aggregated["metric"]) >= {"average_waiting_time",
+                                         "throughput"}
+    waiting = aggregated[aggregated["metric"] == "average_waiting_time"]
+    assert len(waiting) == 2, "one row per controller"
+    assert (waiting["mean"] >= 0).all()

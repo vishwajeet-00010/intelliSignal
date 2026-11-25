@@ -170,21 +170,33 @@ def build_workload(workload: ResolvedWorkload, tag: str = "",
 
 # ---------------------------------------------------------------------------
 def cleanup_workload_inputs(workload: ResolvedWorkload = None,
-                            tag: str = "") -> int:
-    """Delete the generated SUMO inputs for one workload, or for all of them.
+                            tag: str = "", prefix: bool = False) -> int:
+    """Delete generated SUMO inputs. Returns how many files were removed.
 
-    Returns how many files were removed. Called when a Hybrid job is
-    cancelled and by the repository cleanup, so these throwaway files do not
-    accumulate in `sumo/`.
+    Three scopes, narrowest first:
+
+      * `workload` and `tag`  - exactly the files `build_workload` wrote
+        for that tag, and nothing else. This is what every runner calls
+        when it finishes.
+      * `prefix=True`         - every tag of that workload that STARTS with
+        `tag`. The Hybrid job uses it to sweep up all of its own runs.
+      * no workload           - every custom workload's files. Repository
+        cleanup only; never call it while anything is running.
+
+    The first scope used to be a prefix match as well, which meant a runner
+    tagged `_val7001_p1236` also deleted the inputs of the process tagged
+    `_val7001_p12364` - while that process's SUMO was still reading them.
     """
     from utils.scenario_builder import ADDITIONAL_DIR, SUMOCFG_DIR
 
-    stem = (scenario_name(workload, tag) if workload is not None
-            else CUSTOM_PREFIX + "*")
+    if workload is None:
+        stem = CUSTOM_PREFIX + "*"
+    else:
+        stem = glob.escape(scenario_name(workload, tag)) + ("*" if prefix else "")
     removed = 0
-    for directory, pattern in ((ROUTES_DIR, "{}*.rou.xml"),
-                               (ADDITIONAL_DIR, "{}*_tls.add.xml"),
-                               (SUMOCFG_DIR, "{}*.sumocfg")):
+    for directory, pattern in ((ROUTES_DIR, "{}.rou.xml"),
+                               (ADDITIONAL_DIR, "{}_tls.add.xml"),
+                               (SUMOCFG_DIR, "{}.sumocfg")):
         for path in glob.glob(os.path.join(directory, pattern.format(stem))):
             try:
                 os.remove(path)

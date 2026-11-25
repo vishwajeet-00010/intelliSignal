@@ -1,3 +1,10 @@
+> **Numbers here predate the current model family.** The reasoning about
+> the duration action space still holds and the code it describes is
+> still in use, but every figure below was measured on the single
+> generic car with no startup delay, under the 4-20 s `responsive`
+> timing rules. The current figures are in
+> `output/standard_20261125/FINDINGS.md`.
+
 # The duration action space
 
 This document describes the second action space in the project — choosing how

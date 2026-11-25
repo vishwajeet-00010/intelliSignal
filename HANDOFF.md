@@ -2,7 +2,7 @@
 
 Handoff updated: 21 Nov 2026. The stage reports below are historical snapshots from Stages 1–3; later retraining and validation evidence is under `output/dqn_retraining_20261120/`, `output/dqn_stage4_20261120/`, and `output/dqn_stage5_20261121/`. A new Stage 5 run is under `output/dqn_stage5_20261121_attempt3/` and remains incomplete.
 
-**Current workspace:** `D:\intelliSignal` (Windows). The location above in older handoffs is historical.
+**Historical.** This handoff records where the project stood on 21 Nov 2026, four stages and one rebuild ago. For what is true now see `README.md`, `docs/dashboard.md` and `output/standard_20261125/FINDINGS.md`.
 
 > **Read this first.** Stages 1–3 are implemented and Stage 4 robust validation is complete. The Stage 4 suite reported **224 passed, 1 skipped** using Python 3.12.13, SUMO/TraCI 1.28.0, and PyTorch 2.14.1. On 20 matched confirmatory seeds, the retrained incumbent reduced mean waiting versus the starting DQN by **90.1% in moderate traffic** (29.54→2.92 s) and **15.2% in heavy traffic** (19.41→16.47 s). Neither pair of Stage 4 candidate runs passed validation. The dashboard now uses the validated incumbent through `models/active_models.json`; no Stage 4 candidate was promoted. Stage 5 was reconciled as incomplete: 1 primary cell is complete, 1 partial, and 18 have no artifacts. See `output/dqn_stage5_20261121/run_reconciliation.md`; its raw status snapshots and logs remain preserved.
 

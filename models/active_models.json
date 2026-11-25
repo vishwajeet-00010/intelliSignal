@@ -157,7 +157,7 @@
   },
   "profile_models": {
     "standard": {
-      "label": "Profile DQN, candidate B (standard 15-30 s, Indian fleet)",
+      "label": "Profile DQN, lock-and-extend (standard 15-30 s, Indian fleet)",
       "profile": {
         "name": "standard",
         "min_green": 15.0,
@@ -173,12 +173,23 @@
           30
         ],
         "max_red_factor": 4.0,
-        "description": "Conventional signal practice: a 15 s minimum green, long enough for a pedestrian phase. More realistic and markedly more expensive on this junction - the best plan under it is 42.50 s on heavy against 5.754 s unconstrained."
+        "description": "Conventional signal practice, and what the product runs: a 15 s minimum green, long enough for a pedestrian phase, and a 30 s maximum so nobody waits through a whole cycle."
       },
       "controller_family": "phase_duration",
       "candidate": "B",
-      "path": "output/indian_20261125/runs/B_s42/models/best.pt",
-      "sha256": "478955AD4364543AE100E94CA633D412F5DAB739C755538AC780C3CFBB716E1E",
+      "action_space": "lock_extend",
+      "extension": 3.0,
+      "reachable_greens": [
+        15.0,
+        18.0,
+        21.0,
+        24.0,
+        27.0,
+        30.0
+      ],
+      "how_it_works": "Lock-and-extend: every green runs for at least 15 s, then the network decides every 3 s whether to extend it or end it, up to 30 s.",
+      "path": "output/standard_20261125/runs/B_s45/models/best.pt",
+      "sha256": "1269261EF0E960AF9DABDA2E423A70081148E917BDA0C908E33C94687EF61D5B",
       "durations": [
         15.0,
         16.0,
@@ -204,24 +215,28 @@
       "measurement": {
         "split": "test",
         "profile": "standard",
-        "mean_total_delay": 14.942,
-        "sd_total_delay": 4.878,
-        "mean_waiting": 8.395,
-        "mean_completed": 463.2,
+        "seeds_per_workload": 3,
+        "mean_total_delay": 14.9731,
+        "sd_total_delay": 6.2421,
+        "mean_waiting": 7.9606,
+        "mean_completed": 462.89,
         "mean_waiting_to_enter": 0.0,
         "all_compliant": true,
-        "baseline_controller": "fixed",
-        "baseline_total_delay": 17.72,
-        "baseline_completed": 458.5,
+        "baseline_controller": "best fixed plan ns 30 / ew 15",
+        "baseline_total_delay": 25.3164,
+        "baseline_completed": 450.11,
         "paired": {
           "workloads": 6,
           "wins": 6,
-          "worst_delta": -0.048,
-          "mean_delta": -2.778
+          "worst_delta": -1.74,
+          "mean_delta": -10.3434
         }
       },
       "promoted_on": "2026-11-25",
-      "note": "Trained on the Indian urban fleet with real startup lost time, on 18 varied workloads. Selected on validation (15.14 s, best of six runs); reported on the untouched test split: 14.94 s total delay per requested vehicle against the tuned fixed plan's 17.72 s, winning on 6 of 6 workloads. Candidate A reached 14.76 s on test but was not the validation winner."
+      "selection_report": "output/standard_20261125/selection/selection.json",
+      "selected_from": 20,
+      "selection_winner": "B_s45",
+      "note": "Chosen from twenty independently trained runs and four averaged ensembles, each re-scored on the validation traffic at three SUMO seeds. The baseline is the best of all sixty-four fixed plans the timing rules allow, measured the same way. Reported once on the test traffic. The averaged ensembles did not beat the best single run."
     }
   }
 }

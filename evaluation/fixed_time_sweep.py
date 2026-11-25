@@ -58,6 +58,7 @@ from simulation.run_simulation import (prepare_sumo_imports,  # noqa: E402
 from utils.config_loader import load_config                   # noqa: E402
 from utils.metrics import MetricsCollector                    # noqa: E402
 from utils.scenario_builder import build_scenario             # noqa: E402
+from utils.sumo_launch import start_sumo  # noqa: E402
 
 #: Generated SUMO inputs get this suffix so no Stage 1 or RL file is touched.
 SWEEP_SUFFIX = "_fixed_time_sweep"
@@ -124,8 +125,8 @@ def run_fixed_time_plan(scenario: str, green: float, seed: int,
     collector = MetricsCollector(step_length=step_length)
     label = "fts_{}_{:g}_{}".format(scenario, green, seed)
 
-    traci.start([sumo_binary(False), "-c", files["sumocfg"],
-                 "--no-warnings", "--no-step-log"], label=label)
+    start_sumo([sumo_binary(False), "-c", files["sumocfg"],
+                "--no-warnings", "--no-step-log"], label=label)
     try:
         for _ in range(int(round(duration / step_length))):
             traci.simulationStep()

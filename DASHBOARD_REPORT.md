@@ -1,4 +1,12 @@
-# IntelliSignal — Streamlit Dashboard: Final Report
+# IntelliSignal - Streamlit Dashboard: Final Report (historical)
+
+> **This describes a dashboard that no longer exists.** It is a record of
+> the Stage 2 interface, written before the DQN was integrated. The
+> dashboard was rebuilt on 25 Nov 2026 around a single engine
+> (`simulation/engine.py`); the current one is documented in
+> [`docs/dashboard.md`](docs/dashboard.md). Nothing below describes the
+> pages, the modules or the numbers of the current product.
+
 
 This is a historical dashboard report describing the dashboard before Stage 3 DQN integration. Its original claims below are preserved as a record of that implementation point; they do not describe the current repository. The DQN was implemented and integrated in Stage 3, and subsequent evaluation is documented in `STAGE3_REPORT.md`, `HANDOFF.md`, and `output/dqn_stage4_20261120/stage4_validation_report.pdf`.
 

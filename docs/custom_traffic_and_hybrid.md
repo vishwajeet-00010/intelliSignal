@@ -1,6 +1,16 @@
 # Custom traffic and the Hybrid controller
 
-Two additions made for the final demonstration, and how they work.
+Two parts of the product, and how they work. Custom traffic is what the
+**Traffic** page builds when the traffic is described by hand; Hybrid is
+the second half of the **Compare** page. Both run through
+`simulation/engine.py` like everything else, so they are measured by the
+same code as the rest of the dashboard.
+
+The vehicles in a custom workload come from the Indian urban fleet
+(`custom_traffic/fleet.py`): 62 % motorcycles, 22 % cars, 11 %
+auto-rickshaws and 5 % buses, each with its own length, acceleration and
+startup delay. Greens are bounded by the operating timing profile,
+15-30 s, with a 3 s amber and a 2 s all-red after every one of them.
 
 ---
 
@@ -70,12 +80,11 @@ five minutes", does not give an exact count, and makes two controllers
 comparable only because SUMO happens to be deterministic. Writing the
 vehicles out fixes all three.
 
-It also makes the arrival window visible. The same 200 cars on one lane:
-
-| window | mean waiting | completed |
-|---|---|---|
-| over 1800 s (one every 9 s) | 9.12 s | 197 |
-| in the first 300 s (one every 1.5 s) | 32.74 s | 200 |
+It also makes the arrival window visible. The same vehicles on one lane,
+spread over the whole run or compressed into its first few minutes, are
+two different problems for a signal, and an explicit list can say which
+one is being asked for. Measured figures for the current fleet and
+timing rules are in `output/standard_20261125/FINDINGS.md`.
 
 ### Vehicle accounting
 
@@ -113,7 +122,7 @@ roughly twenty measured runs.
 
 | limit | default | meaning |
 |---|---|---|
-| time | 300 s | real seconds from pressing Run, covering tuning, training and validation |
+| time | 5 minutes | real seconds from pressing Run, covering tuning, training and validation |
 | episodes | 30 | additional training episodes for a candidate |
 | patience | 3 | consecutive **completed** validation checks the candidate may lose |
 
@@ -121,12 +130,19 @@ roughly twenty measured runs.
 
 The DQN is selected only when, across matched validation runs, it has
 
-* lower mean waiting time per vehicle, **and**
+* lower **total delay per requested vehicle**, **and**
 * at least equal mean throughput, **and**
 * no increase in vehicles still waiting to enter.
 
 Anything else selects the best fixed plan that was actually measured.
 **A tie goes to fixed time** — "no worse" is not "better".
+
+Delay per requested vehicle is the measure `judge()` in
+`simulation/hybrid.py` tests, because it is the measure the trainer
+selects a checkpoint on and the promotion script refuses a model on.
+Judging here on mean waiting instead would let the dashboard reject a
+model the evaluation had just accepted, on the same traffic. Mean
+waiting is reported beside it rather than decided on.
 
 The search stops early in three ways: the DQN qualifies (the checkpoint is
 saved for that workload), it fails `patience` consecutive checks, or the
@@ -143,21 +159,28 @@ Both controllers get the same explicit vehicle list, the same SUMO seed,
 the same duration and the same `utils.metrics.MetricsCollector`. Training
 seeds (8000+) and validation seeds (7001, 7002) never overlap.
 
-For Moderate and Heavy — which define demand as flows — Hybrid first
-re-expresses the scenario as an explicit vehicle list
-(`workload_from_scenario`). That is the same traffic in intent but **not**
-byte-identical to the flow-based scenario, so a Hybrid number is labelled
-as a Hybrid run and is not compared with the published baselines.
+The historical `moderate` and `heavy` scenarios define demand as flows
+rather than as vehicles. Where one of those is used, Hybrid first
+re-expresses it as an explicit vehicle list (`workload_from_scenario`).
+That is the same traffic in intent but **not** byte-identical to the
+flow-based scenario, so such a run is labelled as a Hybrid run and is
+not compared with the published Stage 1-3 baselines. Those scenarios
+also use a single generic car with no startup delay, so their numbers
+are not comparable with anything measured on the Indian fleet.
 
 ### Safety
 
-Unchanged, and structural rather than enforced. The duration menu is
-bounded by `min_green` and `max_green`, so an unsafe green cannot be asked
-for. Every action ends with the Stage 1 yellow clearance, so a green can
-never become the other green directly. Every action hands the road to the
-other direction next, so no approach can be starved. A controller change
-happens at a phase boundary, because a decision *is* one whole green plus
-its clearance.
+Structural rather than enforced. The duration menu is the active timing
+profile's, bounded by its `min_green` and `max_green`, so a green outside
+15-30 s cannot be asked for. Every green ends with a 3 s amber and a 2 s
+all-red, so a green can never become the other green directly. Every
+action hands the road to the other direction next, so no approach can be
+starved. A controller change happens at a phase boundary, because a
+decision *is* one whole green plus its clearance.
+
+The plan Hybrid sweeps is pulled onto the profile's menu before the
+sweep starts, because a fallback plan the profile forbids is not a
+fallback.
 
 ### Running in a browser
 
@@ -171,15 +194,12 @@ The job lives in `simulation/hybrid_job.py`, not in the Streamlit session:
 
 ### A worked outcome
 
-On the demonstration workload (200 cars on north lane 0, 328 on east lane
-0, 900 s):
-
-```
-Hybrid selected tuned fixed time (ns 15 s / ew 20 s) after 1 check.
-Mean waiting was 6.65 s with fixed time and 18.08 s with the DQN.
-```
-
-Tuning alone took the configured 30/30 plan from 10.78 s to **6.63 s**. The
-registered DQN — trained on balanced moderate traffic — reached 18.08 s on
-this very unbalanced workload and left 58 vehicles waiting to enter, so it
-was rejected. That is the rule working, not the rule failing.
+The useful case to demonstrate is an unbalanced workload: a lot of
+traffic on one approach and little on the one it shares the cycle with.
+Tuning alone moves the configured plan a long way on traffic like that,
+and a model trained on balanced traffic can lose to the tuned plan and
+be rejected. That is the rule working, not the rule failing. Whatever
+Hybrid decided, and both numbers it decided on, are printed on the
+Compare page for the traffic it was run on; the current measured
+figures for the project as a whole are in
+`output/standard_20261125/FINDINGS.md`.

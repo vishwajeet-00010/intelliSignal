@@ -56,7 +56,7 @@ import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional
 
 #: Bumped if the meaning of any field below changes.
-METRICS_VERSION = 2
+METRICS_VERSION = 3
 
 
 def enable_tripinfo(sumocfg_path: str, output_path: str) -> str:
@@ -75,8 +75,14 @@ def enable_tripinfo(sumocfg_path: str, output_path: str) -> str:
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     relative = os.path.relpath(
         output_path, os.path.dirname(os.path.abspath(sumocfg_path)))
+    # `write-unfinished` is what makes the accounting honest. Without it
+    # SUMO reports only the vehicles that reached their destination, so a
+    # controller that leaves traffic stuck inside the junction when the
+    # clock runs out is charged nothing for it - and the worse the
+    # controller, the more of those there are.
     block = ('    <output>\n'
              '        <tripinfo-output value="{}"/>\n'
+             '        <tripinfo-output.write-unfinished value="true"/>\n'
              '    </output>\n\n'
              '</configuration>').format(relative.replace(os.sep, "/"))
     text = text.replace("</configuration>", block)
@@ -87,7 +93,11 @@ def enable_tripinfo(sumocfg_path: str, output_path: str) -> str:
 
 # ---------------------------------------------------------------------------
 def read_tripinfo(path: str) -> List[Dict[str, float]]:
-    """Every completed trip SUMO recorded, as plain dictionaries."""
+    """Every trip SUMO recorded, finished or not, as plain dictionaries.
+
+    A vehicle still on the network when the run ended has an `arrival`
+    of -1 and a `timeLoss` counted up to that moment.
+    """
     if not os.path.isfile(path):
         return []
     try:
@@ -132,8 +142,19 @@ def account(trips: List[Dict[str, float]], scheduled_departures: List[float],
     is the time they actually spent waiting to get in.
     """
     requested = len(scheduled_departures)
-    completed = len(trips)
-    entered = completed + max(int(still_on_network), 0)
+    # SUMO is asked for the unfinished trips as well and marks them with
+    # an arrival of -1. They entered and they were delayed, so they count
+    # towards the delay; they did not finish, so they do not count towards
+    # completion. Leaving them out was worth about a second a vehicle to
+    # whichever controller stranded the most traffic.
+    arrived = [trip for trip in trips if trip.get("arrival", -1.0) >= 0.0]
+    unfinished = [trip for trip in trips if trip.get("arrival", -1.0) < 0.0]
+    completed = len(arrived)
+    # A vehicle that entered either finished (it is in `arrived`), or was
+    # still inside at the end. SUMO reports the second kind when asked;
+    # an older file does not, and then the caller's count is all there
+    # is - so the larger of the two is the honest answer.
+    entered = completed + max(len(unfinished), max(int(still_on_network), 0))
     if entered_ids is not None:
         entered = len(entered_ids)
     never_entered = max(requested - entered, 0)
@@ -163,6 +184,7 @@ def account(trips: List[Dict[str, float]], scheduled_departures: List[float],
         "entered": entered,
         "completed": completed,
         "still_on_network": max(entered - completed, 0),
+        "unfinished_charged": len(unfinished),
         "waiting_to_enter": never_entered,
         "total_time_loss_s": round(total_time_loss, 2),
         "total_stopped_waiting_s": round(total_stopped, 2),

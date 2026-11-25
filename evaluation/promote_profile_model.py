@@ -102,10 +102,63 @@ def read_result(path: Optional[str], controller: str) -> Dict[str, Any]:
     }
 
 
+def read_selection(path: Optional[str]) -> Dict[str, Any]:
+    """The whole selection run, from `evaluation/select_profile_model.py`.
+
+    It carries what a promotion needs and a comparison file cannot: which
+    model won, out of how many, against a fixed baseline that is the best
+    of every plan on the menu rather than the end of one descent.
+    """
+    if not path or not os.path.isfile(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    winner = payload.get("winner") or {}
+    rows = {row.get("controller"): row for row in (payload.get("test") or [])}
+    mine = rows.get("selected model")
+    baseline = rows.get("best fixed plan")
+    if not winner or mine is None or baseline is None:
+        return {}
+    versus = mine.get("against_best_fixed") or {}
+    return {
+        "paths": list(winner.get("paths") or []),
+        "winner": winner.get("name", ""),
+        "kind": winner.get("kind", "single"),
+        "candidates": len(payload.get("runs") or []),
+        "measurement": {
+            "split": "test",
+            "profile": (payload.get("profile") or {}).get("name"),
+            "seeds_per_workload": payload.get("seeds_per_workload"),
+            "mean_total_delay": mine.get("delay"),
+            "sd_total_delay": mine.get("delay_sd_across_workloads"),
+            "mean_waiting": mine.get("waiting"),
+            "mean_completed": mine.get("completed"),
+            "mean_waiting_to_enter": mine.get("pending"),
+            "all_compliant": mine.get("all_compliant"),
+            "baseline_controller": "best fixed plan ns {:g} / ew {:g}".format(
+                (payload.get("best_fixed") or {}).get("ns", 0),
+                (payload.get("best_fixed") or {}).get("ew", 0)),
+            "baseline_total_delay": baseline.get("delay"),
+            "baseline_completed": baseline.get("completed"),
+            "paired": {
+                "workloads": versus.get("of"),
+                "wins": versus.get("wins"),
+                "worst_delta": versus.get("worst"),
+                "mean_delta": versus.get("mean_difference"),
+            } if versus else None,
+        },
+    }
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", required=True)
-    parser.add_argument("--model", required=True)
+    parser.add_argument("--model", default=None,
+                        help="the checkpoint; taken from --selection if "
+                             "that is given instead")
+    parser.add_argument("--selection", default=None,
+                        help="selection.json from "
+                             "evaluation/select_profile_model.py")
     parser.add_argument("--result", default=None)
     parser.add_argument("--controller", default="candidate",
                         help="which row of the results table is this model")
@@ -117,19 +170,29 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     profile = get_profile(args.profile)
-    model = os.path.abspath(args.model)
-    if not os.path.exists(model):
-        raise SystemExit("no such checkpoint: {}".format(model))
-
-    agent = PhaseDQNAgent.load(model)
-    if not compatible(profile, agent.durations):
+    selection = read_selection(args.selection)
+    paths = selection.get("paths") or ([args.model] if args.model else [])
+    if not paths:
         raise SystemExit(
-            "refusing to promote: the checkpoint's greens are {} s, outside "
-            "the {} profile ({:g}-{:g} s).".format(
-                agent.durations, profile.name, profile.min_green,
-                profile.max_green))
+            "nothing to promote: pass --model, or --selection with the "
+            "selection.json of a finished selection run.")
+    models = [os.path.abspath(path) for path in paths]
+    for model in models:
+        if not os.path.exists(model):
+            raise SystemExit("no such checkpoint: {}".format(model))
 
-    measurement = read_result(args.result, args.controller)
+    for model in models:
+        agent = PhaseDQNAgent.load(model)
+        if not compatible(profile, agent.durations):
+            raise SystemExit(
+                "refusing to promote: the checkpoint's greens are {} s, "
+                "outside the {} profile ({:g}-{:g} s).".format(
+                    agent.durations, profile.name, profile.min_green,
+                    profile.max_green))
+    model = models[0]
+
+    measurement = selection.get("measurement") or read_result(
+        args.result, args.controller)
     learned = measurement.get("mean_total_delay")
     baseline = measurement.get("baseline_total_delay")
     if learned is None or baseline is None:
@@ -148,12 +211,24 @@ def main(argv=None) -> int:
             "refusing to promote a model selected on the test split. "
             "Select on validation and report on test.")
 
+    # What this controller can actually do, not what its checkpoint
+    # happens to store. A lock-and-extend model keeps the profile's menu
+    # in `durations` and can only ever produce its extension ladder, so
+    # recording the menu here told every reader the wrong thing.
+    from rl.policy_rollout import action_space_of, describe, extension_of
+
+    story = describe(agent)
     record = {
         "label": args.label or "Profile DQN ({})".format(profile.name),
         "profile": profile.to_dict(),
         "controller_family": "phase_duration",
         "candidate": (agent.scenario.split("candidate:")[-1]
                       if "candidate:" in (agent.scenario or "") else ""),
+        "action_space": action_space_of(agent),
+        "extension": extension_of(agent) if action_space_of(agent) ==
+        "lock_extend" else 0.0,
+        "reachable_greens": story["greens"],
+        "how_it_works": story["summary"],
         "path": os.path.relpath(model, PROJECT_ROOT).replace("\\", "/"),
         "sha256": sha256_of(model),
         "durations": list(agent.durations),
@@ -163,6 +238,18 @@ def main(argv=None) -> int:
         "measurement": measurement,
         "promoted_on": date.today().isoformat(),
     }
+    if len(models) > 1:
+        # An ensemble: every member is recorded with its own fingerprint,
+        # and `path` stays the first of them so a reader that only knows
+        # about single models still finds a real checkpoint.
+        record["members"] = [{
+            "path": os.path.relpath(m, PROJECT_ROOT).replace("\\", "/"),
+            "sha256": sha256_of(m)} for m in models]
+    if args.selection:
+        record["selection_report"] = os.path.relpath(
+            os.path.abspath(args.selection), PROJECT_ROOT).replace("\\", "/")
+        record["selected_from"] = selection.get("candidates")
+        record["selection_winner"] = selection.get("winner")
     if args.note:
         record["note"] = args.note
 

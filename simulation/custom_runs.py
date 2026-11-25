@@ -37,6 +37,7 @@ from custom_traffic.workload import ResolvedWorkload
 from simulation.hybrid import FixedPlan, configured_plan_for
 from simulation.run_simulation import prepare_sumo_imports, sumo_binary
 from utils.metrics import MetricsCollector
+from utils.sumo_launch import start_sumo
 
 CUSTOM_RESULTS_DIR = os.path.join(PROJECT_ROOT, "results", "custom_runs")
 
@@ -75,8 +76,7 @@ def run_fixed(workload: ResolvedWorkload, plan: Optional[FixedPlan] = None,
 
     # An explicit labelled connection, never the module-level default -
     # see the note in simulation/hybrid.py.
-    traci.start(command, label=label)
-    connection = traci.getConnection(label)
+    connection = start_sumo(command, label=label)
     collector.conn = connection
     try:
         for _ in range(steps):
@@ -100,49 +100,26 @@ def run_fixed(workload: ResolvedWorkload, plan: Optional[FixedPlan] = None,
 # ---------------------------------------------------------------------------
 def run_dqn(workload: ResolvedWorkload, agent, seed: Optional[int] = None,
             tag: str = "_rundqn", profile: Optional[str] = None):
-    """One greedy run of a phase-duration policy on the workload."""
-    from rl.phase_environment import PhaseDurationEnv
-    from rl.phase_state import extractor_from_contract
+    """One greedy run of a trained policy on the workload.
+
+    The policy is run in the environment its action space belongs to -
+    a duration menu or lock-and-extend - which `rl/policy_rollout.py`
+    reads from the checkpoint. Choosing it here by hand is how a
+    lock-and-extend model once spent every dashboard run alternating
+    between the two shortest greens on the menu.
+    """
+    from rl.policy_rollout import greedy_rollout
 
     seed = int(seed if seed is not None else workload.seed)
-    env = PhaseDurationEnv(
-        workload=workload, durations=agent.durations, profile=profile,
-        state_extractor=extractor_from_contract(agent.observation_contract),
-        tag=tag)
-    greens: List[Dict[str, Any]] = []
-    compliance = None
-    try:
-        observation, _ = env.reset(seed=seed)
-        collector = MetricsCollector(step_length=env.step_length,
-                                     conn=env.connection)
-        env.step_callback = collector.collect_step
-        while True:
-            phase = env.controller.phase
-            action = agent.act(observation, training=False)
-            values = agent.q_values(observation)
-            observation, _, terminated, truncated, info = env.step(action)
-            greens.append({
-                "time": float(info["simulation_time"]),
-                "phase": "North-South" if phase == 0 else "East-West",
-                "green_seconds": float(info["green_served"]),
-                "q_values": {"{:g}s".format(d): round(float(v), 4)
-                             for d, v in zip(agent.durations, values)},
-            })
-            if terminated or truncated:
-                compliance = info.get("timing_compliance")
-                break
-        summary = collector.summary(workload.name)
-        summary["timing_compliance"] = compliance
-        timeseries = collector.timeseries
-    finally:
-        env.close()
-        env.cleanup_generated_inputs()
+    rollout = greedy_rollout(workload, agent, seed, profile=profile, tag=tag)
+    greens = rollout.greens
 
-    summary = _accounting(summary, workload.total_vehicles)
+    summary = _accounting(rollout.summary, workload.total_vehicles)
     summary.update({"controller": "dqn", "seed": seed,
                     "model": getattr(agent, "model_path", "") or "",
+                    "action_space": rollout.action_space,
                     "decisions": len(greens)})
-    return summary, timeseries, greens
+    return summary, rollout.timeseries, greens
 
 
 # ---------------------------------------------------------------------------

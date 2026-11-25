@@ -138,7 +138,9 @@ class PhaseDQNAgent:
                  device: str = "cpu",
                  scenario: str = "",
                  durations: Sequence[float] = (),
-                 observation_contract: Optional[Dict[str, Any]] = None):
+                 observation_contract: Optional[Dict[str, Any]] = None,
+                 action_space: str = "",
+                 extension: float = 0.0):
         if not 0.0 < gamma_per_second <= 1.0:
             raise ValueError("gamma_per_second must be in (0, 1]")
         if loss not in ("huber", "mse"):
@@ -157,6 +159,16 @@ class PhaseDQNAgent:
         self.scenario = str(scenario)
         self.durations = [float(d) for d in durations]
         self.observation_contract = dict(observation_contract or {})
+        #: "duration_menu" or "lock_extend" - which environment this
+        #: network's outputs mean something in. Written into the checkpoint
+        #: so that nothing downstream has to guess; see rl/policy_rollout.py
+        #: for what happens when it is guessed wrong.
+        self.action_space = str(action_space or "")
+        #: Seconds one EXTEND adds. Zero for a duration menu.
+        self.extension = float(extension or 0.0)
+        #: Whatever the trainer stored beside the weights (selection rule,
+        #: validation result, candidate). Empty for a freshly built agent.
+        self.extra: Dict[str, Any] = {}
         self.device = torch.device(device)
 
         set_seeds(seed)
@@ -368,6 +380,8 @@ class PhaseDQNAgent:
             "gamma_per_second": float(self.gamma_per_second),
             "double_dqn": bool(self.double_dqn),
             "observation_contract": dict(self.observation_contract),
+            "action_space": self.action_space,
+            "extension": float(self.extension),
             "scenario": self.scenario,
             "seed": int(self.seed),
             "saved_at": datetime.now().isoformat(timespec="seconds"),
@@ -411,7 +425,18 @@ class PhaseDQNAgent:
             scenario=checkpoint.get("scenario", ""),
             durations=checkpoint.get("durations", ()),
             observation_contract=checkpoint.get("observation_contract"),
+            action_space=checkpoint.get("action_space", ""),
+            extension=checkpoint.get("extension", 0.0),
         )
+        agent.extra = dict(checkpoint.get("extra") or {})
+        # Checkpoints written before the action space was recorded carry it
+        # only implicitly, in the trainer's notes. Resolve it once here so
+        # every later reader sees the same answer.
+        from rl.policy_rollout import (ACTION_SPACE_EXTEND, action_space_of,
+                                       extension_of)
+        agent.action_space = action_space_of(agent)
+        if agent.action_space == ACTION_SPACE_EXTEND:
+            agent.extension = extension_of(agent)
         agent.policy_net.load_state_dict(checkpoint["policy_state_dict"])
         agent.target_net.load_state_dict(
             checkpoint.get("target_state_dict", checkpoint["policy_state_dict"]))
@@ -472,8 +497,36 @@ def registered_profile_model(profile: str) -> Optional[Dict[str, Any]]:
     return dict(record) if isinstance(record, dict) else None
 
 
-def load_registered_profile_model(profile: str) -> "PhaseDQNAgent":
-    """Load the promoted model for a profile, refusing a mismatched one.
+def sha256_of(path: str) -> str:
+    """The fingerprint of a checkpoint file, as the registry records it."""
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest().lower()
+
+
+def registered_member_paths(record: Dict[str, Any]) -> List[str]:
+    """The checkpoint files a registry record names, in order.
+
+    One model is `path`; an ensemble is `members`, each with its own path
+    and fingerprint. `path` is kept alongside `members` as the first
+    member, so anything that only knows about single models still reads a
+    real checkpoint rather than nothing.
+    """
+    members = record.get("members")
+    if isinstance(members, list) and members:
+        return [str(m.get("path", "") if isinstance(m, dict) else m)
+                for m in members]
+    return [str(record.get("path", ""))]
+
+
+def load_registered_profile_model(profile: str):
+    """Load the promoted policy for a profile, refusing a mismatched one.
+
+    Returns a `PhaseDQNAgent`, or a `PhaseEnsemble` when several
+    checkpoints were promoted together - both act the same way, and
+    everything downstream only asks them to act.
 
     A checkpoint whose menu falls outside the profile's green limits is
     refused rather than used conservatively: a 4 s-green policy under a
@@ -487,24 +540,27 @@ def load_registered_profile_model(profile: str) -> "PhaseDQNAgent":
             "No model is registered for the {!r} timing profile under "
             "'{}' in {}.".format(profile, PROFILE_REGISTRY_SECTION,
                                  REGISTRY_PATH))
-    path = str(record.get("path", ""))
-    if not os.path.isabs(path):
-        path = os.path.join(PROJECT_ROOT, path)
-    if not os.path.exists(path):
-        raise PhaseModelError("Registered model is missing: {}".format(path))
 
-    expected = str(record.get("sha256", "")).lower()
-    if expected:
-        digest = hashlib.sha256()
-        with open(path, "rb") as handle:
-            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                digest.update(chunk)
-        if digest.hexdigest().lower() != expected:
+    relative = registered_member_paths(record)
+    expected = [str(m.get("sha256", "")).lower()
+                for m in (record.get("members") or [])] \
+        or [str(record.get("sha256", "")).lower()]
+    paths = []
+    for index, name in enumerate(relative):
+        path = name if os.path.isabs(name) else os.path.join(PROJECT_ROOT, name)
+        if not os.path.exists(path):
+            raise PhaseModelError(
+                "Registered model is missing: {}".format(path))
+        want = expected[index] if index < len(expected) else ""
+        if want and sha256_of(path) != want:
             raise PhaseModelError(
                 "Registered model for {!r} does not match its recorded "
                 "sha256: {}".format(profile, path))
+        paths.append(path)
 
-    agent = PhaseDQNAgent.load(path)
+    from agents.phase_ensemble import load_policy
+
+    agent = load_policy(paths)
     if not compatible(get_profile(profile), agent.durations):
         raise PhaseModelError(
             "The checkpoint registered for {!r} has greens {} s, which that "

@@ -77,6 +77,7 @@ from simulation.run_simulation import (prepare_sumo_imports,      # noqa: E402
                                        sumo_binary)
 from utils.config_loader import load_config                       # noqa: E402
 from utils.scenario_builder import TLS_ID, build_scenario         # noqa: E402
+from utils.sumo_launch import start_sumo  # noqa: E402
 
 # Scenario files built for the RL environment get this suffix, so the Stage 1
 # generated files are never overwritten.
@@ -353,8 +354,7 @@ class IntelliSignalEnv(gym.Env):
             cmd += ["--no-warnings", "true"]
         cmd += [str(arg) for arg in self.extra_sumo_args]
 
-        traci.start(cmd, label=self._label)
-        self._conn = traci.getConnection(self._label)
+        self._conn = start_sumo(cmd, label=self._label)
         self._closed_cleanly = True
 
     # ------------------------------------------------------------------

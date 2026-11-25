@@ -66,6 +66,7 @@ from utils.config_loader import load_config                      # noqa: E402
 from utils.metrics import MetricsCollector                       # noqa: E402
 from utils.scenario_builder import (TLS_ID, TLS_PROGRAM_ID,      # noqa: E402
                                     build_scenario)
+from utils.sumo_launch import start_sumo  # noqa: E402
 
 #: Controller identifiers used in every result CSV and chart.
 FIXED_TIME = "fixed_time"
@@ -197,8 +198,7 @@ def run_fixed_time_episode(scenario: str, seed: int = 42,
         cmd += QUIET_SUMO_ARGS
 
     label = "intellisignal_fixed_{}_{}".format(scenario, seed)
-    traci.start(cmd, label=label)
-    conn = traci.getConnection(label)
+    conn = start_sumo(cmd, label=label)
     try:
         program = conn.trafficlight.getProgram(TLS_ID)
         if program != TLS_PROGRAM_ID:

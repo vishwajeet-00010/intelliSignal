@@ -151,7 +151,7 @@ class CustomSpec:
     name: str = "custom"
     #: Which scenario's vehicle type, signal plan and step length to start
     #: from. Everything not about demand is inherited from it.
-    base_scenario: str = "moderate"
+    base_scenario: str = "indian_arterial"
     #: Simulated seconds. None means "take the base scenario's duration".
     duration_s: Optional[float] = None
     #: Seed for the generated values AND for SUMO, so a workload is
@@ -161,7 +161,7 @@ class CustomSpec:
 
     # ------------------------------------------------------------------
     @classmethod
-    def empty(cls, base_scenario: str = "moderate", seed: int = 6101
+    def empty(cls, base_scenario: str = "indian_arterial", seed: int = 6101
               ) -> "CustomSpec":
         """A blank form: every lane present, nothing selected, nothing typed."""
         return cls(base_scenario=base_scenario, seed=seed, lanes=[

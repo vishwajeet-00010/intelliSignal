@@ -343,9 +343,13 @@ def test_the_default_profile_is_the_practical_one():
 
 def test_the_dashboard_opens_on_practical_settings():
     from dashboard.state import DEFAULTS
+    from simulation.engine import OPERATING_PROFILE
 
-    assert DEFAULTS["timing_profile"] == "standard"
-    assert DEFAULTS["scenario"] == "indian_arterial"
-    assert DEFAULTS["control_mode"] == "hybrid", (
-        "Hybrid is the safe default: it measures the tuned fixed plan "
-        "against the DQN and uses whichever actually wins")
+    assert DEFAULTS["profile"] == "standard"
+    assert OPERATING_PROFILE == "standard", (
+        "the product runs one set of timing rules; `responsive` exists "
+        "only so historical models can still be loaded and explained")
+    assert DEFAULTS["traffic_kind"] == "preset"
+    assert DEFAULTS["controller"] == "dqn", (
+        "the trained controller is what the project is for; when it "
+        "cannot be trusted the page says so and hands over to Hybrid")

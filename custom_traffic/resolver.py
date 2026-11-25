@@ -514,7 +514,7 @@ def workload_from_scenario(scenario: str, duration_s: Optional[float] = None,
     return resolution.workload
 
 
-def example_spec(base_scenario: str = "moderate", seed: int = 6101
+def example_spec(base_scenario: str = "indian_arterial", seed: int = 6101
                  ) -> CustomSpec:
     """A worked example for the “Generate example” button.
 

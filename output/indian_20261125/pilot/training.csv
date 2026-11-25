@@ -1,0 +1,4 @@
+episode,workload,total_reward,decisions,epsilon,loss,mean_green,interventions,compliant,sumo_seed,wall_clock_s
+1,balanced_light,-102.767,38,0.9958,,18.82,0,True,8000,0.9
+2,directional_light,-124.531,35,0.9919,,20.86,0,True,8001,1.8
+3,lane_skew_light,-90.688,36,0.9879,,20.14,0,True,8002,2.9

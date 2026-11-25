@@ -19,7 +19,7 @@ held in session state until the user edits something or presses Regenerate.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Dict, Optional
 
 import streamlit as st
 
@@ -43,13 +43,13 @@ def _spec() -> CustomSpec:
 
 
 def _store(spec: CustomSpec) -> None:
-    state.set_value("custom_spec", spec.to_dict())
+    state.put("custom_spec", spec.to_dict())
 
 
 def _invalidate() -> None:
     """The form changed, so the preview no longer describes it."""
-    state.set_value("custom_workload", None)
-    state.set_value("custom_issues", [])
+    state.put("custom_workload", None)
+    state.put("custom_issues", [])
 
 
 def _number(label: str, key: str, value, *, minimum=0.0, maximum=None,
@@ -74,10 +74,16 @@ def _number(label: str, key: str, value, *, minimum=0.0, maximum=None,
 
 
 # ---------------------------------------------------------------------------
-def render_form(controller) -> CustomSpec:
+#: The junction the product models. The form no longer offers the older
+#: single-car scenarios: they exist as historical evidence, and traffic
+#: built here is always the Indian fleet with real startup lost time.
+BASE_SCENARIO = "indian_arterial"
+
+
+def render_form() -> CustomSpec:
     """Draw the lane form and return the spec it describes."""
     spec = _spec()
-    scenarios = [s for s in controller.available_scenarios() if s != "custom"]
+    spec.base_scenario = BASE_SCENARIO
 
     st.markdown("#### 1 · Describe the traffic")
     st.caption(
@@ -88,13 +94,13 @@ def render_form(controller) -> CustomSpec:
         "turn).")
 
     top = st.columns([2, 2, 2, 2])
+    base = BASE_SCENARIO
     with top[0]:
-        base = st.selectbox(
-            "Base scenario", scenarios,
-            index=scenarios.index(spec.base_scenario)
-            if spec.base_scenario in scenarios else 0,
-            help="Where the signal plan, vehicle type and step length come "
-                 "from. Only the traffic demand is replaced.")
+        st.text_input("Junction", value="Indian urban arterial",
+                      disabled=True,
+                      help="The signal plan, clearance times and vehicle "
+                           "mix come from config/indian_arterial.yaml. Only "
+                           "the demand is replaced by what you enter here.")
     with top[1]:
         duration = st.number_input(
             "Run length (s)", min_value=60, max_value=7200, step=60,
@@ -237,12 +243,12 @@ def _resolve_into_state(spec: CustomSpec, bump: bool) -> None:
     token = int(state.get("custom_regen_token") or 0)
     if bump:
         token += 1
-        state.set_value("custom_regen_token", token)
+        state.put("custom_regen_token", token)
     resolution: Resolution = resolve(spec, regenerate_token=token)
-    state.set_value("custom_issues", [
+    state.put("custom_issues", [
         {"where": issue.lane_key or "Form", "message": issue.message,
          "severity": issue.severity} for issue in resolution.issues])
-    state.set_value(
+    state.put(
         "custom_workload",
         resolution.workload.to_dict() if resolution.workload else None)
     st.rerun()

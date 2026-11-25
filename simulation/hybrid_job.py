@@ -43,6 +43,12 @@ from simulation.hybrid import (HYBRID_DIR, SELECTED_DQN, SELECTED_FIXED,
 
 #: Seeds used only to validate. They never appear in training, so a candidate
 #: cannot be selected on traffic it was fitted to.
+#: Tuning draws about two dozen runs and keeps the best, so the seed it
+#: is tuned on is a seed it has been fitted to. Judging happens on these
+#: other ones, or the fixed plan would be scored on its own best draw
+#: while the model was scored out of sample.
+TUNE_SEED = 7009
+
 VALIDATION_SEEDS = (7001, 7002)
 
 #: Seeds used only for training episodes.
@@ -59,11 +65,15 @@ class HybridJob:
     def __init__(self, workload: ResolvedWorkload, limits: HybridLimits,
                  configured_plan: FixedPlan, validate_every: int = 5,
                  validation_seeds: Sequence[int] = VALIDATION_SEEDS,
-                 profile=None):
+                 profile=None, tune_seed: int = TUNE_SEED):
         from rl.timing_profile import get_profile
-        #: Every plan Hybrid tunes and every candidate it trains is held to
-        #: this profile, so its fallback is a plan the profile allows.
-        self.profile = get_profile(profile) if profile is not None else None
+        #: Every plan Hybrid tunes and every candidate it trains is held
+        #: to this profile, so its fallback is a plan the profile allows.
+        #: There is no profile-less Hybrid: without one it used to sweep
+        #: 4-30 s greens and train a 4-20 s menu under a product whose
+        #: minimum green is fifteen seconds.
+        self.profile = get_profile(profile)
+        self.tune_seed = int(tune_seed)
         self.workload = workload
         self.limits = limits.validate()
         self.configured_plan = configured_plan
@@ -129,7 +139,24 @@ class HybridJob:
             self._thread.join(timeout=timeout)
         if self.state == "running":
             self.state = "cancelled"
-        cleanup_workload_inputs(self.workload)
+        self._sweep_inputs()
+
+    # ------------------------------------------------------------------
+    def _sweep_inputs(self) -> int:
+        """Remove every SUMO input this job generated, and only those.
+
+        Each runner already deletes its own files when it finishes; this is
+        the net underneath for a run that was interrupted. It is limited to
+        the Hybrid tags so that it cannot take the files of a run the user
+        started on the same traffic from another page while the job was
+        finishing.
+        """
+        from rl.phase_environment import PHASE_SUFFIX
+        from rl.phase_extend_env import EXTEND_SUFFIX
+
+        return sum(cleanup_workload_inputs(self.workload, tag=tag, prefix=True)
+                   for tag in ("_hyb", PHASE_SUFFIX + "_hyb",
+                               EXTEND_SUFFIX + "_hyb"))
 
     # ------------------------------------------------------------------
     def status(self) -> Dict[str, Any]:
@@ -154,7 +181,8 @@ class HybridJob:
             self.phase = "finished"
             from simulation.hybrid import save_decision
             if self.decision and not self.decision.cancelled:
-                save_decision(self.decision)
+                save_decision(self.decision, profile=self.profile,
+                              limits=self.limits)
         except Exception as exc:                 # pragma: no cover - defensive
             self.error = "{}: {}".format(type(exc).__name__, exc)
             self.state = "failed"
@@ -169,7 +197,7 @@ class HybridJob:
                 stopped_because="the background search raised an error",
                 elapsed_s=self.elapsed_s)
         finally:
-            cleanup_workload_inputs(self.workload)
+            self._sweep_inputs()
 
     # ------------------------------------------------------------------
     def _search(self) -> HybridDecision:
@@ -178,7 +206,7 @@ class HybridJob:
         self.phase = "tuning the fixed-time plan"
         self._say("tuning north-south and east-west green independently")
         plan, tuning_complete = tune_fixed_plan(
-            self.workload, self.configured_plan, seed=self.validation_seeds[0],
+            self.workload, self.configured_plan, seed=self.tune_seed,
             deadline=self.deadline, should_stop=self._should_stop,
             on_progress=self._say, profile=self.profile)
         if not tuning_complete:
@@ -193,7 +221,8 @@ class HybridJob:
                 tuning_complete, False, [])
 
         self.phase = "measuring the tuned plan"
-        fixed_runs = [run_fixed_plan(self.workload, plan, seed)
+        fixed_runs = [run_fixed_plan(self.workload, plan, seed,
+                                     profile=self.profile)
                       for seed in self.validation_seeds]
         if self._out_of_time():
             return self._fixed_decision(
@@ -233,28 +262,21 @@ class HybridJob:
 
     # ------------------------------------------------------------------
     def _existing_agent(self):
-        """A registered phase-duration model for this workload's scenario."""
+        """The model promoted for the timing rules in force, if any."""
         try:
-            from agents.phase_dqn_agent import (load_registered_phase_model,
-                                                load_registered_profile_model,
-                                                registered_phase_model,
-                                                registered_profile_model)
-            if self.profile is not None:
-                record = registered_profile_model(self.profile.name)
-                if not record:
-                    return None, ""
-                return (load_registered_profile_model(self.profile.name),
-                        "{} [profile {}]".format(
-                            record.get("label", "registered model"),
-                            self.profile.name))
-
-            record = registered_phase_model(self.workload.base_scenario)
+            from agents.phase_dqn_agent import (
+                load_registered_profile_model, registered_profile_model)
+            # Only the model promoted for the timing rules in force. The
+            # per-scenario models of the earlier stages were trained on a
+            # single generic car under different limits, and letting one
+            # of them take the signal here was never intended.
+            record = registered_profile_model(self.profile.name)
             if not record:
                 return None, ""
-            agent = load_registered_phase_model(self.workload.base_scenario)
-            return agent, "{} [{}]".format(
-                record.get("label", "registered model"),
-                self.workload.base_scenario)
+            return (load_registered_profile_model(self.profile.name),
+                    "{} [profile {}]".format(
+                        record.get("label", "registered model"),
+                        self.profile.name))
         except Exception as exc:
             self._say("could not load a registered model: {}".format(exc))
             return None, ""
@@ -293,20 +315,22 @@ class HybridJob:
         import torch
 
         from agents.phase_dqn_agent import EpsilonSchedule, PhaseDQNAgent
-        from rl.phase_action import DEFAULT_DURATIONS
         from rl.phase_environment import PhaseDurationEnv
-        from rl.phase_state import PhaseStateExtractor
+        from rl.policy_rollout import ACTION_SPACE_MENU
+        from training.train_profile_dqn import build_extractor
 
         torch.set_num_threads(1)
         self.phase = "training a candidate"
 
-        durations = (self.profile.durations if self.profile is not None
-                     else DEFAULT_DURATIONS)
-        extractor = PhaseStateExtractor(
-            max_green_seconds=float(max(durations)))
+        # The same observation contract the shipped family was trained
+        # with. Hybrid used to build its own, with different scales and
+        # hard clipping, so what it trained could not be compared with
+        # the registered model even in principle.
+        durations = self.profile.durations
+        extractor = build_extractor(self.profile)
         env = PhaseDurationEnv(
             workload=self.workload, durations=durations,
-            profile=self.profile.name if self.profile is not None else None,
+            profile=self.profile.name,
             state_extractor=extractor, gamma_per_second=0.99,
             reward_scale=0.005, tag="_hybtrain")
         agent = PhaseDQNAgent(
@@ -314,9 +338,10 @@ class HybridJob:
             num_actions=int(env.action_space.n), hidden_layers=(128, 128),
             gamma_per_second=0.99, batch_size=128, learning_starts=400,
             seed=TRAINING_SEED_BASE,
-            scenario=self.workload.base_scenario,
+            scenario="profile:{}|candidate:A".format(self.profile.name),
             durations=list(env.controller.durations),
-            observation_contract=extractor.contract())
+            observation_contract=extractor.contract(),
+            action_space=ACTION_SPACE_MENU)
 
         per_episode = max(int(self.workload.duration_s / SECONDS_PER_DECISION), 1)
         schedule = EpsilonSchedule(
@@ -431,6 +456,11 @@ class HybridJob:
 
     # ------------------------------------------------------------------
     def _save_candidate(self, agent, origin: str) -> str:
+        if not hasattr(agent, "save"):
+            # A promoted ensemble is several networks. It is already on
+            # disk where the registry points, and there is nothing here
+            # worth copying.
+            return getattr(agent, "model_path", "") or ""
         """Keep the qualifying checkpoint, filed under the workload id."""
         directory = os.path.join(HYBRID_DIR, self.workload.workload_id)
         os.makedirs(directory, exist_ok=True)

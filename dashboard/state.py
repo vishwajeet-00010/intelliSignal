@@ -1,63 +1,57 @@
 """
-IntelliSignal - Dashboard
+IntelliSignal
 dashboard/state.py
 
-Streamlit session state.
+What the dashboard remembers between clicks.
 
-Streamlit re-runs the whole script on every interaction, so anything that must
-survive a click lives here. The rule that matters for this project: **a
-simulation runs only when the Run button is pressed**, never on a page
-refresh. The last run is kept in session state and every page reads it from
-there.
+Streamlit re-runs the whole script on every interaction, so anything that
+must survive a click lives in `st.session_state`. Keeping the keys and
+their defaults in one place means a page cannot invent a key that another
+page then fails to find, and `reset_traffic` can clear everything that
+belonged to the previous traffic in one call - which is what stops a run
+measured on one pattern being shown beside the name of another.
+
+The workload itself is stored as its dictionary rather than the object,
+because Streamlit pickles session state between reruns and a plain dict
+reloads identically every time.
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import streamlit as st
 
-PAGES: List[str] = ["Dashboard", "Custom Traffic", "Simulation",
-                    "Comparison", "Results", "DQN Model", "About"]
+from simulation.engine import OPERATING_PROFILE
 
+#: Every key the dashboard uses, with the value it starts at.
 DEFAULTS: Dict[str, Any] = {
-    "page": "Dashboard",
-    "scenario": "indian_arterial",
-    "control_mode": "hybrid",
-    "duration": 1800,
-    "seed": 42,                # SUMO seed for a DQN run
-    "model_name": None,        # which checkpoint the DQN run should use
-    "last_run": None,          # SimulationRun produced by the Run button
-    "last_error": None,        # str, shown once then cleared
-    "run_history": [],         # list of dicts, newest first
-    "signal_time": 0,          # position of the signal time slider
-
-    # --- custom traffic ------------------------------------------------
-    # The spec is what was typed; the workload is the resolved preview.
-    # They are kept apart so that navigating away and back does not
-    # re-resolve and quietly change the generated values.
-    "custom_spec": None,          # CustomSpec.to_dict()
-    "custom_workload": None,      # ResolvedWorkload.to_dict()
-    "custom_issues": [],          # [{where, message, severity}]
-    "custom_regen_token": 0,      # bumped only by "Regenerate"
-    "auto_hybrid_reason": None,   # why the DQN mode handed over to Hybrid
-
-    # --- hybrid ----------------------------------------------------------
-    "hybrid_wall_clock_s": 300,
-    "hybrid_max_episodes": 30,
-    "hybrid_patience": 3,
-    "hybrid_workload_id": None,   # the job the page is watching
-
-    # --- operational timing profile --------------------------------------
-    # Which green limits every controller is held to. It changes what is
-    # reachable, so it is recorded with every run and shown on the pages
-    # rather than left implicit.
-    "timing_profile": "standard",
+    "page": "Control room",
+    # --- the traffic -------------------------------------------------
+    "traffic_kind": "preset",          # preset | custom
+    "preset": "typical",
+    "duration_s": 900.0,
+    "seed": 6101,
+    "custom_workload": None,           # the resolved workload, as a dict
+    "custom_spec": None,               # the form's own state, as a dict
+    "custom_issues": [],               # what the resolver said about it
+    "custom_regen_token": 0,           # bumped to redraw the generated values
+    # --- the controller ----------------------------------------------
+    "controller": "dqn",
+    "plan_ns": None,                   # None = use the configured plan
+    "plan_ew": None,
+    "compare_with": ["fixed_time", "actuated"],
+    # --- what is running or has run ----------------------------------
+    "job_key": "",
+    "compare_job_key": "",
+    "hybrid_workload_id": "",
+    "last_error": "",
+    "profile": OPERATING_PROFILE,
 }
 
 
-def init_state() -> None:
-    """Put the defaults in place. Safe to call on every re-run."""
+def init() -> None:
+    """Fill in anything missing. Safe to call on every rerun."""
     for key, value in DEFAULTS.items():
         if key not in st.session_state:
             st.session_state[key] = (list(value) if isinstance(value, list)
@@ -68,54 +62,61 @@ def get(key: str, default: Any = None) -> Any:
     return st.session_state.get(key, DEFAULTS.get(key, default))
 
 
-def set_value(key: str, value: Any) -> None:
+def put(key: str, value: Any) -> None:
     st.session_state[key] = value
 
 
-# --------------------------------------------------------------------------
-def record_run(run) -> None:
-    """Remember a finished simulation."""
-    st.session_state["last_run"] = run
-    st.session_state["last_error"] = None
-    history = st.session_state.get("run_history", [])
-    history.insert(0, {
-        "scenario": run.scenario,
-        "mode": run.mode,
-        "controller": run.metrics.get("controller", run.mode),
-        "finished_at": run.finished_at,
-        "wall_clock": run.duration_seconds,
-        "average_waiting_time": run.metric("average_waiting_time"),
-        "average_queue_length": run.metric("average_queue_length"),
-        "throughput": run.metric("throughput"),
-        "simulation_time": run.metric("simulation_time"),
-    })
-    st.session_state["run_history"] = history[:10]
+def reset_traffic() -> None:
+    """Forget everything that belonged to the previous traffic.
 
-
-def record_error(message: str) -> None:
-    st.session_state["last_error"] = message
-
-
-def current_run(controller, scenario: Optional[str] = None,
-                mode: Optional[str] = None):
-    """The run to display for a scenario and control mode.
-
-    Prefers a simulation started from the dashboard in this session; otherwise
-    falls back to whatever results are on disk, so the pages have real numbers
-    to show before anything has been run.
-
-    The MODE is part of the identity of a run. A fixed-time run is never
-    returned when DQN results were asked for: `load_results` has no fallback
-    for the DQN, so the caller gets None and says "no DQN run yet" rather
-    than showing baseline numbers under a DQN heading.
+    A run is only ever shown next to the traffic it was measured on, so
+    changing the traffic must clear the jobs as well as the workload.
     """
-    scenario = scenario or get("scenario")
-    mode = mode or get("control_mode")
-    last = st.session_state.get("last_run")
-    if (last is not None and last.scenario == scenario
-            and getattr(last, "mode", None) == mode):
-        return last
-    try:
-        return controller.load_results(scenario, mode)
-    except Exception:
+    for key in ("job_key", "compare_job_key", "hybrid_workload_id",
+                "last_error"):
+        st.session_state[key] = DEFAULTS[key]
+
+
+# ---------------------------------------------------------------------------
+def current_workload():
+    """The traffic the whole dashboard is working on right now.
+
+    One function, used by every page, so two pages can never disagree
+    about what is on the road.
+    """
+    from custom_traffic.workload import ResolvedWorkload
+    from simulation.engine import preset_workload
+
+    if get("traffic_kind") == "custom":
+        data = get("custom_workload")
+        if not data:
+            return None
+        try:
+            return ResolvedWorkload.from_dict(data)
+        except (KeyError, TypeError, ValueError):
+            return None
+    return preset_workload(get("preset"), float(get("duration_s")))
+
+
+def set_custom_workload(workload) -> None:
+    put("custom_workload", workload.to_dict() if workload is not None else None)
+    reset_traffic()
+
+
+def traffic_label() -> str:
+    """How the current traffic is named on screen."""
+    from simulation.engine import PRESETS
+
+    if get("traffic_kind") == "custom":
+        data = get("custom_workload")
+        return "Custom traffic" if data else "Custom traffic (not defined yet)"
+    preset = PRESETS.get(get("preset"))
+    return preset.label if preset else str(get("preset"))
+
+
+def plan_override() -> Optional[Dict[str, float]]:
+    """The fixed plan the user chose, or None to use the configured one."""
+    ns, ew = get("plan_ns"), get("plan_ew")
+    if ns is None or ew is None:
         return None
+    return {"ns": float(ns), "ew": float(ew), "source": "chosen here"}

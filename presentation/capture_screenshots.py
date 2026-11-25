@@ -43,6 +43,7 @@ if PROJECT_ROOT not in sys.path:
 from simulation.run_simulation import prepare_sumo_imports, sumo_binary  # noqa: E402
 from utils.config_loader import load_config  # noqa: E402
 from utils.scenario_builder import TLS_ID, build_scenario  # noqa: E402
+from utils.sumo_launch import start_sumo  # noqa: E402
 
 SHOT_DIR = os.path.join(PROJECT_ROOT, "presentation", "screenshots")
 VIEW = "View #0"
@@ -242,7 +243,7 @@ def _run_and_capture(scenario: str, shots: list, window_size: str,
     fitter = ViewFitter(scratch)
     created = []
 
-    traci.start(cmd, label="shots_{}".format(scenario))
+    start_sumo(cmd, label="shots_{}".format(scenario))
     try:
         traci.simulationStep()
         traci.gui.setSchema(VIEW, "real world")

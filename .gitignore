@@ -42,3 +42,18 @@ results/custom_workloads/
 results/hybrid/
 output/**/logs/
 results/tripinfo/
+
+# SUMO trip information. The harness reads each file once, immediately
+# after the run that wrote it, and deletes it; what lands here is the
+# leftovers of a worker that was killed.
+results/tripinfo/
+
+# Runs the dashboard measured and kept so it can show them again. They
+# are reproducible from the traffic, the controller and the seed, all
+# three of which are in the file name.
+results/runs/
+
+# Per-episode training logs. The curve that matters is in each run's
+# validation_history.json, which is committed.
+output/*/logs/
+output/**/__pycache__/

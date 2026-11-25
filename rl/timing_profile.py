@@ -183,6 +183,21 @@ class TimingProfile:
 
 # ---------------------------------------------------------------------------
 PROFILES: Dict[str, TimingProfile] = {
+    # The operating profile is listed first, so nothing that takes the
+    # first entry can end up with the historical one.
+    STANDARD: TimingProfile(
+        name=STANDARD,
+        min_green=15.0, max_green=30.0,
+        # Dense where the measured optimum sits and sparse above it: with
+        # the Indian fleet's startup lost time the junction's best plans
+        # are in the 15-25 s range, so resolution matters at the bottom.
+        durations=(15, 16, 17, 18, 20, 22, 25, 30),
+        max_red_factor=4.0,
+        description=(
+            "Conventional signal practice, and what the product runs: a "
+            "15 s minimum green, long enough for a pedestrian phase, and "
+            "a 30 s maximum so nobody waits through a whole cycle."),
+    ),
     RESPONSIVE: TimingProfile(
         name=RESPONSIVE,
         min_green=4.0, max_green=20.0,
@@ -190,23 +205,10 @@ PROFILES: Dict[str, TimingProfile] = {
         max_red_factor=4.0,
         description=(
             "Short greens, as every model up to 23 Nov 2026 was trained. "
-            "The better-performing regime on this junction, because the "
-            "clearance is only 4 s and demand is modest."),
-    ),
-    STANDARD: TimingProfile(
-        name=STANDARD,
-        min_green=15.0, max_green=30.0,
-        # Dense where the measured optimum sits (15-22 s) and sparse above
-        # it: a sweep of every plan in 15-30 s put the best at ns 18 / ew 15
-        # on heavy and 15 / 15 on moderate, so resolution matters at the
-        # bottom of the range and not at the top.
-        durations=(15, 16, 17, 18, 20, 22, 25, 30),
-        max_red_factor=4.0,
-        description=(
-            "Conventional signal practice: a 15 s minimum green, long "
-            "enough for a pedestrian phase. More realistic and markedly "
-            "more expensive on this junction - the best plan under it is "
-            "42.50 s on heavy against 5.754 s unconstrained."),
+            "Kept only so those checkpoints can still be loaded and "
+            "explained. It looked like the better regime because the "
+            "simulation then had no startup lost time; with the Indian "
+            "fleet a 4 s green is the worst plan on the junction."),
     ),
 }
 
@@ -219,7 +221,14 @@ DEFAULT_PROFILE = STANDARD
 
 
 def get_profile(name: Optional[str]) -> TimingProfile:
-    """Look a profile up by name, defaulting to the historical one."""
+    """Look a profile up by name.
+
+    `None` gives DEFAULT_PROFILE, which is the one the product operates
+    under - `standard`, not the historical `responsive`. The docstring
+    used to say the opposite of what the code did, and a caller that
+    believed it would have put a four-second green on a junction whose
+    minimum is fifteen.
+    """
     if name is None:
         return PROFILES[DEFAULT_PROFILE]
     if isinstance(name, TimingProfile):

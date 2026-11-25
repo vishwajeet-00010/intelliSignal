@@ -1,6 +1,16 @@
 """
-IntelliSignal - Dashboard stage
+IntelliSignal - Stages 1-3
 simulation/controller.py
+
+The service layer of the Stage 1-3 dashboard. **Historical.**
+
+> The dashboard was rebuilt on 25 Nov 2026 around `simulation/engine.py`
+> and no longer imports anything in this file. It is kept because the
+> Stage 1-3 tests run against it, and those tests are the evidence that
+> the published Stage 1-3 numbers still reproduce. Nothing here is on
+> the product's code path; new work belongs in `simulation/engine.py`.
+
+What follows describes the arrangement as it was.
 
 The layer between the user interface and the simulation.
 

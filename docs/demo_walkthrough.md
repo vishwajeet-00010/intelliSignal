@@ -1,3 +1,11 @@
+> **Numbers here predate the current model family.** The walkthrough
+> itself is still broadly how a demonstration is given, but every figure
+> below was measured before the Indian urban fleet and the 15-30 s
+> timing rules were in place, and the dashboard has been rebuilt around
+> five pages since it was written. The current figures are in
+> `output/standard_20261125/FINDINGS.md`, and `docs/dashboard.md`
+> describes the dashboard as it is now.
+
 # Teacher demonstration — a ten-minute walkthrough
 
 Everything below was run on 23 Nov 2026 and the numbers are the ones the

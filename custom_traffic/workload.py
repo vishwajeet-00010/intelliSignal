@@ -166,9 +166,13 @@ class ResolvedWorkload:
         return totals
 
     def speeds_used(self) -> List[float]:
-        """Distinct desired speeds, so the builder can write one vType each."""
-        return sorted({round(lane.speed_kmh, 1)
-                       for lane in self.lanes if lane.count > 0})
+        """The distinct desired speeds, rounded as the vehicle-type ids are.
+
+        `custom_traffic/builder.py` names a type after the whole number of
+        km/h, so two lanes at 49.6 and 50.0 km/h must be one type here or
+        SUMO is handed two types with the same id.
+        """
+        return sorted({float(round(v.speed_kmh)) for v in self.vehicles})
 
     def fleet_mix(self) -> Dict[str, int]:
         """How many of each vehicle class the workload actually contains."""

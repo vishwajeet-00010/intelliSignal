@@ -1,340 +1,257 @@
-# IntelliSignal — The Streamlit Dashboard
+# The dashboard
 
-> The dashboard is the **presentation layer**. It shows what the project has
-> actually built and measured. It does not contain a traffic model, a metric
-> calculation or a controller of its own, and it does not contain a DQN,
-> because no DQN exists yet.
+The dashboard is the product: a Streamlit application over one junction,
+one engine and one set of timing rules. Every number on it was produced
+by a SUMO run that either happened while the page was open or had already
+been measured and kept.
 
 ```bash
 streamlit run dashboard.py
 ```
 
----
+It opens in a browser; `.streamlit/config.toml` holds the theme. Nothing
+needs to be trained or generated first: without a promoted model the DQN
+option says so and Hybrid decides instead, and without SUMO the sidebar
+names the check that failed rather than showing a blank page.
 
-## 1. Why a dashboard, and why it is not just a UI
+## 1. One engine behind everything
 
-A command-line project is hard to show to a panel. The dashboard makes the
-same pipeline visible and interactive: pick a scenario, press a button, watch
-a real SUMO simulation run, and read the metrics that simulation produced.
+Every page goes through `simulation/engine.py`, and that goes through
+`evaluation/harness.py` - the same harness the training, selection and
+promotion scripts use. There is no second code path for the picture. A
+controller the dashboard runs is run by the same function, on the same
+vehicle list, under the same timing profile and measured the same two
+ways as a controller the evaluation scripts run, so a number on screen
+and a number in a report are the same number.
 
-What keeps it honest is that it reuses the existing code rather than
-reimplementing it:
+`run_controller()` is the whole interface: a workload and one of
+`fixed_time`, `actuated`, `max_pressure` or `dqn` go in, and a `RunResult`
+comes back. It carries `metrics` (from the live collector and from SUMO's
+own trip records), `compliance` (what the controller says it did), `audit`
+(what the signal actually showed, checked independently), `decisions` (one
+row per green: how long, and what the network thought), `greens` (the
+green timeline, run-length encoded from the recorded signal), `series`
+(per-second rows) and `replay` (where every vehicle was, second by
+second).
 
-| The dashboard needs | It calls | It does **not** |
+The headline measurement is **total delay per requested vehicle**: time
+lost on the road plus time spent unable to enter, over every vehicle the
+traffic asked for, including those still on the network when the run ends.
+It cannot be improved by refusing traffic. **Mean waiting time** is
+reported beside it because it is what the earlier stages reported.
+
+A long run would freeze the page, so `dashboard/jobs.py` puts each run on
+a worker thread and the page polls a snapshot. Jobs are keyed by workload,
+controller set and seed, so leaving a page and coming back finds the job
+still running rather than starting a second one.
+
+## 2. The five pages
+
+The sidebar chooses the page and the traffic, and shows two badges: whether
+a validated model is in charge, and whether the environment (SUMO, PyTorch,
+the built network) is complete. `?page=Compare` in the URL opens that page
+directly, which is how the pages are screenshotted.
+
+### Control room
+
+Choose a controller - DQN (trained), Fixed-time, Actuated or Max-pressure -
+press **Run the junction**, and watch what came out. For a fixed plan two
+select-sliders set the north-south and east-west green from the profile's
+menu, and a button offers the best plan found when the model was selected
+rather than making the user sweep for it.
+
+Below the run: the headline tiles, the junction replay, the signal timeline
+and the halted-vehicle curve, the green lengths against the profile's
+limits, the checks panel, every decision the controller made with the
+Q-values behind it, and a list of every run the dashboard has kept. A saved
+run is reloaded when the traffic, the controller and the seed all match,
+which is why a run can never appear beside traffic it was not measured
+on.
+
+### Traffic
+
+What is on the road, either as one of five ready-made patterns - off-peak,
+typical day, evening peak, kerb-lane rush, sudden surge - or described lane
+by lane. Both end in the same object: an explicit list of vehicles, each
+with its class, its lane, its turn and the second it arrives. Nothing is a
+rate SUMO will sample differently next time, so two controllers meet
+identical traffic and a comparison is a measurement rather than an
+estimate. The preset seeds are 50000 and above, disjoint from the
+training, validation and test splits, so a demonstration can never be run
+on the evidence.
+
+The page also shows the fleet every run uses - 62 % motorcycles, 22 % cars,
+11 % auto-rickshaws, 5 % buses, with each class's length, startup delay and
+road space in PCU - and how much of a green of a given length actually
+moves traffic once the queue's startup delay is paid.
+
+Hand-written traffic goes through `dashboard/custom_form.py` over
+`custom_traffic/`: the form holds what was typed, the resolver decides
+everything left blank and tags each value `user`, `derived` or `auto`, and
+the preview is rendered from the same resolved workload the route file is
+written from. Contradictions are reported with the field to change rather
+than silently fixed. `docs/custom_traffic_and_hybrid.md` has the rules.
+
+### Compare
+
+Several controllers, one set of vehicles, one table. Fixed-time is always
+included because it is the baseline every other row is measured against,
+and `engine.compare()` refuses to put two different workloads, or two
+different seeds, into one table: that is the mistake the table exists to
+prevent. Below it are a delay bar chart, the halted-vehicle curves
+overlaid, and one tab per controller with its tiles, checks, timeline and
+decisions. If any run failed a check, the page says so above the table.
+
+The lower half is **Hybrid**, which is not another controller but the rule
+that decides between a tuned fixed plan and the model, with a wall-clock
+stopwatch running. It tunes a plan on this exact traffic, tests whatever
+model exists against it, and keeps whichever wins; a tie goes to fixed
+time. The job lives in `simulation/hybrid_job.py`, so a browser refresh
+reconnects to the running search instead of restarting it.
+
+### The model
+
+Which model is in charge, why it is allowed to be, and what it cost to find
+out, in that order.
+
+First the registry card: what is registered, how many networks it averages,
+the greens it is allowed, when it was promoted, and the checks that decide
+whether it may take the signal at all. A model is used only if it is
+registered, its file still matches the SHA-256 recorded at promotion, its
+greens lie inside the profile, its promotion record shows it beating a
+tuned fixed plan, and it was selected on traffic it was not reported on.
+Each check is shown with its answer, so the page says why the model is not
+in charge rather than only that it is not.
+
+Then what it was measured at on the test traffic, then how it was chosen:
+every trained run re-scored on the validation traffic, every averaged
+ensemble tried, every fixed plan on the menu measured, and the test split
+read once at the end. That is read straight out of the selection report
+written by `evaluation/select_profile_model.py`, so the claim on screen and
+the evidence behind it are the same file. Last, the validation curve of the
+promoted run, if its history is on disk. An expander lists the older
+Stage 1-3 checkpoints, kept so their published numbers reproduce and not
+offered as controllers because they were trained on a single generic car
+with no startup delay under different timing rules.
+
+### Method
+
+How the junction is modelled, how a controller is measured, and what the
+project does not claim: the timing rules and the arithmetic showing the
+maximum-red rule can never bind under them, why short greens lose once
+startup delay is modelled, the two measurements and the cross-check between
+them, the separation of training, validation, test and demonstration
+traffic, the junction and fleet parameters, and the limitations. The
+limitations are on the page rather than in a footnote because every one of
+them has at some point been the thing that made a number wrong.
+
+## 3. The junction replay
+
+`dashboard/junction.py` draws the junction as one self-contained HTML
+component - no plotting library and no network access, so it works on a
+projector in a room with no internet. The geometry comes from
+`sumo/network/intersection.net.xml`: two lanes in and two out on each arm,
+3.2 m wide, with the stop lines where SUMO puts them.
+
+The vehicles are not a cartoon. `simulation/recorder.py` rides along with
+the run as a harness observer and writes down, once per simulation step,
+every vehicle's position and heading, the number halted and present on each
+approach, and the signal state SUMO displayed. Positions are kept as whole
+decimetres and headings as whole degrees, and vehicles are followed by
+TraCI subscription, so recording costs one round trip per step rather than
+two calls per vehicle per step. Every vehicle on the canvas was therefore
+in the simulation whose numbers sit beside it, and the signal shown is the
+state SUMO displayed rather than a re-derivation of what the controller
+meant to do. The picture can disagree with the controller, which is
+exactly when it is worth looking at.
+
+## 4. The independent signal audit
+
+A controller reports its own compliance, and a controller with a bug would
+report its own bug as compliant, so every run is checked a second time.
+`audit_signal()` in `simulation/recorder.py` reads the recorded signal
+states - what SUMO actually displayed - and tests the timing rules against
+them: every completed green inside the profile's limits, an amber and an
+all-red of the right length after every green, the other direction served
+next, and no approach held on red longer than the profile allows. Red is
+measured as a driver sees it, from the end of an approach's own amber to
+the start of its next green, which is the stricter of the two readings. The
+audit shares no code with any controller.
+
+The checks panel on every run reports that audit plus two measurement
+checks: that SUMO's trip records and the live collector agree on how many
+vehicles finished, and that there were no collisions and no teleports. A
+run measured without recording the signal is reported as unexamined, not as
+passing - `RunResult.trustworthy` requires the audit to exist and to have
+passed.
+
+## 5. Where runs are saved
+
+Finished runs are written to `results/runs/` as
+`<workload_id>_<controller>_<seed>.json`, replay included. The workload id
+is a hash of every vehicle, its lane, its turn and its departure second, so
+two runs with the same id met exactly the same traffic. That naming lets a
+page reload a run instead of repeating it, and makes it impossible to show
+one beside traffic it was not measured on. Saving is a convenience: if the
+write fails the run is still shown, and `tools/clean_workspace.py` clears
+the directory.
+
+## 6. Session state
+
+Streamlit re-runs the whole script on every interaction, so anything that
+must survive a click lives in `st.session_state`. Every key and its default
+is declared in `dashboard/state.py`, so one page cannot invent a key
+another then fails to find.
+
+| key | default | what it holds |
 |---|---|---|
-| scenario settings | `utils.config_loader.load_config()` | hard-code any timing or demand |
-| a simulation | `simulation.run_simulation.run_scenario()` | run SUMO its own way |
-| metrics | `utils.metrics.MetricsCollector` (via the runner) | recompute waiting time or queues |
-| results | the CSV files written by that run | invent or cache numbers |
-| SUMO health | `sumolib` + a real `sumo --version` call | assume SUMO is installed |
-
-Every number on every page came out of a CSV that a SUMO run wrote.
-
----
-
-## 2. Architecture
-
-```
-                USER
-                 |
-                 v
-          STREAMLIT DASHBOARD          dashboard.py + dashboard/
-                 |
-                 v
-        SIMULATION CONTROLLER          simulation/controller.py
-                 |
-        +--------+--------+
-        |                 |
-        v                 v
- Fixed-Time          Future DQN        agents/
- Controller            Agent
-        |                 |
-        +--------+--------+
-                 v
-                TraCI
-                 v
-                SUMO                   sumo/
-                 v
-         Traffic Simulation
-                 v
-             Metrics                   utils/metrics.py
-                 v
-              Results                  results/
-                 v
-          Streamlit Charts             dashboard/charts.py
-```
-
-**The one rule that makes the DQN stage easy:** `dashboard.py` and everything
-in `dashboard/` never import SUMO, TraCI, `rl/` or an agent. They talk to
-`SimulationController` and render what it returns. Adding a DQN therefore
-changes the back end, not the interface.
-
-### Files
-
-| File | Responsibility |
-|---|---|
-| `dashboard.py` | Entry point; the four pages |
-| `dashboard/theme.py` | Palette, CSS, formatting helpers |
-| `dashboard/state.py` | Session state; guarantees a run happens only on a button press |
-| `dashboard/controls.py` | The sidebar: navigation, scenario, control mode, duration, Run |
-| `dashboard/components.py` | Status lights, KPI cards, intersection diagram, signal readout |
-| `dashboard/charts.py` | The Altair charts |
-| `simulation/controller.py` | The only thing the UI talks to |
-| `agents/base_agent.py` | `TrafficAgent` interface, `TrafficState`, the action space |
-| `agents/fixed_time_agent.py` | The Stage 1 controller behind that interface |
-| `agents/dqn_agent.py` | Declared, **not implemented** |
-
----
-
-## 3. The pages
-
-### Dashboard
-Headline KPIs for the selected scenario, the intersection diagram, the scenario
-configuration read from YAML, and the scenario comparison.
-
-### Simulation
-Where a run is started. After a run it shows the measured result and a
-**signal-state scrubber**: a slider over the recorded time series, showing the
-signal colours TraCI actually recorded at that second, the queue at that
-second, and the fixed-time controller's reasoning for that moment.
-
-### Results
-The three required bar charts (waiting time, queue length, throughput), queue
-length over time, vehicles over time, the comparison table, and the real SUMO
-screenshots from `presentation/screenshots/`.
-
-### DQN Model
-
-Everything that has actually been trained for the selected scenario, plus the
-recorded training curves. With no model: the reason and the command to fix it.
-
-### Comparison
-
-Fixed-Time vs DQN with improvement percentages — from the multi-seed
-experiment on disk, and from runs started in the dashboard.
-
-### About Project
-Implementation status, the architecture diagram, the fixed-time baseline with
-its cycle drawn as a timeline, the planned DQN stage, the detected environment,
-and the commands to run everything.
-
----
-
-## 4. Where the results live
-
-| Directory | Written by | Used for |
-|---|---|---|
-| `results/csv/` | the command line (`run_simulation.py`, `run_scenario.py`) | the recorded Stage 1 baseline |
-| `results/data/` | the dashboard's Run button | dashboard runs |
-| `results/plots/` | `simulation/plot_results.py` | the static Matplotlib graphs |
-
-**The dashboard never writes to `results/csv/`.** That folder holds the Stage 1
-numbers quoted in the reports, and overwriting them silently would be a way to
-lose a result you cannot get back. A test asserts this
-(`test_dashboard_never_writes_to_the_stage1_results`).
-
-When a scenario has no dashboard run yet, the dashboard falls back to the
-Stage 1 file and labels the KPI cards "Stage 1 baseline", so the pages have
-real numbers before anything has been run.
-
-### A comparison must be like-for-like
-
-If one scenario has been run for 300 s and the other for 1800 s, the
-comparison table shows a warning. The numbers are all real, but they are not
-comparable, and the dashboard says so rather than letting the bars imply
-otherwise.
-
----
-
-## 5. What is real, and what is a diagram
-
-Being able to answer this in a viva matters more than the pixels.
-
-| Element | Status |
-|---|---|
-| KPI values | **Real** — read from the CSV a SUMO run wrote |
-| Charts | **Real** — built from those CSV files |
-| Status lights | **Real** — `sumo --version` is executed, `traci` is imported, the network file is checked |
-| Signal colours on the Simulation page | **Real** — decoded from the 16-character SUMO signal states TraCI recorded each second |
-| Queue and vehicle counts on the slider | **Real** — from the recorded time series |
-| Scenario settings shown | **Real** — read from the YAML files |
-| SUMO screenshots on the Results page | **Real** — captured by sumo-gui |
-| The intersection diagram | **A schematic.** The road layout matches the modelled network and the signal colours are real when recorded data is supplied, but the vehicle marks are indicative. Every place it appears says so. |
-| DQN results | **None exist.** The mode is listed, disabled and explained. |
-
----
-
-## 6. How the signal state is decoded
-
-SUMO describes a traffic light as one character per controlled link. The
-IntelliSignal junction has 16, four per approach:
-
-```
-index   0  1  2  3   4  5  6  7   8  9 10 11  12 13 14 15
-        \----------/  \----------/  \---------/  \---------/
-           NORTH          EAST         SOUTH        WEST
-
-state   G  G  G  g   r  r  r  r   G  G  G  g   r  r  r  r
-        = North-South green, East-West red
-```
-
-`G` protected green, `g` permissive green (the left turn gives way), `y`
-yellow, `r` red. `dashboard/components.decode_signal_state()` turns that string
-into a colour per approach, and `direction_states()` collapses it to NS and EW.
-This is tested against all three real states the controller produces.
-
----
-
-## 7. Error handling
-
-The dashboard is built to explain problems rather than show a traceback.
-`simulation/controller.py` raises typed errors, each carrying a short hint, and
-the dashboard renders both:
-
-| Situation | What the user sees |
-|---|---|
-| SUMO not installed / `SUMO_HOME` not set | "SUMO is not available. Please verify that SUMO is installed and SUMO_HOME is configured correctly." plus install guidance |
-| Network file missing | A message naming `python sumo/network/build_network.py` |
-| Unknown or missing scenario | The list of scenarios that do exist |
-| DQN mode selected | The mode is disabled, and the reason is stated |
-| No results yet | "Run a scenario from the Simulation page" |
-| Result file unreadable or empty | A message naming the file |
-| SUMO fails to start (port or process conflict) | "SUMO could not be started" plus a suggestion to check for a running SUMO process |
-| Anything unexpected | A plain sentence and a pointer to the terminal — never a raw traceback |
-
----
-
-## 8. Performance
-
-- A simulation runs **only** when the Run button is pressed. Changing pages,
-  moving the slider or switching scenario never starts one. A test asserts this
-  (`test_no_simulation_runs_until_the_button_is_pressed`).
-- The environment probe (which shells out to `sumo --version`) is cached for
-  30 seconds, so it does not run on every click but still notices a fixed
-  installation.
-- The controller object is created once per session with `@st.cache_resource`.
-- A full 1800 s run takes roughly 4 s (moderate) to 10 s (heavy) of real time,
-  so a live demonstration does not stall.
-
----
-
-## 9. The DQN in the dashboard (Stage 3)
-
-The prediction made when this dashboard was written held: the DQN was a
-back-end change. `dashboard/` needed no new widget framework and the four
-original pages still work the same way. What was added:
-
-### How the DQN mode becomes available
-
-It is **not** a boolean somebody flipped. Every time the sidebar is drawn,
-`SimulationController.control_modes(scenario)` asks two questions:
-
-1. Is PyTorch installed?
-2. Is a checkpoint registered for the scenario, or otherwise available on disk?
-
-The default checkpoint comes from `models/active_models.json`, which pins the
-validated Stage 4 incumbent and its hash. Other on-disk checkpoints may be
-selected manually, but the loader checks their recorded preprocessing contract
-before running them. The mode is selectable when PyTorch and a checkpoint file
-are available; a selected legacy checkpoint without a verifiable contract is
-rejected with an explanation when loaded.
-
-```
-DQN unavailable — train a model first.
-
-The DQN is implemented, but no trained checkpoint exists for the heavy
-scenario. A network with random weights is not a controller, so this mode
-stays disabled rather than producing meaningless decisions.
-
-Train one with:
-    python training/train_dqn.py --scenario heavy --episodes 20 --seed 42
-```
-
-Because the question is asked per scenario, switching the scenario selector
-from Moderate to Heavy can disable the mode on its own — which is correct, and
-is covered by a test.
-
-### What a DQN run actually does
-
-`SimulationController.run(mode="dqn_adaptive")` loads the selected checkpoint,
-sets epsilon to 0, and runs a real SUMO simulation through
-`simulation/agent_simulation.py`, which drives the Stage 2 environment with
-the network and measures it with the Stage 1 metrics collector. There is no
-replay of a stored result and no fall back to the fixed-time runner.
-
-### Separate files, so a label can never lie
-
-| Run | Written to |
-|---|---|
-| Fixed-time, from the dashboard | `results/data/<scenario>_results.csv` |
-| DQN, from the dashboard | `results/data/<scenario>_dqn_results.csv` |
-| DQN decision log (per-decision Q-values) | `results/data/<scenario>_dqn_decisions.csv` |
-| The recorded Stage 1 baseline | `results/csv/` — read only, never written |
-
-`load_results(scenario, mode)` has a baseline fallback for fixed-time, which
-it labels "Stage 1 baseline". For the DQN there is **deliberately no
-fallback**: with no DQN run it returns nothing and the page says "No DQN run
-for this scenario yet". A dashboard that showed fixed-time numbers when asked
-for DQN numbers would be lying, and a test asserts it does not.
-
-### New sidebar controls, shown only in DQN mode
-
-* **Trained Model** — defaults to the registered validated incumbent, followed
-  by other checkpoints found on disk. Each selected model is checked against
-  the scenario's observation scales and signal timings before the run starts.
-* **Random Seed** — the SUMO seed. The same seed gives the same traffic, which
-  is how a DQN run and a fixed-time run can be compared fairly.
-
-Neither appears in fixed-time mode, where the seed comes from the scenario
-YAML and there is no model to choose.
-
-### Two new pages
-
-**DQN Model.** Model status, checkpoint path, scenario, architecture,
-parameter count, episodes trained, the hyperparameters actually used, the
-training date, the list of checkpoints found, a diagram of how one decision is
-made, and the recorded training curves (return, loss, epsilon, queue, waiting
-time, throughput per episode) read from `results/training/`. With no model it
-shows the reason and the command that trains one, and invents nothing.
-
-**Comparison.** Fixed-Time vs DQN with improvement percentages, from two
-sources kept apart:
-
-* the multi-seed command-line experiment in `results/evaluation/` — mean ±
-  sample standard deviation, bar charts with error bars, queue length over
-  time for both controllers on the same seed, and an expander listing every
-  individual run so no seed is hidden;
-* the last fixed-time and DQN runs started in the dashboard itself, which
-  refuses to show a percentage when the two runs covered different simulated
-  times.
-
-A positive percentage always means the DQN did better and a negative one
-always means it did worse. `None` is rendered as "n/a" rather than as an
-invented number.
-
-### Q-values on the Simulation page
-
-In DQN mode the time slider shows the **recorded** Q-values at that second,
-read from the decision log. They are not recomputed from a reconstructed
-state: the 10-value observation cannot be rebuilt from the saved time series,
-so rather than invent one, the page shows what was recorded or says it has
-nothing to show.
-
-### What did not change
-
-`dashboard/theme.py`, the status lights, the KPI cards, the intersection
-schematic and the signal decoder are all untouched. `agent_decision_panel()`
-gained a Q-value block; `charts.py` gained three Stage 3 chart builders that
-follow the same rules as the existing ones.
-
----
-
-## 10. Design notes
-
-The two scenario colours (`#3b6fb6` moderate, `#d98324` heavy) are fixed per
-scenario and assigned by identity, never by rank, so a scenario keeps its
-colour on every chart and page. The pair was checked for colour-vision
-separation (worst case ΔE 25.0 for protanopia, 30.6 for normal vision against
-white), and every bar carries a printed value, so no chart depends on colour
-alone. The theme is pinned to light in `.streamlit/config.toml` so the
-dashboard looks the same on any machine during a demonstration.
+| `page` | `Control room` | which page is open |
+| `traffic_kind` | `preset` | `preset` or `custom` |
+| `preset` | `typical` | which ready-made pattern |
+| `duration_s` | `900.0` | simulated seconds |
+| `seed` | `6101` | SUMO's own seed |
+| `custom_workload` | `None` | the resolved workload, as a dict |
+| `custom_spec` | `None` | the form's own state, as a dict |
+| `custom_issues` | `[]` | what the resolver said about it |
+| `custom_regen_token` | `0` | bumped to redraw the generated values |
+| `controller` | `dqn` | the controller on the Control room page |
+| `plan_ns`, `plan_ew` | `None` | the chosen fixed plan; `None` uses the configured one |
+| `compare_with` | `fixed_time`, `actuated` | the controllers on the Compare page |
+| `job_key` | `""` | the single run in flight or last finished |
+| `compare_job_key` | `""` | the comparison in flight or last finished |
+| `hybrid_workload_id` | `""` | which traffic Hybrid was last asked about |
+| `last_error` | `""` | the last failure worth showing |
+| `profile` | `standard` | the operating timing profile |
+
+The workload is stored as a dictionary rather than as the object, because
+session state is pickled between reruns and a plain dict reloads
+identically every time. `state.reset_traffic()` clears the job keys
+whenever the traffic changes, which stops a run measured on one pattern
+being shown beside the name of another, and `state.current_workload()` is
+the one function every page asks for the current traffic, so two pages
+cannot disagree about what is on the road.
+
+## 7. The modules
+
+`dashboard.py` is the entry point, holding the page registry, the sidebar
+and the masthead. `dashboard/state.py` holds the session keys,
+`dashboard/jobs.py` the worker threads, `dashboard/ui.py` the stylesheet
+and every shared piece of interface, `dashboard/junction.py` the replay
+component, `dashboard/charts.py` the Altair charts,
+`dashboard/custom_form.py` the hand-written traffic form and
+`dashboard/hybrid_panel.py` Hybrid's progress and decision. Each page is
+one module under `dashboard/views/`, with `common.py` holding whatever
+more than one of them shows.
+
+The Stage 1-3 dashboard's own modules - `components.py`, `controls.py`,
+`theme.py` and `traffic_panel.py` - were deleted when this one replaced
+them. Nothing imported them any more. `simulation/controller.py` and
+`simulation/custom_runs.py` remain, because the Stage 1-3 tests and two
+frozen verification scripts still run against them, but the dashboard
+does not touch either.
+
+`dashboard/ui.py` enforces three rules so no page has to: a number is never
+shown without its unit and its meaning, good and bad have fixed colours
+everywhere, and nothing claims more than it measured - `verdict` renders
+confirmed, unverified and failed as three distinct states and will not show
+a plain tick for something that was never checked.

@@ -2,75 +2,27 @@
 
 **AI-Based Adaptive Traffic Signal Management Using SUMO and Deep Reinforcement Learning**
 
-> **Current status (22 Nov 2026): the DQN beats the best fixed-time plan on
-> both scenarios.** Measured over confirmatory seeds 6101–6120, 1800 s per
-> run, with the project's own `MetricsCollector`:
+> **Current status (25 Nov 2026).** IntelliSignal is one engine: an
+> explicit list of vehicles drawn from an Indian urban fleet, a signal
+> held to 15-30 s greens with a 3 s amber and a 2 s all-red, and a
+> trained controller that chooses how long each green runs. Every
+> controller the project compares - fixed-time, actuated, max-pressure
+> and the model - is run by the same code on the same vehicles and
+> measured the same two ways, and every run is audited a second time
+> from the signal SUMO actually displayed.
 >
-> | scenario | best fixed plan | duration DQN | change |
-> |---|---|---|---|
-> | heavy | 5.754 s (ns 7 / ew 6) | **5.151 s** | **−10.5 %** |
-> | moderate | 2.761 s (ns 6 / ew 4) | **2.237 s** | **−19.0 %** |
+> The current measured results are in
+> [`output/standard_20261125/FINDINGS.md`](output/standard_20261125/FINDINGS.md),
+> which also records how the model was chosen: twenty independently
+> trained runs and four averaged ensembles, re-scored on validation
+> traffic, against a baseline that is the best of every fixed plan on the
+> menu rather than the end of one search.
 >
-> Throughput is higher in both cases (1468.5 against 1466.5; 691.8 against
-> 690.8), so the lower waiting is not bought by stranding vehicles. Heavy
-> wins on 17 of 20 paired seeds, moderate on 20 of 20.
->
-> This needed a second action space — **one decision per green, choosing that
-> green's duration** — plus a semi-Markov correction to the learning. See
-> [`docs/phase_duration_control.md`](docs/phase_duration_control.md) and
-> [`output/dqn_phase_20261122/FINDINGS.md`](output/dqn_phase_20261122/FINDINGS.md).
->
-> **Two earlier claims in this README are corrected by that work.** The
-> fixed-time baselines it had been compared against were not the best fixed
-> plans: demand is asymmetric, and so is the optimum. Against the properly
-> tuned plan, the deployed Stage 4 models *lose* — heavy 16.469 s against
-> 5.754 s, moderate 2.918 s against 2.761 s. Section 11b below is historical
-> Stage 3 verification against a 30/30 plan and should be read as such.
->
-> **25 Nov 2026 — realistic Indian traffic, and the four-second green
-> explained.** The repeated 4 s greens were not a tuning fault: the
-> simulation had **no startup lost time**, so a 4 s green really did
-> produce nearly 4 s of discharge. With an Indian urban fleet
-> (62 % two-wheelers, cars, autos, buses, each with a real pause before
-> it moves off) a 4 s green now gives **61.3 s** of mean waiting against
-> **8.2 s** at the 12 s optimum — the worst plan on the board.
->
-> The dashboard opens on **Indian arterial · 15–30 s greens · Hybrid**.
-> On an untouched test split the DQN reaches **14.76 s total delay per
-> requested vehicle against the tuned fixed plan's 17.72 s (−16.7 %),
-> winning on 6 of 6 workloads** — the only controller that never loses on
-> any of them. If no validated DQN exists for the active profile, the
-> DQN mode **hands over to Hybrid automatically** rather than refusing.
-> See [`output/indian_20261125/FINDINGS.md`](output/indian_20261125/FINDINGS.md).
->
-> **24 Nov 2026 — operational timing profiles.** Greens are now bounded by
-> a selectable **timing profile** enforced everywhere a controller runs:
-> `responsive` (4–20 s, what the earlier models were trained with) and
-> `standard` (15–30 s, conventional practice). Under `standard`, on an
-> untouched test split of six varied workloads, the new DQN reaches
-> **15.89 s total delay per requested vehicle against the tuned fixed
-> plan's 22.51 s (−29.4 %), winning on 6 of 6 workloads** while completing
-> more vehicles. The repeated four-second greens were traced to
-> **observation saturation**, not to timing: on custom traffic the inputs
-> pinned at their clipping limit in up to 93 % of decisions. See
-> [`output/audit_20261123/FINDINGS.md`](output/audit_20261123/FINDINGS.md).
->
-> The 15–30 s profile costs about **7.4×** on heavy traffic compared with
-> unconstrained short cycles. That is the price of the operating policy,
-> and the two profiles are never compared with each other.
->
-> **23 Nov 2026 — built for the demonstration.** Three additions:
-> **Custom Traffic** (describe demand lane by lane, see the exact preview,
-> run precisely that), a **Hybrid** controller that gives the DQN a fixed
-> amount of wall-clock time to prove itself and falls back to the best
-> measured fixed plan if it does not, and a simplified dashboard. See
-> [`docs/demo_walkthrough.md`](docs/demo_walkthrough.md) for a ten-minute
-> run-through and [`docs/custom_traffic_and_hybrid.md`](docs/custom_traffic_and_hybrid.md)
-> for how they work.
->
-> The Stage 4 incumbents remain registered in `models/active_models.json` and
-> still drive the Moderate and Heavy pages. The new models are registered separately under
-> `phase_duration_models`; dashboard integration is not done.
+> **Earlier figures in this file are historical.** Sections 11 and 11b
+> were measured on a single generic car with no startup lost time, under
+> different timing rules, and are not comparable with anything above.
+> Stages 1-3 still ship as working code and reproducible evidence; their
+> documentation is in [`docs/history/`](docs/history/).
 
 The existing Windows environment is `.venv-stage3` (Python 3.12.13, installed
 SUMO/TraCI/sumolib packages 1.28.0, PyTorch 2.14.1). Comparison CSVs are in
@@ -81,9 +33,11 @@ for 1800 seconds. Waiting time decreased by **42.3% (moderate)** and **8.9%
 Use [`requirements-win-py312.lock`](requirements-win-py312.lock) to recreate
 that exact Windows Python environment. `requirements.txt` remains the portable
 minimum-version list.
-The 16 Nov comparisons below are historical Stage 3 verification. For the
-latest measured DQN results and current project status, see
-[`HANDOFF.md`](HANDOFF.md) and the Stage 4 experiment directory.
+The 16 Nov comparisons above are historical Stage 3 verification. The
+current results are in
+[`output/standard_20261125/FINDINGS.md`](output/standard_20261125/FINDINGS.md);
+[`HANDOFF.md`](HANDOFF.md) is a snapshot of where the project stood on
+21 Nov 2026 and is kept as a record of that point.
 
 ---
 
@@ -108,6 +62,11 @@ builds a **fixed-time baseline** in a realistic simulator. That baseline is Stag
 
 ## 3. Current stages
 
+Stages 1-3 built the simulation, the environment and the first DQN. They
+still run and are still covered by tests, and their documents are in
+[`docs/history/`](docs/history/), marked historical. **They are not how
+the project works today**; the current system is described after them.
+
 **Stage 1** implements the initial SUMO traffic simulation environment, a four-way
 intersection, a fixed-time traffic-signal controller, two traffic-demand scenarios,
 traffic-metric collection through TraCI, and the initial result visualisations.
@@ -116,24 +75,58 @@ traffic-metric collection through TraCI, and the initial result visualisations.
 environment: a 10-number observation, a two-action space (keep / switch phase), a
 congestion-based reward, and a `reset()` / `step()` interface a DQN can plug into.
 Stage 2 builds and validates the environment **only** — it trains nothing. See
-[`docs/rl_environment.md`](docs/rl_environment.md).
+[`docs/history/rl_environment.md`](docs/history/rl_environment.md).
 
 **Stage 3** adds the Deep Q-Network: a PyTorch Q-network over that same environment, a
 replay buffer, a separate target network, a training loop, greedy evaluation, and a
 multi-seed Fixed-Time vs DQN comparison on identical traffic. The agent only ever
 answers *keep* or *switch*; the Stage 2 safety controller still decides what that means
-for the signal. See [`docs/dqn_training.md`](docs/dqn_training.md).
+for the signal. See [`docs/history/dqn_training.md`](docs/history/dqn_training.md).
 
-**The dashboard** is a Streamlit web interface over the same pipeline: pick a scenario
-and a controller, press Run, and a real SUMO simulation produces the metrics and charts
-shown. It never recalculates a metric or invents a number. The DQN mode is enabled only
-when a trained checkpoint actually exists for the selected scenario, and DQN results are
-kept in their own files so they can never be confused with the fixed-time baseline. See
+**The current system** replaces the keep-or-switch formulation with one
+that chooses how long each green runs, and the generic car with a real
+fleet.
+
+- **One operating timing profile**, `standard`: greens of 15-30 s, a 3 s
+  amber, a 2 s all-red, and a maximum red of four times the preceding
+  green, enforced on every controller in `rl/timing_profile.py`. A
+  `responsive` 4-20 s profile exists only so the historical models can
+  still be loaded and explained.
+- **An Indian urban fleet** (`custom_traffic/fleet.py`): 62 %
+  motorcycles, 22 % cars, 11 % auto-rickshaws, 5 % buses, each with its
+  own length, acceleration and startup delay. Demand is an explicit
+  `<vehicle>` element per vehicle, so two controllers meet identical
+  traffic and a comparison is a measurement rather than an estimate.
+- **Two model families**, both trained by
+  `training/train_profile_dqn.py`: candidate **A** chooses a whole green
+  from a menu of durations, candidate **B** serves the minimum green and
+  then extends or ends it. Which environment a checkpoint runs in is read
+  from the checkpoint by `rl/policy_rollout.py`.
+- **Four controllers offered**: the trained DQN, fixed-time, actuated and
+  max-pressure, plus Hybrid on the Compare page, which tunes a plan,
+  tests the model against it and keeps whichever wins.
+- **One headline measurement**: total delay per requested vehicle, from
+  SUMO's own trip records, counting time lost on the road plus time spent
+  unable to enter, including vehicles still on the network when the run
+  ends. Mean waiting time is reported beside it as the historical
+  measure.
+- **Every run audited twice**: once by the controller's own account of
+  itself, and once from the signal SUMO actually displayed
+  (`simulation/recorder.py`), which shares no code with any controller.
+
+**The dashboard** is the product. Five pages - Control room, Traffic,
+Compare, The model, Method - all of them going through
+`simulation/engine.py`, which runs every controller through
+`evaluation/harness.py`. The numbers on screen and the numbers in the
+reports are therefore the same numbers. See
 [`docs/dashboard.md`](docs/dashboard.md).
 
 ```bash
 streamlit run dashboard.py
 ```
+
+The current measured figures are in
+[`output/standard_20261125/FINDINGS.md`](output/standard_20261125/FINDINGS.md).
 
 ### What works today
 
@@ -164,16 +157,21 @@ streamlit run dashboard.py
 | **DQN mode in the dashboard, enabled only when a model exists** | Implemented |
 | Automated tests | **224 passed, 1 skipped** (verified 20 Nov 2026); historical 16 Nov user-reported run: 221 passed, 1 skipped |
 
+The table above is the Stage 1-3 position and is kept as a record of it.
+Since then the dashboard has been rebuilt around the five pages described
+above, variable phase durations have been implemented, and the fleet and
+the timing rules have changed.
+
 ### What is NOT implemented
 
 Real-world traffic data, camera/CCTV or YOLO vehicle detection, hardware
 integration (Raspberry Pi, Arduino, physical signals), cloud deployment,
-multi-intersection coordination, variable phase durations, and alternative RL
-algorithms such as PPO or A2C.
+multi-intersection coordination, and alternative RL algorithms such as
+PPO or A2C.
 
 These are future scope, and nothing in the repository pretends otherwise.
-See the limitations section of [`docs/dqn_training.md`](docs/dqn_training.md)
-for exactly what the DQN result does and does not show.
+The Method page of the dashboard states what the current result does and
+does not show.
 
 ## 4. Technology used so far
 
@@ -286,7 +284,7 @@ Next Observation
 ```
 
 One turn of that loop is one call to `env.step(action)`.
-The full explanation is in [`docs/rl_environment.md`](docs/rl_environment.md).
+The full explanation is in [`docs/history/rl_environment.md`](docs/history/rl_environment.md).
 
 ## 5c. Stage 3 architecture — the DQN
 
@@ -339,124 +337,188 @@ to the other direction next. The two action spaces live side by side; nothing
 about the Stage 2 environment or the deployed Stage 4 models changed.
 
 A longer explanation is in [`docs/phase_duration_control.md`](docs/phase_duration_control.md),
-[`docs/dqn_training.md`](docs/dqn_training.md) and
-[`docs/architecture.md`](docs/architecture.md).
+[`docs/history/dqn_training.md`](docs/history/dqn_training.md) and
+[`docs/history/architecture.md`](docs/history/architecture.md).
 
 ---
 
 ## 6. Project structure
 
+Grouped by what each part is for, not by the stage that built it. Three
+groups: the **product** a visitor touches, the **current pipeline** that
+produces every number the product shows, and the **historical evidence**
+from Stages 1-3, which still runs and is still covered by tests but is no
+longer how the project works.
+
+### The product
+
 ```
-intelliSignal/
-├── README.md
-├── requirements.txt
-├── requirements-win-py312.lock  exact verified Windows/Python 3.12 environment
-├── .gitignore
-│
-├── config/                      scenario definitions (the only place numbers live)
-│   ├── moderate.yaml
-│   ├── heavy.yaml
-│   ├── rl/
-│   │   └── environment.yaml     Stage 2: RL environment settings
-│   └── dqn/
-│       └── training.yaml        Stage 3: every DQN hyperparameter
-│
-├── sumo/
-│   ├── network/                 the four-way intersection
-│   │   ├── intersection.nod.xml     nodes
-│   │   ├── intersection.edg.xml     edges (roads)
-│   │   ├── intersection.con.xml     turning movements
-│   │   ├── intersection.net.xml     built network (netconvert output)
-│   │   └── build_network.py         rebuilds the network
-│   ├── routes/                  generated traffic demand (.rou.xml)
-│   ├── additional/              generated fixed-time signal program
-│   └── config/                  generated .sumocfg files
-│
-├── simulation/
-│   ├── run_simulation.py        run one scenario, collect metrics, save CSV
-│   ├── run_scenario.py          one-command demonstration wrapper
-│   ├── controller.py            the layer the dashboard talks to
-│   ├── agent_simulation.py      Stage 3: one episode under one controller,
-│   │                            fixed-time and DQN measured identically
-│   └── plot_results.py          build the graphs from the CSV files
-│
-├── utils/
-│   ├── config_loader.py         load and validate a scenario YAML file
-│   ├── scenario_builder.py      YAML -> SUMO route / signal / config files
-│   └── metrics.py               TraCI metric collection
-│
-├── dashboard.py                 the Streamlit entry point
-├── dashboard/                   the presentation layer
-│   ├── theme.py                 palette, CSS, formatting
-│   ├── state.py                 session state; a run needs a button press
-│   ├── controls.py              the sidebar
-│   ├── components.py            status lights, KPI cards, intersection, signal
-│   └── charts.py                the Altair charts
-│
-├── agents/                      the decision-making layer
-│   ├── base_agent.py            TrafficAgent interface, TrafficState, actions
-│   ├── fixed_time_agent.py      the Stage 1 controller behind that interface
-│   ├── dqn_agent.py             Stage 3: the DQN agent (epsilon-greedy,
-│   │                            learning, target network, checkpoints)
-│   ├── dqn_network.py           Stage 3: the Q-network (10 -> 64 -> 64 -> 2)
-│   ├── replay_buffer.py         Stage 3: the replay buffer
-│   └── dqn_config.py            Stage 3: hyperparameters and validation
-│
-├── rl/                          Stage 2: the RL environment (no agent, no training)
-│   ├── environment.py           the Gymnasium environment
-│   ├── state.py                 the 10-number observation
-│   ├── action.py                keep / switch, and the signal safety rules
-│   ├── reward.py                the congestion penalty
-│   ├── config.py                loads config/rl/environment.yaml
-│   ├── sumo_rl_adapter.py       SUMO-RL compatibility layer
-│   └── run_environment.py       manual demonstration
-│
-├── training/                    Stage 3: learning
-│   ├── train_dqn.py             the training loop (CLI)
-│   └── plot_training.py         reward / loss / epsilon / queue curves
-│
-├── evaluation/                  Stage 3: measuring and comparing
-│   ├── evaluate_dqn.py          greedy evaluation over several seeds
-│   ├── compare_controllers.py   Fixed-Time vs DQN on identical traffic
-│   └── plot_comparison.py       the comparison charts
-│
-├── models/                      active-model registry and historical checkpoints
-│   ├── active_models.json       SHA-pinned Stage 4 dashboard incumbents
-│   ├── dqn_moderate/            original Stage 3 checkpoints
-│   └── dqn_heavy/               original Stage 3 checkpoints
-│
-├── results/
-│   ├── csv/                     the recorded Stage 1 baseline (NEVER overwritten)
-│   ├── data/                    results from dashboard runs (fixed-time and DQN
-│   │                            in separate files)
-│   ├── training/                Stage 3: per-episode training history CSVs
-│   ├── evaluation/              Stage 3: raw, aggregated and improvement CSVs
-│   └── plots/                   generated graphs
-│       ├── training/            Stage 3: training curves
-│       └── comparison/          Stage 3: Fixed-Time vs DQN charts
-│
-├── tests/
-│   ├── test_simulation.py       24 Stage 1 tests
-│   ├── test_rl_environment.py   47 Stage 2 tests
-│   ├── test_dashboard.py        51 dashboard / agent / controller tests
-│   └── test_dqn.py              Stage 3: network, buffer, agent, training,
-│                                evaluation, comparison, dashboard
-│
-├── docs/
-│   ├── architecture.md
-│   ├── rl_environment.md        Stage 2: the RL environment explained
-│   ├── dqn_training.md          Stage 3: the DQN explained end to end
-│   └── dashboard.md             the dashboard explained
-│
-└── presentation/
-    ├── stage1_progress.md       slide content for the 2nd progress presentation
-    ├── stage1_speaking_notes.md speaking notes + expected questions
-    ├── capture_screenshots.py   captures real screenshots from a running SUMO
-    └── screenshots/
+dashboard.py                  the Streamlit entry point: pages, sidebar
+dashboard/
+  ui.py                       stylesheet, colours, tiles, badges, verdicts
+  state.py                    every session key and its default
+  jobs.py                     runs on worker threads, keyed so they are
+                              never started twice
+  junction.py                 the junction replay, drawn from the recording
+  charts.py                   the Altair charts
+  custom_form.py              describing traffic lane by lane
+  hybrid_panel.py             Hybrid's progress and its decision
+  views/
+    control_room.py           choose a controller, run it, watch it
+    traffic.py                what is on the road
+    compare.py                every controller on the same vehicles, Hybrid
+    model.py                  which model is in charge, and how it was chosen
+    method.py                 how this is modelled, measured and limited
+    common.py                 the pieces more than one page shows
+.streamlit/config.toml        the theme
 ```
 
-Nothing in `sumo/routes/`, `sumo/additional/` or `sumo/config/` is written by hand —
-those files are generated from the YAML configuration every time a scenario runs.
+### The current pipeline
+
+```
+simulation/
+  engine.py                   the one service the dashboard talks to:
+                              presets, controllers, a run, a comparison
+  recorder.py                 the per-second recording, and the independent
+                              audit of the signal SUMO actually displayed
+  hybrid.py                   tune a plan, test the model, keep the winner
+  hybrid_job.py               that search, on a thread, behind the browser
+  custom_runs.py              running an explicit workload outside the UI
+
+evaluation/
+  harness.py                  every controller runs through here
+  select_profile_model.py     score every trained run on the validation
+                              traffic, try ensembles, sweep the fixed plans
+  promote_profile_model.py    write the chosen model into the registry
+  compare_profiles.py         candidate A against candidate B
+  fixed_time_sweep.py         measure every plan on the menu
+  gates.py                    the promotion conditions, as a pure function
+
+rl/
+  timing_profile.py           the timing rules every controller obeys
+  phase_environment.py        candidate A: one decision per green, chosen
+                              from a menu of durations
+  phase_extend_env.py         candidate B: serve the minimum green, then
+                              extend or end
+  phase_state.py              the ten-number observation and its scales
+  phase_action.py             the action space and the clearance rules
+  policy_rollout.py           reads a checkpoint and runs it in the
+                              environment its action space belongs to
+
+agents/
+  phase_dqn_agent.py          the duration/extend agent and the registry
+  phase_ensemble.py           several networks averaged into one policy
+
+custom_traffic/
+  spec.py                     what the user typed; None means "not said"
+  resolver.py                 every value decided, each tagged user /
+                              derived / auto
+  builder.py                  one explicit <vehicle> element per vehicle
+  workload.py                 the resolved workload and its identifier
+  fleet.py                    the Indian urban fleet and its parameters
+  network.py                  checks a lane can actually serve its route
+
+training/
+  train_profile_dqn.py        trains candidate A or candidate B
+  workload_library.py         the training, validation and test splits
+
+utils/
+  delay_accounting.py         total delay per requested vehicle, from
+                              SUMO's own trip records
+  sumo_launch.py              starting and cleaning up a SUMO process
+  metrics.py                  the live TraCI metric collection
+  scenario_builder.py         YAML -> SUMO route / signal / config files
+  config_loader.py            load and validate a scenario file
+
+tools/clean_workspace.py      report, and with --apply remove, what the
+                              runs left behind
+
+config/indian_arterial.yaml   the junction the product runs on
+models/active_models.json     the model registry (below)
+sumo/network/                 the four-arm junction, and its builder
+results/runs/                 every run the dashboard has measured
+output/standard_20261125/     the current training and evaluation run
+```
+
+### Historical evidence (Stages 1-3)
+
+Kept because the published numbers must reproduce. All of it still runs
+and all of it is still covered by the test suite.
+
+```
+rl/environment.py, state.py, action.py, reward.py, config.py,
+    sumo_rl_adapter.py, run_environment.py
+                              the Gymnasium keep/switch environment
+agents/dqn_agent.py, dqn_network.py, replay_buffer.py, dqn_config.py,
+    base_agent.py, fixed_time_agent.py
+training/train_dqn.py, train_phase_dqn.py, plot_training.py
+evaluation/evaluate_dqn.py, compare_controllers.py, plot_comparison.py,
+    evaluate_phase_dqn.py, promote_phase_model.py,
+    calibrate_phase_observation.py, collect_observation_stats.py
+simulation/run_simulation.py, run_scenario.py, controller.py,
+    agent_simulation.py, plot_results.py
+                              the earlier dashboard; the current one does
+                              not import them
+config/moderate.yaml, heavy.yaml, config/rl/, config/dqn/
+results/csv/                  the recorded Stage 1 baseline, never
+                              overwritten
+results/training/, evaluation/, plots/
+experiments/, verification/   the controlled experiments and their reports
+docs/history/                 architecture.md, rl_environment.md,
+                              dqn_training.md
+```
+
+### Tests and documentation
+
+```
+tests/
+  test_engine.py              the one service behind the dashboard
+  test_recorder.py            the recording and the independent audit
+  test_policy_rollout.py      a checkpoint runs in its own action space
+  test_sumo_launch.py         SUMO starts and is cleaned up
+  test_timing_profile.py      the timing rules and the red-limit arithmetic
+  test_custom_traffic.py      the spec, the resolver and the builder
+  test_delay_accounting.py    the headline measurement
+  test_harness.py             every controller through one harness
+  test_hybrid.py              the decision rule, without SUMO
+  test_gates.py               the promotion conditions
+  test_phase_dqn.py, test_phase_environment.py, test_phase_registry.py
+  test_clearance_outside_interval.py
+  test_simulation.py, test_rl_environment.py, test_dqn.py,
+      test_dashboard.py       Stages 1-3
+
+docs/
+  dashboard.md                the product, page by page
+  custom_traffic_and_hybrid.md  describing traffic, and the Hybrid rule
+  demo_walkthrough.md         a ten-minute demonstration
+  phase_duration_control.md   why a controller chooses a duration
+  history/                    Stages 1-3, marked historical
+```
+
+### The model registry
+
+`models/active_models.json` holds three separate sections, because they
+answer three different questions and a checkpoint from one is not usable
+by another.
+
+| section | what is in it | read by |
+|---|---|---|
+| `active_models` | the Stage 3/4 keep-or-switch incumbents, by scenario | `agents/dqn_agent.py` |
+| `phase_duration_models` | the November duration-menu models, by scenario | `agents/phase_dqn_agent.py`, as evidence |
+| `profile_models` | the operating model, keyed by timing profile | `agents/phase_dqn_agent.py` |
+
+**The dashboard reads `profile_models`**, through
+`load_registered_profile_model()`. Each record pins the file's SHA-256,
+the timing profile it was trained for, the split it was selected on, the
+split it was reported on, and the selection report it came from; the
+loader refuses a checkpoint that no longer matches. The other two sections
+exist so the earlier results reproduce, and the Model page lists them as
+evidence rather than offering them as controllers.
+
+Nothing in `sumo/routes/`, `sumo/additional/` or `sumo/config/` is written
+by hand. Those files are generated from the workload or the scenario
+configuration every time something runs, and `tools/clean_workspace.py`
+removes what is left behind.
 
 ---
 
@@ -485,168 +547,127 @@ those files are generated from the YAML configuration every time a scenario runs
 
 ## 8. How to run
 
+Everything below is run from the repository root, with `.venv-stage3`
+active on Windows.
+
 ### The dashboard
 
 ```bash
 streamlit run dashboard.py
 ```
 
-It opens in a browser. Then:
+That is the whole product. It opens in a browser on the **Control room**
+page; the sidebar chooses the page and the traffic. Nothing has to be
+trained or generated first. If SUMO is missing the sidebar says which
+check failed, and if no validated model is registered for the operating
+timing profile the DQN option says so and Hybrid decides instead.
 
-1. **Select a scenario** in the sidebar — Moderate or Heavy traffic.
-2. **Select a control mode** — Fixed-Time, or DQN Adaptive. The DQN mode is
-   enabled only when a trained checkpoint exists for the selected scenario;
-   with no model it is disabled and says *"DQN unavailable — train a model
-   first"*, with the command that trains one.
-3. **Set the simulation duration** — 1800 s matches the recorded Stage 1
-   results; a shorter run is quicker to show live.
-4. **Press Run Simulation.** A real SUMO simulation runs. Nothing runs on a
-   page refresh.
-5. **View the metrics** — average waiting time, average queue length,
-   throughput and simulation time, read from the CSV that run produced.
-6. **View the charts** on the Results page, and step through the recorded
-   signal states with the slider on the Simulation page. For a DQN run the
-   slider also shows the two Q-values the network produced at that second.
-7. **Compare scenarios** in the comparison table and its charts.
-8. **The DQN Model page** shows what has actually been trained — the
-   checkpoint, the architecture, the hyperparameters, the training date and
-   the recorded training curves.
-9. **The Comparison page** shows Fixed-Time vs DQN with improvement
-   percentages, from the multi-seed experiment on disk and from runs you
-   started in the dashboard.
+Five pages: Control room, Traffic, Compare, The model, Method.
+`?page=Compare` in the URL opens one of them directly. Runs the dashboard
+measures are written to `results/runs/`.
+[`docs/dashboard.md`](docs/dashboard.md) describes all of it.
 
-Results from the dashboard are written to `results/data/`, with fixed-time and
-DQN runs in separate files. The recorded Stage 1 baseline in `results/csv/` is
-never overwritten.
+### Train a model
 
-### The command line
-
-Run the moderate-traffic scenario:
+Two model families are trained by the same script. Candidate **A** picks a
+whole green from the profile's menu of durations
+(`rl/phase_environment.py`); candidate **B** serves the minimum green and
+then repeatedly chooses between extending and ending it
+(`rl/phase_extend_env.py`). Which environment a checkpoint later runs in
+is read from the checkpoint itself by `rl/policy_rollout.py`, never
+assumed by the caller.
 
 ```bash
+python training/train_profile_dqn.py --profile standard --candidate B \
+    --episodes 320 --validate-every 20 --seed 42 --out output/run
+```
+
+One run per seed, into its own `--out` directory. `--pilot` runs a short
+sanity check instead of a full training run.
+
+### Choose a model, and promote it
+
+Selection scores every trained run on the validation traffic, tries
+ensembles of the leading runs, sweeps every fixed plan on the profile's
+menu for the baseline, and reads the test split once at the end.
+
+```bash
+python evaluation/select_profile_model.py --profile standard \
+    --runs output/standard_20261125/runs --out output/selection \
+    --seeds 3 --workers 14
+```
+
+`--runs` is the directory holding the training runs, `--seeds` is how many
+SUMO seeds each workload is measured at, and `--workers` is how many runs
+go in parallel. It writes `selection.json`, which is the file the Model
+page reads.
+
+Promotion writes the winner into `profile_models` in
+`models/active_models.json`, with the file's SHA-256, the split it was
+selected on and the split it was reported on:
+
+```bash
+python evaluation/promote_profile_model.py --profile standard \
+    --selection output/selection/selection.json --selected-on validation
+```
+
+The dashboard picks up the new record without being restarted.
+
+### Compare two candidates directly
+
+```bash
+python evaluation/compare_profiles.py --profile standard \
+    --candidate-a <a.pt> --candidate-b <b.pt>
+```
+
+Both checkpoints and a tuned fixed plan on the same workloads. `--no-tune`
+with `--ns-green` and `--ew-green` fixes the baseline plan instead of
+sweeping for it.
+
+### Housekeeping and tests
+
+```bash
+python tools/clean_workspace.py            # report what the runs left behind
+python tools/clean_workspace.py --apply    # and remove it
+python -m pytest tests/ -q                 # the whole suite
+```
+
+`clean_workspace.py` reports before it removes anything, leaves files
+younger than `--min-age-minutes` alone, and refuses to sweep at all while
+something is simulating unless it is given `--force`.
+
+### Historical (Stages 1-3)
+
+These still run and are still covered by the test suite. They use the
+`moderate` and `heavy` scenarios, which are a single generic car with no
+startup delay under the older timing rules, so their numbers are not
+comparable with anything measured on the Indian fleet.
+
+```bash
+# Stage 1: the simulation and the fixed-time baseline
 python simulation/run_simulation.py --scenario moderate
-```
-
-Run the heavy-traffic scenario:
-
-```bash
-python simulation/run_simulation.py --scenario heavy
-```
-
-Watch the simulation in the SUMO GUI (this is the live demonstration):
-
-```bash
-python simulation/run_simulation.py --scenario moderate --gui
-python simulation/run_simulation.py --scenario heavy --gui
-```
-
-Run a scenario and regenerate the graphs in one step:
-
-```bash
-python simulation/run_simulation.py --scenario moderate --plot
-```
-
-Run both scenarios and build every graph with a single command:
-
-```bash
-python simulation/run_scenario.py all
-```
-
-Other useful commands:
-
-```bash
-python simulation/run_scenario.py moderate     # one scenario, end to end
-python simulation/plot_results.py              # rebuild graphs from existing CSVs
-python sumo/network/build_network.py           # rebuild the intersection network
-python presentation/capture_screenshots.py     # capture real SUMO screenshots
-pytest -v tests/                               # run the test suite
-```
-
-A shorter run is handy when demonstrating:
-
-```bash
 python simulation/run_simulation.py --scenario heavy --gui --duration 300
-```
+python simulation/run_scenario.py all
+python simulation/plot_results.py
+python sumo/network/build_network.py
 
-### Stage 2 — the RL environment
-
-Watch the environment run. **This trains nothing**; the actions come from a
-fixed rule, not from a learned agent:
-
-```bash
+# Stage 2: the Gymnasium environment, which trains nothing
 python rl/run_environment.py --scenario moderate
 python rl/run_environment.py --scenario heavy --policy alternate --steps 12
-python rl/run_environment.py --scenario heavy --gui          # see it in sumo-gui
-```
 
-Use it from Python:
-
-```python
-from rl import IntelliSignalEnv
-
-env = IntelliSignalEnv(scenario="heavy")
-observation, info = env.reset(seed=42)
-observation, reward, terminated, truncated, info = env.step(1)   # 1 = switch phase
-env.close()
-```
-
-Or through Gymnasium:
-
-```python
-import gymnasium as gym
-import rl                                    # registers the environment id
-
-env = gym.make("IntelliSignal-v0", scenario="moderate")
-```
-
-### Stage 3 — train, evaluate and compare the DQN
-
-Train. A 20-episode run is a quick demonstration; 100 episodes is the default.
-Neither guarantees a good policy — the comparison below is what decides that.
-
-```bash
-python training/train_dqn.py --scenario moderate --episodes 20  --seed 42   # demo
+# Stage 3: the keep-or-switch DQN
 python training/train_dqn.py --scenario moderate --episodes 100 --seed 42
-python training/train_dqn.py --scenario heavy    --episodes 100 --seed 42
-python training/train_dqn.py --scenario moderate --episodes 100 --seed 43   # 2nd seed
-```
-
-Evaluate the trained policy greedily (epsilon = 0, no learning):
-
-```bash
 python evaluation/evaluate_dqn.py --scenario moderate --seeds 42 43 44
-```
-
-Compare it against the fixed-time baseline on identical traffic:
-
-```bash
 python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44
-python evaluation/compare_controllers.py --scenario heavy --seeds 42 43 44
-
-# add an untrained network as a control, to check how much the LEARNING did
-python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44 --include-untrained
-```
-
-Redraw the charts from the recorded CSVs:
-
-```bash
+python evaluation/compare_controllers.py --scenario moderate --seeds 42 43 44 \
+    --include-untrained
 python training/plot_training.py --scenario moderate --seed 42
 python evaluation/plot_comparison.py --scenario moderate
 ```
 
-Use the agent from Python:
-
-```python
-from agents import DQNAgent
-
-agent = DQNAgent.for_scenario("moderate")        # loads the registered incumbent
-action = agent.act(observation, training=False)  # 0 = keep, 1 = switch
-print(agent.q_values(observation))               # [Q(keep), Q(switch)]
-```
-
-Training and evaluation write to `results/training/`, `results/evaluation/`,
-`results/plots/` and `models/`. The Stage 1 baseline in `results/csv/` is never
-written by any of them, and two tests assert that.
+Those write to `results/training/`, `results/evaluation/`,
+`results/plots/` and `models/`. The Stage 1 baseline in `results/csv/` is
+never written by any of them, and two tests assert that.
 
 ---
 
@@ -696,7 +717,7 @@ Turning split per approach: 25 % right, 55 % straight, 20 % left.
 
 ---
 
-## 11. Stage 1 results
+## 11. Stage 1 results (historical)
 
 Measured with SUMO 1.27.1, seed 42, 1800 s of simulated time per scenario.
 Source files: `results/csv/moderate_results.csv`, `results/csv/heavy_results.csv`.
@@ -834,40 +855,42 @@ noisy from episode to episode and the curves in
 labelled as such.
 
 Full discussion, including every limitation, is in
-[`docs/dqn_training.md`](docs/dqn_training.md) and
+[`docs/history/dqn_training.md`](docs/history/dqn_training.md) and
 [`STAGE3_REPORT.md`](STAGE3_REPORT.md).
 
 ---
 
 ## 12. Tests
 
-Latest verified Windows run (22 Nov 2026): **317 passed, 1 skipped**, using
-`.venv-stage3`.
+```bash
+python -m pytest -q                               # the whole suite
+python -m pytest tests/test_engine.py -q          # the one engine behind the dashboard
+python -m pytest tests/test_recorder.py -q        # the independent signal audit
+python -m pytest tests/test_policy_rollout.py -q  # which environment a checkpoint runs in
+python -m pytest tests/test_sumo_launch.py -q     # starting SUMO safely in parallel
+python -m pytest tests/test_dashboard.py -q       # the five pages, really executed
+python -m pytest tests/test_hybrid.py -q          # the decision rule and its seeds
+python -m pytest tests/test_phase_registry.py -q  # promotion, fingerprints, ensembles
+```
 
-The 20 Nov figure of "224 passed, 1 skipped" recorded in earlier reports was
-not reproducible: `test_training_replay_uses_executed_action_and_masks_unavailable_switch`
-failed on `main` and also at `8b8fa34`, before any of this work. It is fixed
-(commit `43cd8dd`).
+The run count and timing for the current suite are recorded with the
+results in
+[`output/standard_20261125/FINDINGS.md`](output/standard_20261125/FINDINGS.md).
+
+`tests/conftest.py` does three things for every test: it puts the
+repository on the import path, it cancels any background simulation a
+test left running, and it fails any test that rewrites the committed
+figures in `results/plots`. There is also an end-to-end check outside
+pytest, which runs the real simulator against the real registry:
 
 ```bash
-python -m pytest -q                               # entire current suite
-python -m pytest tests/test_simulation.py -q      # Stage 1: 24 tests
-python -m pytest tests/test_rl_environment.py -q  # Stage 2: 47 tests
-python -m pytest tests/test_dashboard.py -q       # dashboard: 55 tests
-python -m pytest tests/test_dqn.py -q             # Stage 3: 96 tests
-python -m pytest tests/test_phase_dqn.py -q       # duration action space: 33
-python -m pytest tests/test_phase_environment.py -q  # its environment: 13
-python -m pytest tests/test_phase_registry.py -q  # promotion + loading: 11
+python tools/verify_product.py            # all checks
+python tools/verify_product.py --quick    # the ones that do not simulate
 ```
 
-```
-221 passed, 1 skipped in 166.72s (0:02:46) — historical run, 16 Nov 2026
-```
-
-The result above was reported by the user on Windows on 16 Nov 2026 using
-`.venv-stage3`. The earlier Linux run recorded 222 passed in 157 s.
-The skipped test's identity was not included in the supplied output; the
-process-cleanup test uses `pgrep` and skips when that utility is unavailable.
+Roughly half the suite covers Stages 1-3. Those tests are kept because
+they are the evidence that the historical results still reproduce, not
+because the current product uses that code.
 
 **Stage 1 (24 tests)** covers configuration loading and validation, rejection of invalid
 configuration, existence and contents of the SUMO network, generation of the route file
@@ -925,34 +948,61 @@ table is in [`STAGE3_REPORT.md`](STAGE3_REPORT.md).
 
 ---
 
-## 13. Current limitations
+## 13. Limitations
 
-- The intersection is a **single**, simplified four-way junction with two lanes per
-  approach. There is no coordination between junctions and no green wave.
-- The agent has only **two actions** — hold the green or change it. It cannot choose a
-  phase duration, a phase order or a protected left-turn stage.
-- **100 training episodes** is about 18,000 decisions, chosen so a run finishes on a
-  student laptop. Published traffic-RL work often uses one to two orders of magnitude
-  more. The policy is not converged in any strong sense.
-- The traffic is **simulated, not measured** from a real road. No detector data, no
-  camera, no hardware. Transfer to a real junction is unproven.
-- The agent reads **exact** queue lengths and waiting times instantly from the
-  simulator. A real deployment would have sensor noise, latency and failures.
-- Demand is **stationary** within an episode: no rush-hour ramp, no incident, no weather.
-- Only **two demand scenarios** are studied.
-- The DQN was **not benchmarked against PPO, A2C or tuned actuated control**. The claims
-  here are limited to DQN versus *this* fixed-time plan.
-- Returns vary substantially between episodes and seeds, so conclusions are drawn from
-  means over three evaluation seeds with standard deviations reported — never from one
-  good run.
-- The dashboard's intersection diagram is a schematic, not a SUMO rendering. Its signal
-  colours are real when recorded data is supplied; the vehicle marks are indicative.
-- The dashboard runs a simulation to completion and then shows the result; it does not
-  stream a live simulation frame by frame.
-- There is no pedestrian, public-transport or emergency-vehicle modelling.
+These are the boundaries of the project as it stands today. The dashboard
+states them on its Method page too, because a result whose limits are
+hidden is worth less than one whose limits are stated.
 
-These are deliberate boundaries of the project as scoped, not defects. The longer
-version is in the limitations section of [`docs/dqn_training.md`](docs/dqn_training.md).
+**The junction**
+
+- A **single** four-way junction, two lanes each way. No coordination with
+  a neighbour, no green wave, no bus stops, parking or pedestrians.
+- The roads leaving the junction are free, so a queue can never back up
+  into it from downstream.
+- There is no public-transport priority and no emergency-vehicle
+  pre-emption.
+
+**The traffic**
+
+- The fleet shares are **representative, not surveyed**. 62 % two-wheelers,
+  22 % cars, 11 % auto-rickshaws and 5 % buses is typical of an Indian
+  urban arterial, not a count taken at a particular junction.
+- **Saturation headway was not validated against field data.** It emerges
+  from the headway, minimum gap and startup delay given to each vehicle
+  class and lands in a plausible range, which is not the same as having
+  been measured.
+- Demand is **deterministic**: every vehicle is written out individually,
+  which is what makes two controllers comparable, but it is not the same
+  as stochastic arrivals. The controller is therefore not tested against
+  the variability a real junction sees.
+- The traffic is **simulated, not measured** from a real road. No detector
+  data, no camera, no hardware; transfer to a real junction is unproven.
+
+**What the controller can see and do**
+
+- It reads **exact** queue lengths and waiting times from the simulator.
+  A real deployment would have sensor noise, latency and failures.
+- It chooses the length of each green. It does not choose the phase
+  **order**, and there is no protected left-turn stage.
+- Training is 320 episodes per run. Published traffic-RL work often uses
+  an order of magnitude more.
+
+**What the comparison does and does not show**
+
+- The claims are limited to this junction, this fleet and these timing
+  rules, against a tuned fixed plan, actuated control and max-pressure.
+  The DQN has **not** been compared with PPO or A2C.
+- Six test traffic patterns at three SUMO seeds each is a small sample,
+  and the two candidate action spaces are close enough that the
+  difference between them is within noise.
+- `moderate` and `heavy` still use a single generic car with no startup
+  delay. Their numbers are preserved so the earlier stages reproduce, and
+  nothing puts them in a table with anything measured on the Indian fleet.
+
+The Stage 1-3 limitations, which described a controller that could only
+hold or change the green, are in
+[`docs/history/dqn_training.md`](docs/history/dqn_training.md).
 
 ---
 
@@ -973,10 +1023,19 @@ Done (Stage 3):
    -> safety controller -> SUMO -> reward -> replay buffer -> target network
    -> training -> saved model -> greedy evaluation -> Fixed-Time vs DQN
 
+Done (current):
+Indian urban fleet -> explicit vehicle list -> one engine
+   -> fixed-time / actuated / max-pressure / trained DQN, all under the
+      standard 15-30 s timing profile
+   -> SUMO trip records -> total delay per requested vehicle
+   -> independent audit of the signal that was actually displayed
+   -> train both candidates -> select on validation -> promote with a
+      pinned sha256 -> report once on test -> the dashboard
+
 Future scope - NOT BUILT:
 PPO / A2C  |  CCTV + YOLO detection  |  hardware in the loop
-multi-intersection coordination  |  variable phase durations
-real traffic datasets  |  time-varying demand and incidents
+multi-intersection coordination  |  real traffic datasets
+stochastic arrivals  |  pedestrians, bus stops and parking
 ```
 
 Nothing in `rl/` had to change for Stage 3 — which was the point of Stage 2. Nothing in
@@ -985,6 +1044,13 @@ the road, the demand, the observation, the action, the reward, the safety rules 
 recorded baseline are all exactly as the earlier stages left them. Stage 3 added the
 network, the buffer, the target network, the training loop, the evaluation and the
 comparison on top.
+
+The current system was added the same way. It did not modify the Stage 1-3
+code: the keep-or-switch environment, the Stage 3 agent and the recorded
+baseline are untouched and still tested. What it added is a second action
+space, a fleet, a timing profile, an honest delay measurement, an
+independent audit of the signal, and one engine that every one of them
+runs through.
 
 The future-scope items above are listed as future scope in the code as well. Nothing in
 the repository pretends to implement them.

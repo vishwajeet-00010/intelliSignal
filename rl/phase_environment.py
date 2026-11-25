@@ -68,6 +68,7 @@ from simulation.run_simulation import (prepare_sumo_imports,       # noqa: E402
                                        sumo_binary)
 from utils.config_loader import load_config                        # noqa: E402
 from utils.scenario_builder import TLS_ID, build_scenario          # noqa: E402
+from utils.sumo_launch import SumoStartError, start_sumo  # noqa: E402
 
 #: Generated SUMO inputs get this suffix, so no Stage 1 or Stage 2 file is
 #: ever overwritten.
@@ -119,6 +120,11 @@ class PhaseDurationEnv(gym.Env):
         #: MetricsCollector can measure an agent-driven run with the code
         #: that measured the fixed-time baseline.
         self.step_callback = None
+        #: Called with the connection the moment SUMO is up and before
+        #: a single second is simulated. A caller that measures the run
+        #: attaches here, because `reset` itself advances the clock and
+        #: anything attached afterwards would miss the opening seconds.
+        self.on_connect = None
 
         # A custom workload replaces the scenario's demand with an explicit
         # vehicle list. Everything else - the signal plan, the vehicle type,
@@ -202,6 +208,8 @@ class PhaseDurationEnv(gym.Env):
 
         self.close()
         self._start_sumo()
+        if self.on_connect is not None:
+            self.on_connect(self._conn)
 
         self.controller.reset(PHASE_NS)
         self._steps_done = 0
@@ -289,8 +297,11 @@ class PhaseDurationEnv(gym.Env):
 
         observation = self._observe(last_raw)
 
-        no_traffic_left = self._conn.simulation.getMinExpectedNumber() <= 0
-        terminated = bool(no_traffic_left)
+        # Every controller is given the same horizon. Stopping early when
+        # the network happens to drain would average the queue over fewer
+        # seconds than a controller that ran to the end, and the two
+        # numbers would then not be comparable.
+        terminated = False
         truncated = bool(self._steps_done >= self.total_steps)
 
         info = self._build_info(last_raw, action)
@@ -390,20 +401,28 @@ class PhaseDurationEnv(gym.Env):
     def _start_sumo(self) -> None:
         import traci
 
-        self._files = self._build_inputs()
-        if self.tripinfo_path:
-            from utils.delay_accounting import enable_tripinfo
-            enable_tripinfo(self._files["sumocfg"], self.tripinfo_path)
-        cmd = [
-            sumo_binary(self.render_mode == "human"),
-            "-c", self._files["sumocfg"],
-            "--seed", str(self._sumo_seed),
-            "--start", "--quit-on-end",
-            "--no-warnings", "true",
-        ]
-        cmd += [str(arg) for arg in self.extra_sumo_args]
-        traci.start(cmd, label=self._label)
-        self._conn = traci.getConnection(self._label)
+        # Two tries, rebuilding the inputs in between: if SUMO could not be
+        # started at all, the likeliest cause after a port clash is that
+        # the files it was pointed at are no longer there.
+        for attempt in (1, 2):
+            self._files = self._build_inputs()
+            if self.tripinfo_path:
+                from utils.delay_accounting import enable_tripinfo
+                enable_tripinfo(self._files["sumocfg"], self.tripinfo_path)
+            cmd = [
+                sumo_binary(self.render_mode == "human"),
+                "-c", self._files["sumocfg"],
+                "--seed", str(self._sumo_seed),
+                "--start", "--quit-on-end",
+                "--no-warnings", "true",
+            ]
+            cmd += [str(arg) for arg in self.extra_sumo_args]
+            try:
+                self._conn = start_sumo(cmd, label=self._label)
+                break
+            except SumoStartError:
+                if attempt == 2:
+                    raise
         # Batch the per-second lane readings into one round-trip. TraCI
         # latency, not SUMO, is what an episode spends its time on.
         self.state_extractor.subscribe(self._conn)

@@ -40,6 +40,7 @@ if PROJECT_ROOT not in sys.path:
 from utils.config_loader import cycle_time, load_config, total_demand  # noqa: E402
 from utils.metrics import MetricsCollector  # noqa: E402
 from utils.scenario_builder import TLS_ID, TLS_PROGRAM_ID, build_scenario  # noqa: E402
+from utils.sumo_launch import start_sumo  # noqa: E402
 
 RESULTS_CSV_DIR = os.path.join(PROJECT_ROOT, "results", "csv")
 
@@ -118,7 +119,7 @@ def run_scenario(scenario: str, use_gui: bool = False, quiet: bool = False,
     label = "intellisignal_{}".format(scenario)
 
     try:
-        traci.start(cmd, label=label)
+        start_sumo(cmd, label=label)
     except Exception as exc:
         raise SystemExit("SUMO failed to start: {}".format(exc))
 

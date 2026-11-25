@@ -1,0 +1,62 @@
+[
+  {
+    "check": "every controller obeys the 15-30 s rule in real SUMO",
+    "ok": true,
+    "detail": "dqn           greens 15-21 s, 14 completed, clean; fixed_time    greens 25-30 s, 9 completed, clean; actuated      greens 30-30 s, 8 completed, clean; max_pressure  greens 15-30 s, 9 completed, clean",
+    "seconds": 9.9
+  },
+  {
+    "check": "the audit is independent: it catches a signal that breaks the rules",
+    "ok": true,
+    "detail": "a 9 s and a 31 s green were reported as ['maximum green', 'maximum red', 'minimum green']",
+    "seconds": 0.0
+  },
+  {
+    "check": "the registered model is the file the registry names",
+    "ok": true,
+    "detail": "output/standard_20261125/runs/B_s45/models/best.pt matches",
+    "seconds": 0.0
+  },
+  {
+    "check": "a lock-and-extend model is run as lock-and-extend",
+    "ok": true,
+    "detail": "ladder [15.0, 18.0, 21.0, 24.0, 27.0, 30.0] and it served [15.0, 18.0, 21.0]",
+    "seconds": 1.8
+  },
+  {
+    "check": "the dashboard's numbers are the harness's numbers",
+    "ok": true,
+    "detail": "engine 15.3690 s against harness 15.3690 s",
+    "seconds": 2.5
+  },
+  {
+    "check": "two controllers meet exactly the same vehicles",
+    "ok": true,
+    "detail": "228 vehicles written identically twice",
+    "seconds": 0.0
+  },
+  {
+    "check": "a saved run reloads as the same run",
+    "ok": true,
+    "detail": "12.928 s delay, 300 steps of replay, audit True",
+    "seconds": 1.6
+  },
+  {
+    "check": "a vehicle still inside at the end is charged for its delay",
+    "ok": true,
+    "detail": "40 vehicles were still inside and 40 of them were charged",
+    "seconds": 3.2
+  },
+  {
+    "check": "the model beats the tuned fixed plan on the traffic it is shown",
+    "ok": true,
+    "detail": "3 of 3 presets improved: offpeak -42.3 %, typical -3.1 %, peak -9.3 %",
+    "seconds": 14.2
+  },
+  {
+    "check": "the dashboard starts and every page renders",
+    "ok": true,
+    "detail": "5 pages: Control room, Traffic, Compare, The model, Method",
+    "seconds": 2.8
+  }
+]

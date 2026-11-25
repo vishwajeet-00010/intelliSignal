@@ -325,7 +325,13 @@ def train(scenario: str = "moderate", config: Optional[DQNConfig] = None,
         if save_plots:
             try:
                 from training.plot_training import plot_training_history
-                summary["plots"] = plot_training_history(csv_path)
+                # Beside the run's own results, not in the committed
+                # figures: a two-episode training run from a test used
+                # to overwrite the curves in the report.
+                summary["plots"] = plot_training_history(
+                    csv_path,
+                    output_dir=(None if results_dir == TRAINING_RESULTS_DIR
+                                else os.path.join(results_dir, "plots")))
             except Exception as exc:                # pragma: no cover
                 summary["plots"] = []
                 if not quiet:

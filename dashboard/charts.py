@@ -1,391 +1,332 @@
 """
-IntelliSignal - Dashboard
+IntelliSignal
 dashboard/charts.py
 
-Every chart the dashboard draws.
+The charts, all of them, in one place.
 
-All of them are built from the CSV files the simulation produced. No chart
-function invents a number, and none of them recalculates a metric that
-`utils/metrics.py` already measured - they read and draw.
+Each one answers a question a viewer actually asks, and nothing is
+plotted that cannot be read off the simulation that produced it:
 
-Design rules followed here:
-  * one colour per scenario, assigned by identity and never by rank, so a
-    scenario keeps its colour on every chart and every page
-  * a value is printed on every bar, so the chart never depends on colour
-    alone and is readable in print or with colour-vision deficiency
-  * thin marks, recessive grid lines, no chart junk
-  * a tooltip on every mark, because a dashboard chart is meant to be probed
+    queue_over_time      when did traffic pile up, and on which arm
+    signal_timeline      what the signal showed, second by second
+    green_lengths        how long the greens were, and how they varied
+    delay_bars           which controller lost the least time
+    paired_bars          and whether it won on every pattern or on average
+    training_curve       how a model's validation score moved while it learned
+    fixed_grid           the whole grid of fixed plans that were measured
+
+Colours come from `dashboard/ui.py`, so north-south is the same blue
+here, in the junction drawing and in the tables.
 """
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 import altair as alt
 import pandas as pd
 
-from dashboard.theme import (BORDER, INK, INK_MUTED, SCENARIO_COLORS,
-                             SCENARIO_LABELS, scenario_label)
+from dashboard.ui import (BAD, BRAND, CONTROLLER_COLORS, EW_COLOR, GOOD,
+                          INK, LINE, MUTED, NS_COLOR)
 
-# Fixed order, so the colour scale never re-assigns colours when a scenario
-# is missing from the data.
-SCENARIO_DOMAIN: List[str] = ["Moderate traffic", "Heavy traffic"]
-SCENARIO_RANGE: List[str] = [SCENARIO_COLORS["moderate"], SCENARIO_COLORS["heavy"]]
-
-_AXIS = dict(labelColor=INK_MUTED, titleColor=INK_MUTED, labelFontSize=11,
-             titleFontSize=11, tickColor=BORDER, domainColor=BORDER,
-             gridColor="#eceef0")
+FONT = "Segoe UI, system-ui, sans-serif"
 
 
-def _base(frame: pd.DataFrame, height: int = 260) -> alt.Chart:
-    return alt.Chart(frame).properties(height=height)
+def _base(chart: alt.Chart, height: int = 220) -> alt.Chart:
+    return (chart.properties(height=height)
+            .configure_view(strokeWidth=0)
+            .configure_axis(labelFont=FONT, titleFont=FONT, labelColor=MUTED,
+                            titleColor=MUTED, labelFontSize=11,
+                            titleFontSize=11, gridColor=LINE, domainColor=LINE,
+                            tickColor=LINE)
+            .configure_legend(labelFont=FONT, titleFont=FONT,
+                              labelColor=INK, titleColor=MUTED,
+                              labelFontSize=11, titleFontSize=11)
+            .configure_title(font=FONT, fontSize=12, color=MUTED,
+                             anchor="start", fontWeight=600))
 
 
-def _color_scale() -> alt.Scale:
-    return alt.Scale(domain=SCENARIO_DOMAIN, range=SCENARIO_RANGE)
-
-
-def _prepare(frame: pd.DataFrame) -> pd.DataFrame:
-    """Add the display label used as the categorical key."""
-    out = frame.copy()
-    out["Scenario"] = out["scenario"].map(scenario_label)
-    return out
-
-
-# ==========================================================================
-# Bar charts - one metric, one bar per scenario
-# ==========================================================================
-def metric_bar(frame: pd.DataFrame, column: str, title: str,
-               axis_title: str, value_format: str = ".2f",
-               height: int = 270) -> Optional[alt.LayerChart]:
-    """A bar per scenario for one metric, with the value printed on the bar."""
-    if frame is None or frame.empty or column not in frame.columns:
-        return None
-    data = _prepare(frame.dropna(subset=[column]))
-    if data.empty:
-        return None
-
-    bars = _base(data, height).mark_bar(
-        size=52, cornerRadiusTopLeft=4, cornerRadiusTopRight=4
-    ).encode(
-        x=alt.X("Scenario:N", title=None, axis=alt.Axis(labelAngle=0, **_AXIS),
-                sort=SCENARIO_DOMAIN),
-        y=alt.Y("{}:Q".format(column), title=axis_title,
-                axis=alt.Axis(**_AXIS)),
-        color=alt.Color("Scenario:N", scale=_color_scale(), legend=None),
-        tooltip=[
-            alt.Tooltip("Scenario:N", title="Scenario"),
-            alt.Tooltip("{}:Q".format(column), title=axis_title, format=value_format),
-            alt.Tooltip("source:N", title="Source"),
-        ],
-    )
-    labels = _base(data, height).mark_text(
-        dy=-9, color=INK, fontSize=13
-    ).encode(
-        x=alt.X("Scenario:N", sort=SCENARIO_DOMAIN),
-        y=alt.Y("{}:Q".format(column)),
-        text=alt.Text("{}:Q".format(column), format=value_format),
-    )
-    return (bars + labels).properties(title=alt.TitleParams(
-        text=title, anchor="start", color=INK, fontSize=13, fontWeight=600,
-        offset=10))
-
-
-def waiting_time_chart(frame):
-    return metric_bar(frame, "average_waiting_time",
-                      "Average waiting time per vehicle",
-                      "seconds / vehicle", ".2f")
-
-
-def queue_length_chart(frame):
-    return metric_bar(frame, "average_queue_length",
-                      "Average queue length at the intersection",
-                      "vehicles", ".2f")
-
-
-def throughput_chart(frame):
-    return metric_bar(frame, "throughput",
-                      "Throughput — vehicles that passed through",
-                      "vehicles", ".0f")
-
-
-# ==========================================================================
-# Line chart - queue length over time
-# ==========================================================================
-def queue_over_time_chart(series: dict, height: int = 320) -> Optional[alt.Chart]:
-    """Recorded queue length second by second, one line per scenario.
-
-    `series` maps a scenario name to its timeseries DataFrame.
-    """
-    frames = []
-    for scenario, frame in (series or {}).items():
-        if frame is None or frame.empty or "queue_length" not in frame.columns:
-            continue
-        part = frame[["time", "queue_length"]].copy()
-        part["Scenario"] = scenario_label(scenario)
-        frames.append(part)
-    if not frames:
-        return None
-
-    data = pd.concat(frames, ignore_index=True)
-    hover = alt.selection_point(fields=["time"], nearest=True, on="mouseover",
-                                empty=False)
-
-    lines = alt.Chart(data).mark_line(strokeWidth=1.4).encode(
-        x=alt.X("time:Q", title="Simulation time (s)", axis=alt.Axis(**_AXIS)),
-        y=alt.Y("queue_length:Q", title="Halting vehicles at the intersection",
-                axis=alt.Axis(**_AXIS)),
-        color=alt.Color("Scenario:N", scale=_color_scale(),
-                        legend=alt.Legend(title=None, orient="top-left",
-                                          labelColor=INK, labelFontSize=11,
-                                          symbolStrokeWidth=3)),
-    )
-    points = alt.Chart(data).mark_circle(size=52, opacity=0).encode(
-        x="time:Q", y="queue_length:Q",
-        color=alt.Color("Scenario:N", scale=_color_scale(), legend=None),
-        tooltip=[
-            alt.Tooltip("Scenario:N", title="Scenario"),
-            alt.Tooltip("time:Q", title="Time (s)", format=".0f"),
-            alt.Tooltip("queue_length:Q", title="Queue", format=".0f"),
-        ],
-    ).add_params(hover)
-
-    return (lines + points).properties(
-        height=height,
-        title=alt.TitleParams(text="Queue length over time",
-                              anchor="start", color=INK, fontSize=13,
-                              fontWeight=600, offset=10),
-    ).interactive(bind_y=False)
-
-
-# ==========================================================================
-# Vehicles in the network over time
-# ==========================================================================
-def vehicles_over_time_chart(series: dict, height: int = 260) -> Optional[alt.Chart]:
-    frames = []
-    for scenario, frame in (series or {}).items():
-        if frame is None or frame.empty or "running_vehicles" not in frame.columns:
-            continue
-        part = frame[["time", "running_vehicles"]].copy()
-        part["Scenario"] = scenario_label(scenario)
-        frames.append(part)
-    if not frames:
-        return None
-    data = pd.concat(frames, ignore_index=True)
-    return alt.Chart(data).mark_line(strokeWidth=1.4).encode(
-        x=alt.X("time:Q", title="Simulation time (s)", axis=alt.Axis(**_AXIS)),
-        y=alt.Y("running_vehicles:Q", title="Vehicles in the network",
-                axis=alt.Axis(**_AXIS)),
-        color=alt.Color("Scenario:N", scale=_color_scale(),
-                        legend=alt.Legend(title=None, orient="top-left",
-                                          labelColor=INK, labelFontSize=11,
-                                          symbolStrokeWidth=3)),
-        tooltip=[
-            alt.Tooltip("Scenario:N", title="Scenario"),
-            alt.Tooltip("time:Q", title="Time (s)", format=".0f"),
-            alt.Tooltip("running_vehicles:Q", title="Vehicles", format=".0f"),
-        ],
-    ).properties(
-        height=height,
-        title=alt.TitleParams(text="Vehicles in the network over time",
-                              anchor="start", color=INK, fontSize=13,
-                              fontWeight=600, offset=10),
-    )
-
-
-# ==========================================================================
-# Signal timing plan
-# ==========================================================================
-def signal_plan_chart(segments, height: int = 110) -> Optional[alt.Chart]:
-    """The configured fixed-time cycle drawn as a timeline.
-
-    `segments` is the list of (label, seconds) from FixedTimeAgent.timeline().
-    """
-    if not segments:
-        return None
-    from dashboard.theme import SIGNAL_COLORS
-
-    rows, start = [], 0.0
-    for label, seconds in segments:
-        rows.append({"Phase": label, "start": start, "end": start + seconds,
-                     "seconds": seconds})
-        start += seconds
-    data = pd.DataFrame(rows)
-
-    color_for = {
-        "NS green": SIGNAL_COLORS["green"],
-        "EW green": SIGNAL_COLORS["green"],
-        "Yellow": SIGNAL_COLORS["yellow"],
-        "All red": SIGNAL_COLORS["red"],
-    }
-    domain = list(dict.fromkeys(data["Phase"].tolist()))
-    scale = alt.Scale(domain=domain,
-                      range=[color_for.get(p, "#7a7f85") for p in domain])
-
-    bars = alt.Chart(data).mark_bar(height=34, cornerRadius=3, stroke="#ffffff",
-                                    strokeWidth=2).encode(
-        x=alt.X("start:Q", title="Seconds into the cycle", axis=alt.Axis(**_AXIS)),
-        x2="end:Q",
-        color=alt.Color("Phase:N", scale=scale,
-                        legend=alt.Legend(title=None, orient="bottom",
-                                          labelColor=INK, labelFontSize=11)),
-        tooltip=[alt.Tooltip("Phase:N"),
-                 alt.Tooltip("seconds:Q", title="Duration (s)", format=".0f")],
-    )
-    labels = alt.Chart(data).mark_text(color="#ffffff", fontSize=11,
-                                       fontWeight=600).encode(
-        x=alt.X("start:Q"), x2="end:Q",
-        text=alt.Text("seconds:Q", format=".0f"),
-    )
-    return (bars + labels).properties(
-        height=height,
-        title=alt.TitleParams(text="Configured fixed-time cycle",
-                              anchor="start", color=INK, fontSize=13,
-                              fontWeight=600, offset=10))
-
-
-# ==========================================================================
-# Stage 3: controller comparison and training curves
-# ==========================================================================
-#: One colour per CONTROLLER, assigned by identity like the scenario colours,
-#: so Fixed-Time and DQN keep their colour on every chart and every page.
-CONTROLLER_COLORS = {
-    "fixed_time": "#4c78a8",
-    "dqn": "#e45756",
-    "dqn_untrained": "#b0b4b9",
-}
-CONTROLLER_LABELS = {
-    "fixed_time": "Fixed-Time",
-    "dqn": "DQN",
-    "dqn_untrained": "DQN (untrained control)",
-}
-CONTROLLER_DOMAIN: List[str] = ["Fixed-Time", "DQN", "DQN (untrained control)"]
-CONTROLLER_RANGE: List[str] = [CONTROLLER_COLORS["fixed_time"],
-                               CONTROLLER_COLORS["dqn"],
-                               CONTROLLER_COLORS["dqn_untrained"]]
-
-
-def _controller_scale() -> alt.Scale:
-    return alt.Scale(domain=CONTROLLER_DOMAIN, range=CONTROLLER_RANGE)
-
-
-def controller_metric_chart(aggregated: pd.DataFrame, metric: str,
-                            title: str, unit: str = "",
-                            height: int = 260) -> Optional[alt.Chart]:
-    """One metric, one bar per controller, with the std as an error bar.
-
-    `aggregated` is the long-format mean/std table written by
-    evaluation/compare_controllers.py. The error bar is the sample standard
-    deviation across the evaluation seeds; when only one seed was run there
-    is no deviation and none is drawn.
-    """
-    if aggregated is None or aggregated.empty:
-        return None
-    rows = aggregated[aggregated["metric"] == metric].copy()
-    if rows.empty:
-        return None
-
-    rows["Controller"] = rows["controller"].map(
-        lambda c: CONTROLLER_LABELS.get(c, str(c)))
-    rows["std_filled"] = rows["std"].fillna(0.0)
-    rows["low"] = rows["mean"] - rows["std_filled"]
-    rows["high"] = rows["mean"] + rows["std_filled"]
-
-    tooltip = [alt.Tooltip("Controller:N"),
-               alt.Tooltip("mean:Q", title="Mean", format=".2f"),
-               alt.Tooltip("std:Q", title="Std deviation", format=".2f"),
-               alt.Tooltip("seeds:Q", title="Seeds", format=".0f")]
-
-    bars = alt.Chart(rows).mark_bar(cornerRadiusTopLeft=3,
-                                    cornerRadiusTopRight=3, size=46).encode(
-        x=alt.X("Controller:N", title=None, sort=CONTROLLER_DOMAIN,
-                axis=alt.Axis(labelAngle=0, **_AXIS)),
-        y=alt.Y("mean:Q", title=unit or None, axis=alt.Axis(**_AXIS)),
-        color=alt.Color("Controller:N", scale=_controller_scale(), legend=None),
-        tooltip=tooltip,
-    )
-    errors = alt.Chart(rows).mark_rule(strokeWidth=1.4, color=INK_MUTED).encode(
-        x=alt.X("Controller:N", sort=CONTROLLER_DOMAIN),
-        y="low:Q", y2="high:Q",
-    )
-    labels = alt.Chart(rows).mark_text(dy=-8, color=INK, fontSize=11,
-                                       fontWeight=600).encode(
-        x=alt.X("Controller:N", sort=CONTROLLER_DOMAIN),
-        y=alt.Y("high:Q"),
-        text=alt.Text("mean:Q", format=".2f"),
-    )
-    return (bars + errors + labels).properties(
-        height=height,
-        title=alt.TitleParams(text=title, anchor="start", color=INK,
-                              fontSize=13, fontWeight=600, offset=10))
-
-
-def queue_by_controller_chart(series: dict, height: int = 320
-                              ) -> Optional[alt.Chart]:
-    """Per-second queue length for each controller on the same traffic.
-
-    `series` maps a controller key to its recorded time-series DataFrame.
-    """
+# ---------------------------------------------------------------------------
+def queue_over_time(series: Sequence[Dict[str, Any]], height: int = 210
+                    ) -> Optional[alt.Chart]:
+    """Vehicles halted on each axis, through the run."""
     if not series:
         return None
-    frames = []
-    for controller, frame in series.items():
-        if frame is None or frame.empty or "queue_length" not in frame.columns:
-            continue
-        part = frame[["time", "queue_length"]].copy()
-        part["Controller"] = CONTROLLER_LABELS.get(controller, str(controller))
-        frames.append(part)
-    if not frames:
+    frame = pd.DataFrame(list(series))
+    if "queue_NS" not in frame.columns:
+        if "queue_length" not in frame.columns:
+            return None
+        frame = frame.rename(columns={"queue_length": "All approaches"})
+        long = frame.melt("time", ["All approaches"], "axis", "queue")
+    else:
+        frame = frame.rename(columns={"queue_NS": "North-South",
+                                      "queue_EW": "East-West"})
+        long = frame.melt("time", ["North-South", "East-West"],
+                          "axis", "queue")
+    chart = alt.Chart(long).mark_area(opacity=0.55, interpolate="step-after")
+    return _base(
+        chart.encode(
+            x=alt.X("time:Q", title="seconds"),
+            y=alt.Y("queue:Q", title="vehicles halted", stack=True),
+            color=alt.Color("axis:N", title=None,
+                            scale=alt.Scale(
+                                domain=["North-South", "East-West",
+                                        "All approaches"],
+                                range=[NS_COLOR, EW_COLOR, BRAND])),
+            tooltip=[alt.Tooltip("time:Q", title="second"),
+                     alt.Tooltip("axis:N", title=""),
+                     alt.Tooltip("queue:Q", title="halted")]),
+        height)
+
+
+def queue_compare(runs: Dict[str, Sequence[Dict[str, Any]]],
+                  height: int = 210) -> Optional[alt.Chart]:
+    """Total queue through the run, one line per controller."""
+    rows: List[Dict[str, Any]] = []
+    for label, series in runs.items():
+        for row in series:
+            value = row.get("queue_total", row.get("queue_length"))
+            if value is None:
+                continue
+            rows.append({"time": row.get("time", 0), "queue": value,
+                         "controller": label})
+    if not rows:
         return None
-    data = pd.concat(frames, ignore_index=True)
-
-    return alt.Chart(data).mark_line(strokeWidth=1.1, opacity=0.9).encode(
-        x=alt.X("time:Q", title="Simulation time (s)", axis=alt.Axis(**_AXIS)),
-        y=alt.Y("queue_length:Q", title="Halting vehicles",
-                axis=alt.Axis(**_AXIS)),
-        color=alt.Color("Controller:N", scale=_controller_scale(),
-                        legend=alt.Legend(title=None, orient="top",
-                                          labelColor=INK, labelFontSize=11)),
-        tooltip=[alt.Tooltip("time:Q", title="t (s)", format=".0f"),
-                 alt.Tooltip("queue_length:Q", title="Queue", format=".0f"),
-                 alt.Tooltip("Controller:N")],
-    ).properties(
-        height=height,
-        title=alt.TitleParams(
-            text="Queue length over time — same network, same demand, same seed",
-            anchor="start", color=INK, fontSize=13, fontWeight=600, offset=10))
+    frame = pd.DataFrame(rows)
+    chart = alt.Chart(frame).mark_line(strokeWidth=1.6, opacity=0.9)
+    return _base(
+        chart.encode(
+            x=alt.X("time:Q", title="seconds"),
+            y=alt.Y("queue:Q", title="vehicles halted"),
+            color=alt.Color("controller:N", title=None),
+            tooltip=["controller:N", alt.Tooltip("time:Q", title="second"),
+                     alt.Tooltip("queue:Q", title="halted")]),
+        height)
 
 
-def training_curve_chart(history: pd.DataFrame, column: str, title: str,
-                         unit: str = "", height: int = 260
-                         ) -> Optional[alt.Chart]:
-    """One training curve per seed, drawn from the recorded history CSV.
+# ---------------------------------------------------------------------------
+def signal_timeline(greens: Sequence[Dict[str, Any]], height: int = 110
+                    ) -> Optional[alt.Chart]:
+    """Every green the signal showed, as a bar on a time axis."""
+    if not greens:
+        return None
+    frame = pd.DataFrame([{
+        "start": row["start"], "end": row["end"],
+        "phase": row["phase"], "seconds": row["green_seconds"],
+        "completed": "served" if row.get("completed", True) else "cut off by "
+                     "the end of the run",
+    } for row in greens])
+    chart = alt.Chart(frame).mark_bar(height=22, cornerRadius=3)
+    return _base(
+        chart.encode(
+            x=alt.X("start:Q", title="seconds"),
+            x2="end:Q",
+            y=alt.Y("phase:N", title=None, sort=["North-South", "East-West"]),
+            color=alt.Color("phase:N", legend=None,
+                            scale=alt.Scale(
+                                domain=["North-South", "East-West"],
+                                range=[NS_COLOR, EW_COLOR])),
+            opacity=alt.Opacity("completed:N", legend=None,
+                                scale=alt.Scale(domain=["served",
+                                                        "cut off by the end "
+                                                        "of the run"],
+                                                range=[0.92, 0.4])),
+            tooltip=[alt.Tooltip("phase:N", title="direction"),
+                     alt.Tooltip("start:Q", title="from"),
+                     alt.Tooltip("seconds:Q", title="green (s)"),
+                     alt.Tooltip("completed:N", title="")]),
+        height)
 
-    The raw per-episode values are drawn. Nothing is smoothed: a noisy
-    learning curve is the result, and hiding the noise would misrepresent it.
+
+def green_lengths(greens: Sequence[Dict[str, Any]], min_green: float,
+                  max_green: float, height: int = 190) -> Optional[alt.Chart]:
+    """How long the greens were - the shape of what the controller chose."""
+    served = [row for row in greens if row.get("completed", True)]
+    if not served:
+        return None
+    frame = pd.DataFrame([{"phase": row["phase"],
+                           "seconds": row["green_seconds"]}
+                          for row in served])
+    bars = (alt.Chart(frame).mark_bar(opacity=0.85)
+            .encode(
+                x=alt.X("seconds:Q", bin=alt.Bin(step=1),
+                        title="green length (s)",
+                        scale=alt.Scale(domain=[min_green - 1, max_green + 1])),
+                y=alt.Y("count()", title="greens"),
+                color=alt.Color("phase:N", title=None,
+                                scale=alt.Scale(
+                                    domain=["North-South", "East-West"],
+                                    range=[NS_COLOR, EW_COLOR])),
+                tooltip=[alt.Tooltip("count()", title="greens"),
+                         alt.Tooltip("phase:N", title="direction")]))
+    rules = (alt.Chart(pd.DataFrame({"x": [min_green, max_green]}))
+             .mark_rule(color=MUTED, strokeDash=[4, 3], opacity=0.7)
+             .encode(x="x:Q"))
+    return _base(bars + rules, height)
+
+
+# ---------------------------------------------------------------------------
+def delay_bars(rows: Sequence[Dict[str, Any]], height: int = 210,
+               field: str = "delay",
+               title: str = "delay per requested vehicle (s)"
+               ) -> Optional[alt.Chart]:
+    """One bar per controller. Shorter is better, and it says so."""
+    if not rows:
+        return None
+    frame = pd.DataFrame([{"controller": row["label"],
+                           "key": row.get("controller", ""),
+                           "value": row.get(field, 0.0)} for row in rows])
+    chart = alt.Chart(frame).mark_bar(cornerRadiusEnd=4, height=26)
+    return _base(
+        chart.encode(
+            x=alt.X("value:Q", title=title),
+            y=alt.Y("controller:N", title=None, sort="x"),
+            color=alt.Color("key:N", legend=None,
+                            scale=alt.Scale(
+                                domain=list(CONTROLLER_COLORS),
+                                range=list(CONTROLLER_COLORS.values()))),
+            tooltip=[alt.Tooltip("controller:N", title=""),
+                     alt.Tooltip("value:Q", title=title, format=".2f")]),
+        height)
+
+
+def paired_bars(rows: Sequence[Dict[str, Any]], height: int = 210
+                ) -> Optional[alt.Chart]:
+    """Change against the fixed plan, per traffic pattern.
+
+    Below zero is better. The colour says so without the reader having
+    to remember which way round the metric runs.
     """
-    if history is None or history.empty or column not in history.columns:
+    if not rows:
         return None
-    data = history[["episode", column] + (
-        ["seed"] if "seed" in history.columns else [])].copy()
-    data = data.dropna(subset=[column])
-    if data.empty:
-        return None
-    if "seed" not in data.columns:
-        data["seed"] = "42"
-    data["Seed"] = data["seed"].astype(str)
+    frame = pd.DataFrame(list(rows))
+    chart = alt.Chart(frame).mark_bar(cornerRadius=2)
+    return _base(
+        chart.encode(
+            x=alt.X("difference:Q",
+                    title="change against the fixed plan (s per vehicle)"),
+            y=alt.Y("workload:N", title=None, sort="-x"),
+            color=alt.condition(alt.datum.difference < 0,
+                                alt.value(GOOD), alt.value(BAD)),
+            tooltip=[alt.Tooltip("workload:N", title="traffic"),
+                     alt.Tooltip("difference:Q", title="change (s)",
+                                 format="+.2f")]),
+        height)
 
-    return alt.Chart(data).mark_line(strokeWidth=1.6, point=False).encode(
-        x=alt.X("episode:Q", title="Episode", axis=alt.Axis(**_AXIS)),
-        y=alt.Y("{}:Q".format(column), title=unit or None,
-                axis=alt.Axis(**_AXIS), scale=alt.Scale(zero=False)),
-        color=alt.Color("Seed:N", legend=alt.Legend(
-            title="Training seed", orient="top", labelColor=INK,
-            labelFontSize=11, titleFontSize=11, titleColor=INK_MUTED)),
-        tooltip=[alt.Tooltip("episode:Q", title="Episode", format=".0f"),
-                 alt.Tooltip("{}:Q".format(column), title=title, format=".4f"),
-                 alt.Tooltip("Seed:N")],
-    ).properties(
-        height=height,
-        title=alt.TitleParams(text=title, anchor="start", color=INK,
-                              fontSize=13, fontWeight=600, offset=10))
+
+# ---------------------------------------------------------------------------
+def training_curve(history: Sequence[Dict[str, Any]], height: int = 220
+                   ) -> Optional[alt.Chart]:
+    """Validation delay against episode, with the selected point marked."""
+    rows = [{"episode": row.get("episode"),
+             "delay": row.get("mean_total_delay")}
+            for row in history
+            if row.get("episode") is not None
+            and row.get("mean_total_delay") is not None]
+    if not rows:
+        return None
+    frame = pd.DataFrame(rows)
+    best = frame.loc[frame["delay"].idxmin()]
+    line = (alt.Chart(frame).mark_line(color=BRAND, strokeWidth=2,
+                                       point=alt.OverlayMarkDef(size=28))
+            .encode(x=alt.X("episode:Q", title="episode"),
+                    y=alt.Y("delay:Q", title="validation delay (s)",
+                            scale=alt.Scale(zero=False)),
+                    tooltip=[alt.Tooltip("episode:Q"),
+                             alt.Tooltip("delay:Q", format=".2f")]))
+    mark = (alt.Chart(pd.DataFrame([best])).mark_point(
+        color=GOOD, size=160, filled=True, shape="diamond")
+        .encode(x="episode:Q", y="delay:Q"))
+    return _base(line + mark, height)
+
+
+def seed_scores(runs: Sequence[Dict[str, Any]], height: int = 260
+                ) -> Optional[alt.Chart]:
+    """Every trained run's validation score, so the spread is visible."""
+    rows = [{"run": run.get("name", ""),
+             "candidate": "A - duration menu" if run.get("candidate") == "A"
+                          else "B - lock and extend",
+             "delay": (run.get("validation") or {}).get("delay")}
+            for run in runs if (run.get("validation") or {}).get("delay")]
+    if not rows:
+        return None
+    frame = pd.DataFrame(rows)
+    chart = alt.Chart(frame).mark_circle(size=110, opacity=0.85)
+    return _base(
+        chart.encode(
+            x=alt.X("delay:Q", title="validation delay (s)",
+                    scale=alt.Scale(zero=False)),
+            y=alt.Y("candidate:N", title=None),
+            color=alt.Color("candidate:N", legend=None,
+                            scale=alt.Scale(range=[BRAND, EW_COLOR])),
+            tooltip=[alt.Tooltip("run:N", title="run"),
+                     alt.Tooltip("delay:Q", format=".2f")]),
+        height)
+
+
+def fixed_grid(grid: Sequence[Dict[str, Any]], height: int = 300
+               ) -> Optional[alt.Chart]:
+    """Every fixed plan that was measured, as a heat map."""
+    rows = [{"ns": row["ns"], "ew": row["ew"], "delay": row["delay"]}
+            for row in grid if "ns" in row and "delay" in row]
+    if not rows:
+        return None
+    frame = pd.DataFrame(rows)
+    chart = alt.Chart(frame).mark_rect()
+    return _base(
+        chart.encode(
+            x=alt.X("ew:O", title="east-west green (s)"),
+            y=alt.Y("ns:O", title="north-south green (s)", sort="descending"),
+            color=alt.Color("delay:Q", title="delay (s)",
+                            scale=alt.Scale(scheme="blueorange",
+                                            reverse=True)),
+            tooltip=[alt.Tooltip("ns:O", title="ns green"),
+                     alt.Tooltip("ew:O", title="ew green"),
+                     alt.Tooltip("delay:Q", title="delay", format=".2f")]),
+        height)
+
+
+# ---------------------------------------------------------------------------
+def arrivals(workload, height: int = 170) -> Optional[alt.Chart]:
+    """When the traffic arrives, by approach - the shape of the demand."""
+    vehicles = getattr(workload, "vehicles", None)
+    if not vehicles:
+        return None
+    frame = pd.DataFrame([{"depart": v.depart,
+                           "approach": v.approach.title()}
+                          for v in vehicles])
+    chart = alt.Chart(frame).mark_bar(opacity=0.85)
+    return _base(
+        chart.encode(
+            x=alt.X("depart:Q", bin=alt.Bin(maxbins=60),
+                    title="arrival time (s)"),
+            y=alt.Y("count()", title="vehicles", stack=True),
+            color=alt.Color("approach:N", title=None,
+                            scale=alt.Scale(
+                                domain=["North", "South", "East", "West"],
+                                range=[NS_COLOR, "#5a92cd", EW_COLOR,
+                                       "#d9a06a"])),
+            tooltip=[alt.Tooltip("count()", title="vehicles"),
+                     alt.Tooltip("approach:N", title="from")]),
+        height)
+
+
+def fleet_donut(mix: Dict[str, int], height: int = 170) -> Optional[alt.Chart]:
+    """What is actually on the road, by count."""
+    rows = [{"vehicle": name, "count": count} for name, count in mix.items()
+            if count]
+    if not rows:
+        return None
+    frame = pd.DataFrame(rows)
+    from dashboard.ui import VEHICLE_COLORS
+
+    chart = alt.Chart(frame).mark_arc(innerRadius=42, cornerRadius=2)
+    return _base(
+        chart.encode(
+            theta=alt.Theta("count:Q", stack=True),
+            color=alt.Color("vehicle:N", title=None,
+                            scale=alt.Scale(
+                                domain=list(VEHICLE_COLORS),
+                                range=list(VEHICLE_COLORS.values()))),
+            tooltip=["vehicle:N", alt.Tooltip("count:Q", title="vehicles")]),
+        height)

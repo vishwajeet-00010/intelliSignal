@@ -34,6 +34,20 @@ TRIPINFO = """<?xml version="1.0" encoding="UTF-8"?>
 </tripinfos>
 """
 
+#: SUMO is asked for the unfinished trips too (`write-unfinished`), and
+#: marks a vehicle still on the network when the run ended with an
+#: arrival of -1. Its delay counts; its journey does not.
+TRIPINFO_WITH_UNFINISHED = """<?xml version="1.0" encoding="UTF-8"?>
+<tripinfos>
+    <tripinfo id="a" depart="0.00" departDelay="0.00" duration="40.00"
+              waitingTime="5.00" timeLoss="12.00" arrival="40.00"/>
+    <tripinfo id="b" depart="10.00" departDelay="2.00" duration="60.00"
+              waitingTime="25.00" timeLoss="38.00" arrival="70.00"/>
+    <tripinfo id="c" depart="20.00" departDelay="0.00" duration="180.00"
+              waitingTime="90.00" timeLoss="140.00" arrival="-1.00"/>
+</tripinfos>
+"""
+
 
 def write(tmp_path, text=TRIPINFO):
     path = tmp_path / "trips.xml"
@@ -79,19 +93,63 @@ def test_vehicles_that_never_entered_are_charged(tmp_path):
 
 def test_blocking_the_entry_cannot_improve_the_honest_metric(tmp_path):
     """Two runs, same traffic. One lets everyone in, one blocks most."""
-    trips = read_tripinfo(write(tmp_path))
+    everyone = read_tripinfo(write(tmp_path, _ten_trips()))
+    only_two = read_tripinfo(write(tmp_path, TRIPINFO))
     scheduled = [float(10 * i) for i in range(10)]
 
-    lets_them_in = account(trips, scheduled, run_end_s=200.0,
-                           still_on_network=8)
-    blocks_them = account(trips, scheduled, run_end_s=200.0,
-                          still_on_network=0)
+    lets_them_in = account(everyone, scheduled, run_end_s=200.0)
+    blocks_them = account(only_two, scheduled, run_end_s=200.0)
 
     assert lets_them_in["waiting_to_enter"] == 0
     assert blocks_them["waiting_to_enter"] == 8
     assert (blocks_them["mean_total_delay_per_requested"]
             > lets_them_in["mean_total_delay_per_requested"]), (
         "refusing vehicles must make the honest metric worse, not better")
+
+
+def _ten_trips() -> str:
+    """Ten vehicles that all got in and all finished."""
+    rows = [
+        '    <tripinfo id="v{i}" depart="{d:.2f}" departDelay="0.00" '
+        'duration="40.00" waitingTime="5.00" timeLoss="12.00" '
+        'arrival="{a:.2f}"/>'.format(i=i, d=10.0 * i, a=10.0 * i + 40.0)
+        for i in range(10)]
+    return "\n".join(['<?xml version="1.0" encoding="UTF-8"?>', "<tripinfos>"]
+                     + rows + ["</tripinfos>", ""])
+
+
+def test_a_vehicle_still_inside_at_the_end_is_charged_for_its_delay(tmp_path):
+    """Otherwise the worse controller gets the delay it caused for free.
+
+    A controller that strands traffic inside the junction leaves more
+    unfinished trips than one that clears it. While those trips were
+    left out of the sum, stranding traffic lowered the reported delay.
+    """
+    scheduled = [0.0, 10.0, 20.0]
+    with_stranded = read_tripinfo(write(tmp_path, TRIPINFO_WITH_UNFINISHED))
+
+    # The same run as SUMO used to report it: the stranded vehicle is
+    # known to be on the network, but its trip is not in the file, so
+    # none of the delay it suffered is counted anywhere.
+    unreported = account(read_tripinfo(write(tmp_path, TRIPINFO)), scheduled,
+                         run_end_s=200.0, still_on_network=1)
+    counted = account(with_stranded, scheduled, run_end_s=200.0)
+
+    assert counted["unfinished_charged"] == 1
+    assert counted["completed"] == 2, "an unfinished trip is not completed"
+    assert counted["entered"] == 3, "but it did get onto the network"
+    assert counted["still_on_network"] == 1
+    assert counted["waiting_to_enter"] == 0
+
+    # The two describe the same run; only one of them charges for it.
+    assert unreported["entered"] == counted["entered"]
+    assert unreported["completed"] == counted["completed"]
+    assert counted["total_time_loss_s"] - unreported["total_time_loss_s"] \
+        == pytest.approx(140.0)
+    assert (counted["mean_total_delay_per_requested"]
+            > unreported["mean_total_delay_per_requested"]), (
+        "a vehicle the signal left stuck inside must cost the controller "
+        "something, or stranding traffic improves the score")
 
 
 def test_stopped_waiting_and_time_loss_are_never_added(tmp_path):
@@ -155,12 +213,14 @@ def test_enabling_tripinfo_rewrites_only_the_generated_config(tmp_path):
 
     enable_tripinfo(str(config), output)
     text = config.read_text(encoding="utf-8")
-    assert "tripinfo-output" in text
+    assert "<tripinfo-output " in text
+    assert "<tripinfo-output.write-unfinished " in text, (
+        "the unfinished trips are what stop a stranded vehicle being free")
     assert text.count("</configuration>") == 1
 
     # Applying it twice must not nest a second output block.
     enable_tripinfo(str(config), output)
-    assert config.read_text(encoding="utf-8").count("tripinfo-output") == 1
+    assert config.read_text(encoding="utf-8").count("<output>") == 1
 
 
 def test_the_historical_field_is_not_touched(tmp_path):
