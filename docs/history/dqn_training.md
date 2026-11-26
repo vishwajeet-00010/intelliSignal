@@ -571,7 +571,7 @@ than from anything the network learned.** `--include-untrained` runs the same
 architecture with random weights on the same traffic as a control. If the
 trained network is no better than the untrained one, the learning did not do
 the work — and that is worth knowing before claiming it did. The measured
-answer for this project is in `STAGE3_REPORT.md`.
+answer for this project is in the [Stage 3 report](STAGE3_REPORT.md).
 
 ### Output files
 

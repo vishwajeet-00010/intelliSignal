@@ -4,7 +4,7 @@
 > the Stage 2 interface, written before the DQN was integrated. The
 > dashboard was rebuilt on 25 Nov 2026 around a single engine
 > (`simulation/engine.py`); the current one is documented in
-> [`docs/dashboard.md`](docs/dashboard.md). Nothing below describes the
+> [Dashboard guide](../dashboard.md). Nothing below describes the
 > pages, the modules or the numbers of the current product.
 
 
